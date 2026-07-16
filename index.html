@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLIMMER OS · 微光管家</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --ink:#2a3038; --sub:#8a94a3;
+    --accent:#4a90d9; --line:#dde3ea;
+    --evil-bg:#0a0508; --evil-panel:#150a0e; --evil-ink:#e8d5d5;
+    --evil-accent:#c1121f; --evil-line:#3a1520;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+    background:linear-gradient(160deg,#dfe6ee 0%,#c9d4e0 100%);
+    color:var(--ink); min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 1.2s;
+  }
+  body.hijacked{background:linear-gradient(160deg,#0a0508 0%,#1a0510 100%)}
+
+  /* ---------- tablet frame ---------- */
+  #tablet{
+    width:min(760px,96vw); height:min(88vh,860px);
+    background:var(--panel); border-radius:26px;
+    border:10px solid #1b1e24;
+    box-shadow:0 30px 80px rgba(30,45,70,.35);
+    display:flex; flex-direction:column; overflow:hidden; position:relative;
+    transition:background .8s, box-shadow .8s, border-color .8s;
+  }
+  body.hijacked #tablet{
+    background:var(--evil-panel);
+    border-color:#000;
+    box-shadow:0 30px 90px rgba(150,10,30,.45);
+    color:var(--evil-ink);
+  }
+
+  /* ---------- status bar ---------- */
+  #statusbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 26px 8px; font-size:12px; letter-spacing:.12em;
+    color:var(--sub); font-family:"SF Mono",Consolas,monospace; flex:none;
+  }
+  body.hijacked #statusbar{color:#7a4550}
+  #statusbar .brand{font-weight:600}
+  body.hijacked #statusbar .brand::after{content:" · SYSTEM COMPROMISED"; color:var(--evil-accent)}
+
+  /* ---------- search bar ---------- */
+  #searchwrap{padding:14px 26px 10px; flex:none}
+  #searchbox{
+    display:flex; align-items:center; gap:10px;
+    background:var(--bg); border:1px solid var(--line); border-radius:14px;
+    padding:13px 18px; transition:all .5s;
+  }
+  body.hijacked #searchbox{background:#1c0a12; border-color:var(--evil-line)}
+  #searchbox svg{flex:none}
+  #query{
+    flex:1; border:none; outline:none; background:transparent;
+    font-size:16px; color:inherit; font-family:inherit;
+  }
+  #query::placeholder{color:#a7b0bd}
+  body.hijacked #query::placeholder{color:#5a3040}
+  #gobtn{
+    border:none; background:var(--accent); color:#fff; border-radius:10px;
+    padding:8px 18px; font-size:14px; cursor:pointer; font-family:inherit;
+  }
+  body.hijacked #gobtn{background:var(--evil-accent)}
+  #hintline{font-size:12px;color:var(--sub);padding:8px 4px 0;min-height:20px}
+  body.hijacked #hintline{color:#7a4550}
+
+  /* ---------- results ---------- */
+  #results{flex:1; overflow-y:auto; padding:6px 26px 90px; scroll-behavior:smooth}
+  #results::-webkit-scrollbar{width:8px}
+  #results::-webkit-scrollbar-thumb{background:#c3ccd8;border-radius:4px}
+  body.hijacked #results::-webkit-scrollbar-thumb{background:#40151f}
+
+  .card{
+    background:var(--bg); border:1px solid var(--line); border-radius:16px;
+    padding:22px; margin:14px 0; animation:cardin .45s ease;
+    line-height:1.85; font-size:15px;
+  }
+  @keyframes cardin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .card h3{font-size:17px;margin-bottom:10px;font-weight:600}
+  .card .tag{
+    display:inline-block;font-size:11px;letter-spacing:.15em;color:var(--accent);
+    border:1px solid var(--accent);border-radius:6px;padding:2px 8px;margin-bottom:12px;
+    font-family:"SF Mono",Consolas,monospace;
+  }
+  .card .sub{color:var(--sub);font-size:13px}
+  .card ul{padding-left:1.4em;margin:6px 0}
+  .card .footer-easter{
+    margin-top:16px;font-size:11px;color:#b9c1cc;text-align:center;letter-spacing:.05em;
+    user-select:text; transition:color .3s;
+  }
+  .card .footer-easter:hover{color:#6b2233}
+  .imgwrap{border-radius:12px;overflow:hidden;margin:12px 0;position:relative;line-height:0}
+  .imgwrap svg{width:100%;height:auto;display:block}
+  .caption{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.6}
+
+  /* corrupt card */
+  .card.corrupt{
+    background:#12060c; border-color:var(--evil-line); color:var(--evil-ink);
+    box-shadow:0 0 30px rgba(193,18,31,.15) inset;
+  }
+  .card.corrupt h3{color:#ff5464}
+  .card.corrupt .tag{color:var(--evil-accent);border-color:var(--evil-accent)}
+  .card.corrupt .sub{color:#8a5560}
+  .mono{font-family:"SF Mono",Consolas,monospace;font-size:13px}
+  .redact{background:#3a3a3a;color:#3a3a3a;border-radius:3px;padding:0 4px;user-select:none}
+  .card.corrupt .redact{background:#2a0a12;color:#2a0a12}
+  .log-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  .log-table td,.log-table th{border:1px solid var(--evil-line);padding:6px 10px;text-align:left}
+  .log-table th{color:#c98090}
+  .disconnect{
+    display:block;margin:18px auto 4px;border:1px solid var(--evil-accent);
+    background:transparent;color:var(--evil-accent);border-radius:10px;
+    padding:10px 26px;font-size:14px;cursor:pointer;font-family:inherit;
+    letter-spacing:.1em;
+  }
+  .disconnect:hover{background:var(--evil-accent);color:#fff}
+
+  /* keyword pill */
+  .kw{color:var(--evil-accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--evil-accent)}
+  .kw-normal{color:var(--accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--accent)}
+
+  /* ---------- flicker text (洗涤→收割) ---------- */
+  .flick{position:relative;display:inline-block}
+  .flick .a,.flick .b{transition:none}
+  .flick .b{
+    position:absolute;left:0;top:0;color:#a01020;opacity:0;
+    animation:flick 9s infinite steps(1);
+  }
+  .flick .a{animation:flickA 9s infinite steps(1)}
+  @keyframes flick{0%,100%{opacity:0} 61.0%{opacity:1} 61.8%{opacity:0} 62.2%{opacity:1} 62.7%{opacity:0}}
+  @keyframes flickA{0%,100%{opacity:1} 61.0%{opacity:0} 61.8%{opacity:1} 62.2%{opacity:0} 62.7%{opacity:1}}
+
+  /* ghost layer inside panorama */
+  .ghostlayer{opacity:0;animation:ghostflash 11s infinite steps(1)}
+  @keyframes ghostflash{0%,100%{opacity:0} 72.0%{opacity:.85} 72.6%{opacity:0} 73.0%{opacity:.6} 73.4%{opacity:0}}
+
+  /* ---------- hijack fx ---------- */
+  #glitchveil{
+    position:fixed;inset:0;pointer-events:none;z-index:60;opacity:0;
+    background:repeating-linear-gradient(0deg,rgba(255,0,60,.08) 0 2px,transparent 2px 4px);
+    mix-blend-mode:screen;
+  }
+  body.glitching #glitchveil{opacity:1;animation:veil .12s infinite}
+  @keyframes veil{0%{transform:translateY(0)}50%{transform:translateY(3px)}100%{transform:translateY(-2px)}}
+  body.glitching #tablet{animation:shake .1s infinite}
+  @keyframes shake{
+    0%{transform:translate(1px,-1px)}25%{transform:translate(-2px,1px)}
+    50%{transform:translate(2px,2px)}75%{transform:translate(-1px,-2px)}100%{transform:translate(1px,1px)}
+  }
+  body.hijacked #results .card.corrupt{animation:cardin .45s ease, rgbsplit 4s infinite}
+  @keyframes rgbsplit{
+    0%,93%,100%{text-shadow:none}
+    94%{text-shadow:-2px 0 #f0f, 2px 0 #0ff}
+    95%{text-shadow:2px 0 #f0f, -2px 0 #0ff}
+    96%{text-shadow:none}
+  }
+  /* ---------- scare fx: blackout / face flash / fall / zoom ---------- */
+  #blackout{position:fixed;inset:0;background:#000;z-index:80;display:none}
+  body.blackout #blackout{display:block}
+  #faceflash{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:#000}
+  body.faceflash #faceflash{display:flex}
+  #faceflash svg{width:min(80vh,92vw);max-width:540px}
+
+  body.falling .card{animation:fallaway .9s cubic-bezier(.5,0,1,.6) forwards}
+  body.falling .card:nth-child(2){animation-delay:.07s}
+  body.falling .card:nth-child(3){animation-delay:.15s}
+  body.falling .card:nth-child(n+4){animation-delay:.22s}
+  @keyframes fallaway{to{transform:translateY(120vh) rotate(9deg);opacity:.2}}
+
+  /* deep-water theme (hijack #3) */
+  body.hijacked.deep{background:linear-gradient(160deg,#010810 0%,#03141f 100%)}
+  body.hijacked.deep #tablet{background:#040e18;box-shadow:0 30px 90px rgba(10,70,110,.5)}
+  body.hijacked.deep #searchbox{background:#06141f;border-color:#123048}
+  body.hijacked.deep .card.corrupt{background:#04101c;border-color:#123048;box-shadow:0 0 30px rgba(60,150,190,.10) inset}
+  body.hijacked.deep .card.corrupt h3{color:#7fd4e8}
+  body.hijacked.deep .card.corrupt .tag{color:#5ab8d0;border-color:#5ab8d0}
+  body.hijacked.deep .disconnect{border-color:#5ab8d0;color:#5ab8d0}
+  body.hijacked.deep .disconnect:hover{background:#5ab8d0;color:#02141f}
+
+  .card.zoomscare{animation:zoomin .55s cubic-bezier(.2,1.4,.3,1)}
+  @keyframes zoomin{0%{transform:scale(.08);opacity:0}55%{transform:scale(1.55);opacity:1}100%{transform:scale(1);opacity:1}}
+
+  /* persistent scanlines when hijacked */
+  body.hijacked #tablet::after{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);
+  }
+
+  /* ---------- overlays (boot / story / end) ---------- */
+  .overlay{
+    position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:40px;
+    background:#0d1117;color:#dce3ec;cursor:pointer;
+  }
+  .overlay.hidden{display:none}
+  #boot .logo{font-size:34px;letter-spacing:.4em;font-weight:200;margin-bottom:8px;font-family:"SF Mono",Consolas,monospace}
+  #boot .logo b{font-weight:700}
+  #boot .slogan{color:#7d8899;font-size:14px;letter-spacing:.2em;margin-bottom:50px}
+  #boot .tap{font-size:13px;color:#5a6472;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
+  #story{background:rgba(8,10,14,.96)}
+  #storytext{max-width:520px;font-size:16px;line-height:2.1;min-height:120px}
+  #storytext .who{display:block;font-size:12px;letter-spacing:.25em;color:#6f7a89;margin-bottom:10px}
+  #storytext.narr{color:#9aa5b4;font-style:normal}
+  #storytext.recep .who{color:#7fb2e5}
+  #storytext.xiaoya .who{color:#e5a7b8}
+  #storytext.sys{font-family:"SF Mono",Consolas,monospace;color:#8fd3c7}
+  #storytext.sys .who{color:#4a9a8a}
+  #storynext{margin-top:40px;font-size:12px;color:#525c6a;letter-spacing:.2em;animation:pulse 2s infinite}
+
+  #endscreen{background:#050308;color:#cbb8bc}
+  #endscreen h1{font-size:30px;font-weight:300;letter-spacing:.5em;margin-bottom:20px;text-indent:.5em}
+  #endscreen .t333{font-family:"SF Mono",Consolas,monospace;color:#c1121f;font-size:20px;letter-spacing:.3em;margin:18px 0;animation:pulse 1.6s infinite}
+  #endscreen p{font-size:14px;line-height:2;color:#8a7a80;max-width:460px}
+  #endbtns{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  #endscreen button{
+    border:1px solid #6a5058;background:transparent;color:#cbb8bc;
+    padding:10px 30px;border-radius:10px;cursor:pointer;font-family:inherit;letter-spacing:.15em;
+  }
+  #endscreen button:disabled{opacity:.35;cursor:default}
+
+  /* ---------- ch2 scare fx: rot / freeze / silence ---------- */
+  body.rotting #tablet{animation:rotfade 1.7s forwards}
+  @keyframes rotfade{
+    0%{filter:none}
+    40%{filter:hue-rotate(30deg) saturate(.9) brightness(.9)}
+    100%{filter:hue-rotate(65deg) saturate(.55) contrast(1.25) brightness(.55)}
+  }
+  body.hijacked.mold{background:linear-gradient(160deg,#070a03 0%,#111605 100%)}
+  body.hijacked.mold #tablet{background:#0c1105;box-shadow:0 30px 90px rgba(90,120,20,.35);filter:none}
+  body.hijacked.mold #searchbox{background:#10160a;border-color:#2a3a12}
+  body.hijacked.mold .card.corrupt{background:#0d1206;border-color:#2a3a12;box-shadow:0 0 30px rgba(140,180,60,.10) inset}
+  body.hijacked.mold .card.corrupt h3{color:#b7d075}
+  body.hijacked.mold .card.corrupt .tag{color:#86b049;border-color:#86b049}
+  body.hijacked.mold .disconnect{border-color:#86b049;color:#86b049}
+  body.hijacked.mold .disconnect:hover{background:#86b049;color:#0c1105}
+
+  #frostveil{
+    position:fixed;inset:0;z-index:70;pointer-events:none;opacity:0;transition:opacity 1.4s;
+    background:
+      radial-gradient(ellipse at 50% 50%, transparent 34%, rgba(215,238,255,.30) 72%, rgba(235,248,255,.65) 100%),
+      repeating-conic-gradient(from 12deg, rgba(255,255,255,.05) 0 2deg, transparent 2deg 17deg);
+  }
+  body.cold #frostveil{opacity:1}
+  body.hijacked.cold{background:linear-gradient(160deg,#0a0f16 0%,#16222e 100%)}
+  body.hijacked.cold #tablet{background:#0d141c;box-shadow:0 30px 90px rgba(80,140,190,.35)}
+  body.hijacked.cold #searchbox{background:#101a24;border-color:#2a4258}
+  body.hijacked.cold .card.corrupt{background:#0e1620;border-color:#2a4258;box-shadow:0 0 30px rgba(150,200,240,.10) inset}
+  body.hijacked.cold .card.corrupt h3{color:#cfe8ff}
+  body.hijacked.cold .card.corrupt .tag{color:#8fc7ee;border-color:#8fc7ee}
+  body.hijacked.cold .disconnect{border-color:#8fc7ee;color:#8fc7ee}
+  body.hijacked.cold .disconnect:hover{background:#8fc7ee;color:#0d141c}
+
+  body.hijacked.silent{background:#000}
+  body.hijacked.silent #tablet{background:#060606;border-color:#000;box-shadow:none}
+  body.hijacked.silent #searchbox{background:#0b0b0b;border-color:#1e1e1e}
+  body.hijacked.silent .card.corrupt{background:#0a0a0a;border-color:#242424;box-shadow:none}
+  body.hijacked.silent .card.corrupt h3{color:#bdbdbd}
+  body.hijacked.silent .card.corrupt .tag{color:#8a8a8a;border-color:#8a8a8a}
+  body.hijacked.silent .disconnect{border-color:#8a8a8a;color:#8a8a8a}
+  body.hijacked.silent .disconnect:hover{background:#8a8a8a;color:#0a0a0a}
+  .card.slowfade{animation:slowfade 3.2s ease both}
+  @keyframes slowfade{0%{opacity:0}60%{opacity:0}100%{opacity:1}}
+  body.vanish #results,body.vanish #hintline,body.vanish #statusbar{animation:vanish .4s forwards}
+  @keyframes vanish{to{opacity:0}}
+  body.hijacked #statusbar,body.hijacked #results{opacity:1;animation:none}
+
+  /* ---------- ch3 scare fx: mirror flip / flashlight dark ---------- */
+  #tablet{will-change:transform}
+  body.mirrored #tablet{transform:scaleX(-1);filter:saturate(.4) brightness(1.05)}
+  body:not(.mirrored) #tablet{transition:transform .5s ease, filter .5s}
+  body.mirrored #tablet{transition:transform .5s ease, filter .5s}
+
+  body.hijacked.silver{background:linear-gradient(160deg,#0e1014 0%,#1c2026 100%)}
+  body.hijacked.silver #tablet{background:#12151a;box-shadow:0 30px 90px rgba(150,170,200,.25)}
+  body.hijacked.silver #searchbox{background:#171b21;border-color:#3a404a}
+  body.hijacked.silver .card.corrupt{background:#14171c;border-color:#3a404a;box-shadow:0 0 30px rgba(200,215,235,.08) inset}
+  body.hijacked.silver .card.corrupt h3{color:#dfe5ee}
+  body.hijacked.silver .card.corrupt .tag{color:#aeb8c6;border-color:#aeb8c6}
+  body.hijacked.silver .disconnect{border-color:#aeb8c6;color:#aeb8c6}
+  body.hijacked.silver .disconnect:hover{background:#aeb8c6;color:#12151a}
+
+  #torchveil{
+    position:fixed;inset:0;z-index:75;pointer-events:none;opacity:0;transition:opacity .3s;
+    background:radial-gradient(circle 150px at 50% 45%, transparent 0 100px, rgba(0,0,0,.97) 190px);
+  }
+  body.torch #torchveil{opacity:1;animation:torchroam 2.4s steps(1) forwards}
+  @keyframes torchroam{
+    0%  {background:radial-gradient(circle 150px at 22% 24%, transparent 0 100px, rgba(0,0,0,.97) 190px)}
+    28% {background:radial-gradient(circle 150px at 74% 30%, transparent 0 100px, rgba(0,0,0,.97) 190px)}
+    55% {background:radial-gradient(circle 150px at 38% 72%, transparent 0 100px, rgba(0,0,0,.97) 190px)}
+    80%,100%{background:radial-gradient(circle 170px at 50% 46%, transparent 0 120px, rgba(0,0,0,.97) 210px)}
+  }
+  body.hijacked.noir{background:#020202}
+  body.hijacked.noir #tablet{background:#070707;border-color:#000;box-shadow:none}
+  body.hijacked.noir #searchbox{background:#0d0d0b;border-color:#2c2a20}
+  body.hijacked.noir .card.corrupt{background:#0b0b09;border-color:#2c2a20;box-shadow:none}
+  body.hijacked.noir .card.corrupt h3{color:#e8dc9a}
+  body.hijacked.noir .card.corrupt .tag{color:#d8c766;border-color:#d8c766}
+  body.hijacked.noir .disconnect{border-color:#d8c766;color:#d8c766}
+  body.hijacked.noir .disconnect:hover{background:#d8c766;color:#0b0b09}
+
+  .portalbtn{
+    display:block;margin:16px auto 4px;border:1px solid #4a90d9;background:transparent;
+    color:#4a90d9;border-radius:10px;padding:10px 26px;font-size:14px;cursor:pointer;
+    font-family:inherit;letter-spacing:.1em;
+  }
+  .portalbtn:hover{background:#4a90d9;color:#fff}
+
+  /* ---------- ch4: through-the-mirror ripple + mirror world ---------- */
+  @keyframes rippleT{
+    0%{transform:scale(1)}
+    25%{transform:scale(1.03,.97)}
+    50%{transform:scale(.97,1.03);filter:blur(2px)}
+    75%{transform:scale(1.02,.98);filter:blur(.5px)}
+    100%{transform:scale(1)}
+  }
+  body.rippling #tablet{animation:rippleT 1.4s ease}
+  #rippleveil{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:70;pointer-events:none}
+  body.rippling #rippleveil{display:flex}
+  #rippleveil .ring{
+    position:absolute;border:2px solid rgba(160,200,255,.55);border-radius:50%;
+    width:40px;height:40px;opacity:0;animation:ringout 1.2s ease-out forwards;
+  }
+  #rippleveil .ring:nth-child(2){animation-delay:.25s;border-color:rgba(160,200,255,.35)}
+  #rippleveil .ring:nth-child(3){animation-delay:.5s;border-color:rgba(160,200,255,.2)}
+  @keyframes ringout{0%{opacity:1;transform:scale(.2)}100%{opacity:0;transform:scale(22)}}
+
+  /* mirror world: persistent cold inverted theme (not a hijack) */
+  body.mw{background:linear-gradient(160deg,#0e1014 0%,#1a1e26 100%)}
+  body.mw #tablet{background:#141821;border-color:#000;color:#ccd6e4;box-shadow:0 30px 80px rgba(120,150,200,.2)}
+  body.mw #statusbar{color:#6b7686}
+  body.mw #searchbox{background:#1a2029;border-color:#39404d}
+  body.mw #query::placeholder{color:#4d5766}
+  body.mw #gobtn{background:#39404d}
+  body.mw #hintline{color:#6b7686}
+  body.mw .card{background:#181d26;border-color:#39404d;color:#ccd6e4}
+  body.mw .card .sub{color:#7d8898}
+  body.mw .card .tag{color:#8fa8c8;border-color:#8fa8c8}
+  body.mw #results::-webkit-scrollbar-thumb{background:#39404d}
+  body.mw #cluebtn{background:#1a2029;color:#8fa8c8}
+  body.mw #cluepanel{background:#141821;border-color:#39404d;color:#ccd6e4}
+
+  /* ---------- developer mode ---------- */
+  #devgate{
+    position:absolute;inset:0;z-index:95;display:none;align-items:center;justify-content:center;
+    background:rgba(0,8,0,.88);
+  }
+  #devgate.show{display:flex}
+  .devbox{
+    background:#050d05;border:1px solid #2f7a2f;border-radius:12px;padding:28px 36px;
+    text-align:center;font-family:"SF Mono",Consolas,monospace;color:#7dff9e;
+  }
+  .devbox h4{font-size:13px;letter-spacing:.3em;margin-bottom:16px;font-weight:normal}
+  .devbox input{
+    background:#020a02;border:1px solid #2f7a2f;border-radius:8px;color:#7dff9e;
+    font-family:inherit;font-size:18px;letter-spacing:.5em;text-align:center;
+    width:150px;padding:8px;outline:none;
+  }
+  .devbox .devbtns{margin-top:16px;display:flex;gap:10px;justify-content:center}
+  .devbox button{
+    background:transparent;border:1px solid #2f7a2f;border-radius:8px;color:#7dff9e;
+    font-family:inherit;font-size:12px;padding:6px 18px;cursor:pointer;letter-spacing:.2em;
+  }
+  .devbox button:hover{background:#2f7a2f;color:#020a02}
+  #deverr{color:#ff5a5a;font-size:11px;min-height:16px;margin-top:10px}
+
+  #devbar{
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:50;
+    background:#020a02;border:1px solid #2f7a2f;border-radius:10px;
+    padding:6px 14px;display:none;align-items:center;gap:10px;
+    font-family:"SF Mono",Consolas,monospace;color:#7dff9e;font-size:11px;
+    box-shadow:0 4px 20px rgba(0,0,0,.5);white-space:nowrap;
+  }
+  body.dev #devbar{display:flex}
+  #devrange{width:200px;accent-color:#3fdc5f}
+  #devlabel{min-width:118px;text-align:left}
+  #devclose{
+    background:transparent;border:none;color:#7dff9e;font-size:14px;cursor:pointer;
+    padding:0 2px;line-height:1;
+  }
+  #devclose:hover{color:#ff5a5a}
+
+  /* ---------- clue drawer ---------- */
+  #cluebtn{
+    position:absolute;right:20px;bottom:20px;z-index:30;
+    border:none;border-radius:50%;width:52px;height:52px;cursor:pointer;
+    background:var(--ink);color:#fff;font-size:20px;box-shadow:0 6px 18px rgba(0,0,0,.25);
+  }
+  body.hijacked #cluebtn{background:#2a0d16;color:#c98090}
+  #cluebtn .dot{
+    position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;
+    background:var(--evil-accent);display:none;
+  }
+  #cluepanel{
+    position:absolute;right:20px;bottom:84px;z-index:30;width:280px;
+    background:var(--panel);border:1px solid var(--line);border-radius:16px;
+    padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.25);display:none;
+  }
+  body.hijacked #cluepanel{background:var(--evil-panel);border-color:var(--evil-line);color:var(--evil-ink)}
+  #cluepanel h4{font-size:13px;letter-spacing:.2em;color:var(--sub);margin-bottom:10px}
+  #cluepanel li{font-size:13px;line-height:1.9;list-style:none;padding-left:16px;position:relative}
+  #cluepanel li::before{content:"›";position:absolute;left:2px;color:var(--accent)}
+  body.hijacked #cluepanel li::before{color:var(--evil-accent)}
+  #cluepanel .empty{font-size:12px;color:var(--sub)}
+
+  #mutebtn{
+    position:absolute;left:20px;bottom:20px;z-index:30;border:none;background:transparent;
+    color:var(--sub);font-size:18px;cursor:pointer;
+  }
+  @media(max-width:560px){
+    #results{padding:6px 14px 90px}
+    #searchwrap{padding:12px 14px 8px}
+    #statusbar{padding:14px 16px 6px}
+  }
+</style>
+</head>
+<body>
+<div id="glitchveil"></div>
+<div id="blackout"></div>
+<div id="frostveil"></div>
+<div id="torchveil"></div>
+<div id="rippleveil"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+<div id="faceflash">
+  <svg viewBox="0 0 400 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <filter id="fblur"><feGaussianBlur stdDeviation="2.2"/></filter>
+      <radialGradient id="fvig" cx=".5" cy=".5" r=".72">
+        <stop offset=".5" stop-color="#000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000" stop-opacity="1"/>
+      </radialGradient>
+    </defs>
+    <rect width="400" height="420" fill="#000"/>
+    <g filter="url(#fblur)">
+      <ellipse cx="200" cy="218" rx="92" ry="124" fill="#c9bcae"/>
+      <path d="M108 170 C118 62 282 62 292 170 L298 348 C282 306 268 262 262 202
+               L250 122 L236 192 L226 112 L206 182 L188 106 L178 186 L160 116 L150 202
+               C144 264 126 310 102 350 Z" fill="#0a0806"/>
+      <ellipse cx="168" cy="212" rx="15" ry="22" fill="#080604"/>
+      <ellipse cx="232" cy="214" rx="15" ry="24" fill="#080604"/>
+      <path d="M168 232 q4 26 0 46" stroke="#161008" stroke-width="6" fill="none" opacity=".8"/>
+      <path d="M232 236 q-3 22 1 40" stroke="#161008" stroke-width="5" fill="none" opacity=".6"/>
+      <ellipse cx="201" cy="302" rx="19" ry="33" fill="#0a0503"/>
+    </g>
+    <rect width="400" height="420" fill="url(#fvig)"/>
+  </svg>
+</div>
+
+<div id="tablet">
+  <!-- boot -->
+  <div class="overlay" id="boot">
+    <div class="logo">GLIMMER <b>OS</b></div>
+    <div class="slogan">微光，知你所求。</div>
+    <div class="tap">— 轻触任意处开机 · TAP TO BEGIN —</div>
+  </div>
+
+  <!-- story overlay -->
+  <div class="overlay hidden" id="story">
+    <div id="storytext"></div>
+    <div id="storynext">▸ 继续</div>
+  </div>
+
+  <!-- chapter end -->
+  <div class="overlay hidden" id="endscreen">
+    <h1 id="endtitle">第一章 · 完</h1>
+    <div class="t333" id="endtag">TONIGHT&nbsp;&nbsp;03:33</div>
+    <p id="endstats"></p>
+    <p id="endquote">「所有进入微光的人，都将成为微光的一部分。」</p>
+    <div id="endbtns"></div>
+  </div>
+
+  <!-- OS -->
+  <div id="statusbar">
+    <span class="brand">GLIMMER OS</span>
+    <span id="clock">21:47</span>
+    <span>ROOM 0413 · 🔋 82%</span>
+  </div>
+
+  <div id="searchwrap">
+    <div id="searchbox">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" opacity=".5">
+        <circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>
+      </svg>
+      <input id="query" type="text" autocomplete="off"
+        placeholder="您好，我是微光管家，请问需要什么服务？（例如：送水、订餐）">
+      <button id="gobtn">搜索</button>
+    </div>
+    <div id="hintline"></div>
+  </div>
+
+  <div id="results"></div>
+
+  <button id="cluebtn" title="线索手账">🗒<span class="dot" id="cluedot"></span></button>
+  <div id="cluepanel">
+    <h4>线索手账 · CLUES</h4>
+    <ul id="cluelist"></ul>
+    <div class="empty" id="clueempty">还没有记下任何线索。<br>观察异样 → 在搜索框输入关键词。</div>
+  </div>
+  <button id="mutebtn" title="声音开关">🔊</button>
+
+  <!-- developer mode -->
+  <div id="devgate">
+    <div class="devbox">
+      <h4>DEVELOPER ACCESS</h4>
+      <input id="devpw" type="password" maxlength="4" autocomplete="off" inputmode="numeric">
+      <div id="deverr"></div>
+      <div class="devbtns">
+        <button id="devok">确认</button>
+        <button id="devcancel">取消</button>
+      </div>
+    </div>
+  </div>
+  <div id="devbar">
+    <span>DEV</span>
+    <input type="range" id="devrange" min="0" max="20" step="1" value="0">
+    <span id="devlabel">第一章 · 开局</span>
+    <button id="devclose" title="退出开发者模式">×</button>
+  </div>
+</div>
+
+<script>
+/* =====================  STATE  ===================== */
+const S = {
+  stage: 0,          // 0 start, 1 saw hotel page, 2 saw death log, 3 saw cctv, 4 saw altar
+  searches: 0,
+  fails: 0,
+  muted: false,
+  locked: false,     // input locked during fx
+  yaScared: false,   // one-time zoom scare used
+  seenRoom: false,   // 0413 room profile viewed
+  seenCard: false,   // welcome card embossing viewed
+  seenCCTV: false,   // cctv footage viewed
+  seenAlbum: false,  // grandma photo viewed
+  seenGranny: false, // grandma's expelled-member archive viewed
+  mw: false,         // inside the mirror world (ch4)
+  hintKey: '',       // two-level hint tracking
+  hintLv: 0,
+  clues: [],
+};
+const $ = id => document.getElementById(id);
+const results = $('results'), query = $('query'), hintline = $('hintline');
+
+/* =====================  AUDIO  ===================== */
+let AC = null;
+function ac(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function sfxGlitch(dur=1.1){
+  if(S.muted) return; const ctx = ac(); if(!ctx) return;
+  const t = ctx.currentTime;
+  // noise burst
+  const len = ctx.sampleRate*dur, buf = ctx.createBuffer(1,len,ctx.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len,1.5);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=900; bp.Q.value=.6;
+  const g = ctx.createGain(); g.gain.setValueAtTime(.28,t); g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  src.connect(bp).connect(g).connect(ctx.destination); src.start(t);
+  // low drone
+  const o = ctx.createOscillator(); o.type='sawtooth'; o.frequency.setValueAtTime(46,t);
+  const g2 = ctx.createGain(); g2.gain.setValueAtTime(.12,t); g2.gain.exponentialRampToValueAtTime(.001,t+dur*1.6);
+  o.connect(g2).connect(ctx.destination); o.start(t); o.stop(t+dur*1.7);
+}
+function sfxSting(vol=1){
+  /* sharp shriek for sudden-appear scares */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime;
+  [880,932,1244].forEach(f => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(f*.5,t); o.frequency.exponentialRampToValueAtTime(f*2.2,t+.32);
+    g.gain.setValueAtTime(.11*vol,t); g.gain.exponentialRampToValueAtTime(.001,t+.5);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.55);
+  });
+  const len = ctx.sampleRate*.15, buf = ctx.createBuffer(1,len,ctx.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*(1-i/len);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const g = ctx.createGain(); g.gain.value = .22*vol;
+  src.connect(g).connect(ctx.destination); src.start(t);
+}
+function sfxFall(){
+  /* descending pitch + bubbling — sinking underwater */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(320,t); o.frequency.exponentialRampToValueAtTime(36,t+1.5);
+  g.gain.setValueAtTime(.2,t); g.gain.exponentialRampToValueAtTime(.001,t+1.8);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+1.9);
+  const len = ctx.sampleRate*1.6, buf = ctx.createBuffer(1,len,ctx.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*.6*Math.sin(i/len*Math.PI);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const lp = ctx.createBiquadFilter(); lp.type='lowpass';
+  lp.frequency.setValueAtTime(700,t); lp.frequency.exponentialRampToValueAtTime(120,t+1.6);
+  const g2 = ctx.createGain(); g2.gain.value = .16;
+  src.connect(lp).connect(g2).connect(ctx.destination); src.start(t);
+}
+function sfxFlies(){
+  /* fly-swarm buzz for the rot scare */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime, dur = 1.8;
+  [92,117].forEach(f => {
+    const o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+    o.type='sawtooth'; o.frequency.value = f;
+    lfo.type='sine'; lfo.frequency.value = 7 + Math.random()*4; lg.gain.value = .05;
+    lfo.connect(lg).connect(g.gain);
+    g.gain.setValueAtTime(.07,t); g.gain.exponentialRampToValueAtTime(.001,t+dur);
+    o.connect(g).connect(ctx.destination);
+    o.start(t); o.stop(t+dur); lfo.start(t); lfo.stop(t+dur);
+  });
+}
+function sfxFreeze(){
+  /* ice cracks + thin shimmer */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime;
+  [0,.38,.85].forEach(dt => {
+    const len = ctx.sampleRate*.06, buf = ctx.createBuffer(1,len,ctx.sampleRate), d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*(1-i/len);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 2400;
+    const g = ctx.createGain(); g.gain.value = .3;
+    src.connect(hp).connect(g).connect(ctx.destination); src.start(t+dt);
+  });
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(2600,t); o.frequency.exponentialRampToValueAtTime(1400,t+1.6);
+  g.gain.setValueAtTime(.05,t); g.gain.exponentialRampToValueAtTime(.001,t+1.6);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+1.7);
+}
+function sfxShimmer(){
+  /* glassy rising shimmer for the mirror flip */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(500,t); o.frequency.exponentialRampToValueAtTime(2600,t+1.2);
+  g.gain.setValueAtTime(.07,t); g.gain.exponentialRampToValueAtTime(.001,t+1.4);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+1.5);
+  [1800,2300,2750].forEach((f,i) => {
+    const p = ctx.createOscillator(), pg = ctx.createGain();
+    p.type='triangle'; p.frequency.value = f;
+    pg.gain.setValueAtTime(.09,t+.3+i*.32); pg.gain.exponentialRampToValueAtTime(.001,t+.3+i*.32+.25);
+    p.connect(pg).connect(ctx.destination); p.start(t+.3+i*.32); p.stop(t+.3+i*.32+.3);
+  });
+}
+function sfxHeart(){
+  /* slow double heartbeats in the dark */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime;
+  for(let b=0;b<3;b++){
+    [0,.22].forEach(dd => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(58,t+b*.85+dd);
+      g.gain.setValueAtTime(dd? .18:.26, t+b*.85+dd);
+      g.gain.exponentialRampToValueAtTime(.001, t+b*.85+dd+.14);
+      o.connect(g).connect(ctx.destination); o.start(t+b*.85+dd); o.stop(t+b*.85+dd+.16);
+    });
+  }
+}
+function sfxPlunge(){
+  /* soft watery whoosh — passing through the mirror surface */
+  if(S.muted) return; const ctx = ac(); if(!ctx) return; const t = ctx.currentTime;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(55,t+.9);
+  g.gain.setValueAtTime(.16,t); g.gain.exponentialRampToValueAtTime(.001,t+1.1);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+1.2);
+  const len = ctx.sampleRate*1.1, buf = ctx.createBuffer(1,len,ctx.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i] = (Math.random()*2-1)*.5*Math.sin(i/len*Math.PI);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const lp = ctx.createBiquadFilter(); lp.type='lowpass';
+  lp.frequency.setValueAtTime(1200,t); lp.frequency.exponentialRampToValueAtTime(200,t+1.1);
+  const g2 = ctx.createGain(); g2.gain.value = .12;
+  src.connect(lp).connect(g2).connect(ctx.destination); src.start(t);
+}
+function sfxKey(){
+  if(S.muted) return; const ctx = ac(); if(!ctx) return;
+  const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+  o.type='square'; o.frequency.value = 620 + Math.random()*300;
+  g.gain.setValueAtTime(.05,t); g.gain.exponentialRampToValueAtTime(.001,t+.06);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.07);
+}
+$('mutebtn').onclick = () => { S.muted = !S.muted; $('mutebtn').textContent = S.muted?'🔇':'🔊'; };
+
+/* =====================  CLOCK  ===================== */
+(function tick(){
+  const el = $('clock');
+  // fictional in-game evening clock, creeps toward 03:33 as stages advance
+  const base = [ '21:47','22:31','23:58','01:12','02:59','08:12','10:26','13:40','16:55','18:03','09:12','13:26','20:41','23:57','19:05','21:40','21:45','22:47','23:59' ][Math.min(S.stage,18)];
+  /* in the mirror world, time runs backwards */
+  el.textContent = S.mw ? base.split('').reverse().join('') : base;
+  setTimeout(tick, 4000);
+})();
+
+/* =====================  CLUES  ===================== */
+function addClue(text){
+  if(S.clues.includes(text)) return;
+  S.clues.push(text);
+  const li = document.createElement('li'); li.textContent = text;
+  $('cluelist').appendChild(li);
+  $('clueempty').style.display='none';
+  $('cluedot').style.display='block';
+}
+$('cluebtn').onclick = () => {
+  const p = $('cluepanel');
+  p.style.display = p.style.display==='block' ? 'none':'block';
+  $('cluedot').style.display='none';
+};
+
+/* =====================  STORY OVERLAY  ===================== */
+function showStory(beats, done){
+  const ov = $('story'), tx = $('storytext');
+  let i = 0; ov.classList.remove('hidden'); S.locked = true;
+  function render(){
+    const b = beats[i];
+    tx.className = b.cls||'narr';
+    tx.innerHTML = (b.who?`<span class="who">${b.who}</span>`:'') + b.text;
+  }
+  render();
+  ov.onclick = () => {
+    i++;
+    if(i>=beats.length){ ov.classList.add('hidden'); ov.onclick=null; S.locked=false; if(done) done(); }
+    else render();
+  };
+}
+
+/* =====================  BOOT + INTRO  ===================== */
+$('boot').addEventListener('click', () => {
+  ac(); // unlock audio with gesture
+  $('boot').classList.add('hidden');
+  showStory([
+    {cls:'narr', text:'大堂明亮得有些刺眼，冷白色调。<br>前台小姐的笑容非常标准——标准到有些僵硬。'},
+    {cls:'recep', who:'前台', text:'“王先生、林小姐，欢迎入住<b>微光度假村</b>。这是您的房卡，0413 房。”'},
+    {cls:'recep', who:'前台', text:'“我们酒店全面接入了「微光管家」系统。订餐、找设施、任何疑问，直接在搜索框输入即可——<br>它比任何真人都更了解这间酒店。”'},
+    {cls:'xiaoya', who:'小雅', text:'“哇，你看窗外，顶楼是无边泳池诶！<br>今晚先吃自助，明天我要拍一整天照片！”'},
+    {cls:'narr', text:'房间极其现代化。桌上放着一台极简风格的平板，<br>屏幕上只有一个干净的搜索框，闪烁着：'},
+    {cls:'sys', who:'GLIMMER OS', text:'“微光，知你所求。”<br><br><span style="opacity:.55">// 试着搜索点什么吧，比如这家酒店的名字。</span>'},
+  ], () => {
+    hint('小雅去洗手间了。你盯着搜索框——要不，先搜搜「微光度假村」？');
+    addClue('酒店名：微光度假村（The Glimmer Resort）');
+    query.focus();
+  });
+});
+
+/* =====================  HINT LINE  ===================== */
+function hint(t){ hintline.textContent = t; }
+
+/* 两级提示：level 1 给方向（谜面），level 2 给答案 */
+function getHint(level){
+  const st = S.stage;
+  if(st === 0) return level===1 ? '这家酒店的一切，都从它的名字开始。' : '搜索「微光度假村」。';
+  if(st === 1) return level===1 ? '宣传页说：46 层，客梯全楼直达，按键全在图里。那就数数看——少了哪一层？' : '搜索「44」。';
+  if(st === 2){
+    if(!S.seenRoom) return level===1 ? '名字被抹掉了，可房号没有。日志里反复出现的那个房号——就是你自己的房间。' : '搜索「0413」。';
+    if(!S.seenCard) return level===1 ? '房间履历说，前住客留下了一样东西。回收失败，还在床头。' : '搜索「欢迎卡」。';
+    return level===1 ? '把卡片对着光。压痕是两个字——一个姓，一个名。认出来，搜它。' : '搜索「陈婷」。';
+  }
+  if(st === 3) return level===1 ? '月亮会沉在哪里？想想全景照片里，那一闪而过的一帧。' : '搜索「水底」（或「枯井」）。';
+  if(st === 4) return '（第一章线索已全部解开）';
+  if(st === 5) return level===1 ? '每桌都有、必须喝完、还免费——先查查这碗汤的底细。' : '搜索「安神汤」。';
+  if(st === 6) return level===1 ? '「辰砂」是什么？「黄表」又是什么？再把菜单上那行印反的字读一遍。' : '搜索「符水」（反字：以符镇魂）。';
+  if(st === 7) return level===1 ? 'B1-C4，存储零下 18 度。什么地方常年零下 18 度？' : '搜索「冷库」。';
+  if(st === 8) return level===1  ? '他没有嘴，只能把字写反。倒过来读——最后一句的开头三个字。' : '搜索「回魂夜」。';
+  if(st === 9) return '（第二章线索已全部解开）';
+  if(st === 10) return level===1 ? '深夜的健身房。镜子照出来的房间，和真实的房间不一样——多了什么？' : '搜索「镜子」。';
+  if(st === 11) return level===1 ? '镜中那扇门上挂着牌子，字是反写的。读出来，去搜它。' : '搜索「沈氏堂」。';
+  if(st === 12){
+    if(level === 1){
+      if(!S.seenGranny) return '口令：4 位西历，「去问井」。进门后问事要生辰——先拿证件上的试。若井说那是假的：留言板里有位「北海阿婆」，说自己"改得了纸上的东西"……她是谁？在这边搜搜她。';
+      if(!S.seenAlbum) return '外婆改过的那"一页"，就是户口。真生日不在任何系统里——去搜「相册」。';
+      return '毛笔字：羊年、三月；2008 年时五岁 → 哪一年生？问事页下面的甲子表能换成干支。';
+    }
+    return '1900 进门 → 证件生日 2001-07 → 甲子表＝辛巳 → 问事被驳回 → 微光搜「外婆」→ 搜「相册」：羊年三月、2008 年五岁 → 2003＝癸未 → 问事「癸未年三月」→ 搜「第四面镜」。';
+  }
+  if(st === 13) return '（第三章线索已全部解开）';
+  if(st === 14){
+    if(!S.sawPerm) return level===1 ? '房卡被降了级。这栋楼里，什么东西的权限比房卡高？——先查查你自己的通行状况。' : '搜索「房卡」（或「权限」）。';
+    if(!S.sawPai) return level===1 ? '权限表上只有一样东西畅通无阻：堂内铜牌。查它的下落。' : '搜索「铜牌」。';
+    return level===1 ? '044 号铜牌，领取后未归还，躺在 B1 冷库。去见它现在的邻居。' : '搜索「冷库」。';
+  }
+  if(st === 15) return level===1 ? '亥时三刻，诸镜皆门——可"亥时三刻"是几点几分？旧门户的对照表不止甲子那一张。' : '十二时辰表：亥时＝21:00–23:00，一刻＝十五分 → 亥时三刻＝21:45。回来搜「21:45」。';
+  if(st === 16) return level===1 ? '镜中的电梯，面板上只有一个键。' : '搜索「44」（或「电梯」）。';
+  if(st === 17) return level===1 ? '牌位的生辰栏空着——井开时按它判"旧躯"。写谁，谁就是旧躯。写一个井等了很久的人。（甲子六十年一周天。）' : '沈聿生于光绪三年＝1877。1877＋120＝1997，查旧门户甲子表：1997＝丁丑 → 搜索「丁丑」。';
+  return '（第四章线索已全部解开）';
+}
+
+/* =====================  SVG ART  ===================== */
+const svgPanorama = `
+<svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="酒店全景">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b1e3a"/><stop offset=".6" stop-color="#1d3a5f"/><stop offset="1" stop-color="#3d5a80"/>
+    </linearGradient>
+    <linearGradient id="pool" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fd4e8"/><stop offset="1" stop-color="#1a6e8e"/>
+    </linearGradient>
+    <linearGradient id="bld" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3648"/><stop offset="1" stop-color="#141c28"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="340" fill="url(#sky)"/>
+  <circle cx="530" cy="60" r="26" fill="#f4f1de" opacity=".95"/>
+  <circle cx="522" cy="54" r="24" fill="url(#sky)" opacity=".55"/>
+  <g fill="#fff" opacity=".5">
+    <circle cx="80" cy="40" r="1.4"/><circle cx="160" cy="70" r="1"/><circle cx="240" cy="30" r="1.3"/>
+    <circle cx="330" cy="55" r="1"/><circle cx="430" cy="25" r="1.2"/><circle cx="600" cy="90" r="1"/>
+  </g>
+  <!-- tower -->
+  <rect x="230" y="70" width="180" height="230" fill="url(#bld)" rx="4"/>
+  <g fill="#ffd98e" opacity=".85">
+    ${(() => {let w='';for(let r=0;r<14;r++)for(let c=0;c<7;c++){if(Math.sin(r*7+c*13)>0.15)w+=`<rect x="${244+c*23}" y="${86+r*15}" width="12" height="7" rx="1"/>`;}return w;})()}
+  </g>
+  <!-- rooftop infinity pool -->
+  <rect x="222" y="54" width="196" height="18" fill="url(#pool)" rx="3"/>
+  <rect x="222" y="54" width="196" height="4" fill="#bdf0ff" opacity=".7" rx="2"/>
+  <!-- side wings -->
+  <rect x="120" y="180" width="90" height="120" fill="#1c2735" rx="3"/>
+  <rect x="430" y="200" width="100" height="100" fill="#1c2735" rx="3"/>
+  <g fill="#ffd98e" opacity=".6">
+    <rect x="132" y="196" width="10" height="6"/><rect x="156" y="196" width="10" height="6"/>
+    <rect x="132" y="216" width="10" height="6"/><rect x="180" y="236" width="10" height="6"/>
+    <rect x="444" y="216" width="10" height="6"/><rect x="468" y="236" width="10" height="6"/>
+  </g>
+  <!-- sea -->
+  <rect x="0" y="300" width="640" height="40" fill="#0e2438"/>
+  <path d="M0 306 Q80 300 160 306 T320 306 T480 306 T640 306" stroke="#3d6a8a" fill="none" opacity=".6"/>
+  <!-- GHOST LAYER: bones under the pool water, flashes rarely -->
+  <g class="ghostlayer">
+    <rect x="222" y="54" width="196" height="18" fill="#0a0a0a" rx="3"/>
+    <g stroke="#e8e2d0" stroke-width="2" fill="none" opacity=".9">
+      <path d="M240 66 q10 -8 20 0"/><path d="M270 60 v10"/><path d="M262 65 h16"/>
+      <path d="M300 62 q8 8 16 0"/><circle cx="336" cy="63" r="5"/>
+      <path d="M352 58 l10 10 M362 58 l-10 10"/><path d="M382 66 q10 -10 20 -2"/>
+    </g>
+    <text x="320" y="46" fill="#e8e2d0" font-size="10" text-anchor="middle" font-family="monospace" opacity=".8">枯 井 旧 址</text>
+  </g>
+</svg>`;
+
+const svgElevator = `
+<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="电梯楼层面板">
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3a4250"/><stop offset=".5" stop-color="#232a35"/><stop offset="1" stop-color="#3a4250"/>
+    </linearGradient>
+    <radialGradient id="btn" cx=".35" cy=".3" r="1">
+      <stop offset="0" stop-color="#525d6e"/><stop offset="1" stop-color="#1c222c"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="300" fill="url(#steel)"/>
+  <rect x="180" y="18" width="280" height="264" rx="14" fill="#151a22" stroke="#4a5462"/>
+  <text x="320" y="46" text-anchor="middle" fill="#8fa2b8" font-size="13" letter-spacing="4" font-family="monospace">GLIMMER ELEVATOR</text>
+  ${(() => {
+    const floors=['46','45','43','42','41','40','15','14','13','12','5','4','3','2','1','B1'];
+    let out=''; floors.forEach((f,i)=>{
+      const col=i%4,row=Math.floor(i/4);
+      const x=214+col*58, y=66+row*52;
+      out+=`<circle cx="${x+18}" cy="${y+18}" r="18" fill="url(#btn)" stroke="#5a6577"/>
+            <text x="${x+18}" y="${y+23}" text-anchor="middle" fill="#cdd6e2" font-size="13" font-family="monospace">${f}</text>`;
+    }); return out;
+  })()}
+  <text x="320" y="292" text-anchor="middle" fill="#5a6577" font-size="10" font-family="monospace" letter-spacing="2">OTIS-SHEN LIFT CO.</text>
+</svg>`;
+
+const svgCCTV = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="监控残片">
+  <defs>
+    <linearGradient id="cctvbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1a14"/><stop offset="1" stop-color="#05100a"/>
+    </linearGradient>
+    <filter id="blur1"><feGaussianBlur stdDeviation="3"/></filter>
+    <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#ffffff" opacity=".05"/>
+    </pattern>
+  </defs>
+  <rect width="640" height="360" fill="url(#cctvbg)"/>
+  <!-- pool deck at night, green tint -->
+  <rect x="60" y="220" width="520" height="90" fill="#0f2f24" rx="4"/>
+  <rect x="60" y="220" width="520" height="10" fill="#1d4f3c"/>
+  <!-- water -->
+  <path d="M60 260 q60 -8 120 0 t120 0 t120 0 t120 0 v50 h-480 z" fill="#123a2c" opacity=".9"/>
+  <!-- railing -->
+  <g stroke="#1d4f3c" stroke-width="3"><path d="M80 220 v-60 M180 220 v-60 M280 220 v-60 M380 220 v-60 M480 220 v-60 M560 220 v-60"/><path d="M70 165 h500"/></g>
+  <!-- blurred figure standing at pool edge -->
+  <g filter="url(#blur1)">
+    <ellipse cx="330" cy="205" rx="16" ry="42" fill="#020604"/>
+    <circle cx="330" cy="158" r="11" fill="#020604"/>
+    <ellipse cx="330" cy="252" rx="20" ry="6" fill="#000" opacity=".7"/>
+  </g>
+  <!-- long wet hair hint -->
+  <path d="M321 152 q-6 30 -4 52 M339 152 q8 28 5 54" stroke="#020604" stroke-width="3" fill="none" filter="url(#blur1)"/>
+  <!-- scanlines + vignette -->
+  <rect width="640" height="360" fill="url(#scan)"/>
+  <rect width="640" height="360" fill="none" stroke="#000" stroke-width="60" opacity=".35"/>
+  <!-- OSD -->
+  <text x="24" y="36" fill="#7dff9e" font-size="15" font-family="monospace">CAM_B1-POOL · REC</text>
+  <circle cx="200" cy="31" r="6" fill="#ff3b3b"><animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/></circle>
+  <text x="616" y="36" fill="#7dff9e" font-size="15" font-family="monospace" text-anchor="end">03:33:33</text>
+  <text x="24" y="340" fill="#7dff9e" font-size="12" font-family="monospace" opacity=".8">2025-10-04 · FRAME CORRUPTED ▓▓▒░</text>
+</svg>`;
+
+const svgOldPhoto = `
+<svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="建站前旧照片">
+  <defs>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.5 0 0 0 0 0.47 0 0 0 0 0.42 0 0 0 0.18 0"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+    <linearGradient id="sepia" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7a98c"/><stop offset="1" stop-color="#7d7159"/>
+    </linearGradient>
+  </defs>
+  <!-- torn paper border -->
+  <rect width="640" height="400" fill="#efe6d2"/>
+  <g filter="url(#grain)">
+    <rect x="28" y="28" width="584" height="310" fill="url(#sepia)"/>
+    <!-- barren ground -->
+    <rect x="28" y="250" width="584" height="88" fill="#6b5f49"/>
+    <!-- dry well: ring of stones -->
+    <ellipse cx="320" cy="272" rx="92" ry="26" fill="#3d3628"/>
+    <ellipse cx="320" cy="266" rx="92" ry="26" fill="none" stroke="#8d7f63" stroke-width="10"/>
+    <ellipse cx="320" cy="272" rx="60" ry="15" fill="#171310"/>
+    <!-- bare tree -->
+    <g stroke="#2f2a1f" stroke-width="6" fill="none" stroke-linecap="round">
+      <path d="M120 260 v-110"/><path d="M120 180 q-28 -22 -44 -50"/><path d="M120 160 q26 -18 36 -46"/>
+      <path d="M120 205 q-18 -8 -30 -24"/>
+    </g>
+    <!-- distant figures in a ring (tiny, unsettling) -->
+    <g fill="#2f2a1f" opacity=".85">
+      <circle cx="240" cy="238" r="4"/><rect x="237" y="242" width="6" height="14"/>
+      <circle cx="410" cy="240" r="4"/><rect x="407" y="244" width="6" height="14"/>
+      <circle cx="320" cy="228" r="4"/><rect x="317" y="232" width="6" height="14"/>
+      <circle cx="470" cy="252" r="4"/><rect x="467" y="256" width="6" height="14"/>
+      <circle cx="182" cy="248" r="4"/><rect x="179" y="252" width="6" height="14"/>
+    </g>
+    <!-- sky scratch marks -->
+    <path d="M80 60 l60 4 M400 90 l90 -6 M200 110 l40 2" stroke="#a4977c" stroke-width="1" opacity=".6"/>
+  </g>
+  <text x="320" y="372" text-anchor="middle" fill="#6b5c46" font-size="15" font-family="serif" letter-spacing="6">光緒二十六年 · 北海 祭壇舊址</text>
+  <text x="560" y="392" text-anchor="end" fill="#9a8a6f" font-size="10" font-family="serif">沈氏藏</text>
+</svg>`;
+
+const svgWelcome = `
+<svg viewBox="0 0 640 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="床头欢迎卡">
+  <defs>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2d22"/><stop offset="1" stop-color="#241a12"/>
+    </linearGradient>
+    <linearGradient id="cardp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4eee2"/><stop offset="1" stop-color="#e6ddca"/>
+    </linearGradient>
+    <filter id="embossblur"><feGaussianBlur stdDeviation=".6"/></filter>
+  </defs>
+  <rect width="640" height="380" fill="url(#wood)"/>
+  <!-- lamp glow from top-left, the card is tilted toward light -->
+  <ellipse cx="140" cy="40" rx="260" ry="150" fill="#ffdf9e" opacity=".12"/>
+  <g transform="rotate(-4 320 200)">
+    <rect x="120" y="80" width="400" height="240" rx="8" fill="url(#cardp)"/>
+    <rect x="132" y="92" width="376" height="216" rx="5" fill="none" stroke="#cbbb95"/>
+    <!-- printed text (the new card) -->
+    <text x="320" y="140" text-anchor="middle" fill="#8a7448" font-size="14" font-family="serif" letter-spacing="6">歡迎蒞臨 · 微光度假村</text>
+    <text x="320" y="180" text-anchor="middle" fill="#5a4a2f" font-size="20" font-family="serif" letter-spacing="3">王先生 · 林小姐 敬啟</text>
+    <text x="320" y="290" text-anchor="middle" fill="#b3a37e" font-size="10" font-family="serif" letter-spacing="2">GLIMMER RESORT · ROOM 0413</text>
+    <!-- EMBOSSED strokes of the previous card: 「陈婷」 + a shaky plea, pressed into the paper -->
+    <g filter="url(#embossblur)" opacity=".55">
+      <text x="238" y="252" fill="none" stroke="#c9b992" stroke-width="1.6" font-size="56" font-family="serif" transform="rotate(2 238 252)">陈</text>
+      <text x="318" y="260" fill="none" stroke="#c9b992" stroke-width="1.6" font-size="56" font-family="serif" transform="rotate(-3 318 260)">婷</text>
+      <text x="408" y="246" fill="none" stroke="#cec09c" stroke-width="1.1" font-size="17" font-family="serif" transform="rotate(3 408 246)">救我</text>
+    </g>
+    <!-- highlight edge of embossing (light from top-left) -->
+    <g opacity=".28">
+      <text x="237" y="251" fill="none" stroke="#fffbe8" stroke-width=".7" font-size="56" font-family="serif" transform="rotate(2 237 251)">陈</text>
+      <text x="317" y="259" fill="none" stroke="#fffbe8" stroke-width=".7" font-size="56" font-family="serif" transform="rotate(-3 317 259)">婷</text>
+    </g>
+  </g>
+</svg>`;
+
+const svgMenu = `
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="云顶餐厅菜单">
+  <defs>
+    <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7f2e8"/><stop offset="1" stop-color="#ece3d2"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="420" fill="#20242c"/>
+  <rect x="60" y="24" width="520" height="372" fill="url(#cream)" rx="6"/>
+  <rect x="76" y="40" width="488" height="340" fill="none" stroke="#c9b98f" rx="4"/>
+  <text x="320" y="86" text-anchor="middle" fill="#5a4a2f" font-size="24" font-family="serif" letter-spacing="10">雲 頂 餐 廳</text>
+  <text x="320" y="108" text-anchor="middle" fill="#a08d64" font-size="11" font-family="serif" letter-spacing="4">CLOUD PEAK · 44F</text>
+  <line x1="150" y1="126" x2="490" y2="126" stroke="#c9b98f"/>
+  <g fill="#4a3d28" font-size="16" font-family="serif">
+    <text x="130" y="168">低温慢煮 M9 和牛</text><text x="510" y="168" text-anchor="end">¥ 888</text>
+    <text x="130" y="204">蓝鳍金枪鱼大腹</text><text x="510" y="204" text-anchor="end">¥ 666</text>
+    <text x="-226" y="240" transform="scale(-1,1)" fill="#6a3d3d">以符鎮魂引客歸井</text><text x="510" y="240" text-anchor="end">¥ 444</text>
+    <text x="130" y="276">惠灵顿牛排（全熟不可选）</text><text x="510" y="276" text-anchor="end">¥ 555</text>
+  </g>
+  <line x1="150" y1="300" x2="490" y2="300" stroke="#c9b98f"/>
+  <text x="320" y="332" text-anchor="middle" fill="#8a2f2f" font-size="17" font-family="serif" letter-spacing="3">特供 · 安神汤　每客一盅 · 免费</text>
+  <text x="320" y="356" text-anchor="middle" fill="#a08d64" font-size="11" font-family="serif">古法慢炖 · 强烈建议每晚饮用 · 谢绝剩余</text>
+  <text x="320" y="388" text-anchor="middle" fill="#c4b48c" font-size="9" font-family="serif" letter-spacing="2">菜单每日 03:33 更新 · 限量 44 盅</text>
+</svg>`;
+
+const svgFreezer = `
+<svg viewBox="0 0 640 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="B1 冷库">
+  <defs>
+    <linearGradient id="frz" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0e1822"/><stop offset="1" stop-color="#050a10"/>
+    </linearGradient>
+    <filter id="fog"><feGaussianBlur stdDeviation="6"/></filter>
+    <radialGradient id="lamp" cx=".5" cy="0" r="1">
+      <stop offset="0" stop-color="#b8d4e8" stop-opacity=".5"/><stop offset=".6" stop-color="#b8d4e8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="380" fill="url(#frz)"/>
+  <rect width="640" height="200" fill="url(#lamp)"/>
+  <!-- ceiling rail -->
+  <rect x="40" y="40" width="560" height="10" fill="#26303c"/>
+  <!-- hooks and hanging shapes -->
+  ${(() => {
+    let out='';
+    const xs=[110,220,330,440,550];
+    xs.forEach((x,i)=>{
+      out+=`<path d="M${x} 50 v22 q0 12 10 12" stroke="#5a6a7a" stroke-width="5" fill="none"/>`;
+      if(i===3){
+        /* hook 04: a distinctly human silhouette */
+        out+=`<g fill="#04070c">
+          <circle cx="${x+12}" cy="104" r="13"/>
+          <path d="M${x-4} 118 q16 -10 32 0 l-3 96 q-13 8 -26 0 z"/>
+          <path d="M${x-2} 214 l-4 60 M${x+26} 214 l4 60" stroke="#04070c" stroke-width="9" stroke-linecap="round"/>
+        </g>
+        <text x="${x+12}" y="304" text-anchor="middle" fill="#6a8098" font-size="11" font-family="monospace">04</text>`;
+      } else {
+        out+=`<path d="M${x-8} 90 q20 -12 40 2 q6 40 -4 92 q-16 10 -30 0 q-12 -50 -6 -94z" fill="#101c26"/>
+        <text x="${x+12}" y="304" text-anchor="middle" fill="#3a4a5a" font-size="11" font-family="monospace">0${i+1}</text>`;
+      }
+    });
+    return out;
+  })()}
+  <!-- floor + fog -->
+  <rect x="0" y="310" width="640" height="70" fill="#0a121c"/>
+  <ellipse cx="320" cy="330" rx="300" ry="26" fill="#9db8cc" opacity=".12" filter="url(#fog)"/>
+  <!-- temp panel -->
+  <rect x="432" y="322" width="188" height="48" rx="6" fill="#08121c" stroke="#26404f"/>
+  <text x="446" y="341" fill="#7dffb0" font-size="12" font-family="monospace">库温　　 -18.0°C</text>
+  <text x="446" y="361" fill="#ff5a5a" font-size="12" font-family="monospace">4号挂位　+36.5°C</text>
+  <circle cx="608" cy="357" r="4" fill="#ff5a5a"><animate attributeName="opacity" values="1;.2;1" dur="1s" repeatCount="indefinite"/></circle>
+  <text x="24" y="356" fill="#3a4a5a" font-size="11" font-family="monospace">B1 COLD STORAGE · AUTH ONLY</text>
+</svg>`;
+
+const svgCalendar = `
+<svg viewBox="0 0 640 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="老黄历">
+  <defs>
+    <filter id="paper2">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0.12 0"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <rect width="640" height="420" fill="#141210"/>
+  <g filter="url(#paper2)">
+    <rect x="170" y="20" width="300" height="380" fill="#e8dcc0" rx="3"/>
+    <rect x="170" y="20" width="300" height="56" fill="#8a2f2f"/>
+    <text x="320" y="57" text-anchor="middle" fill="#f2e6c8" font-size="22" font-family="serif" letter-spacing="8">農曆 七月</text>
+    <text x="320" y="230" text-anchor="middle" fill="#2a2015" font-size="130" font-family="serif">十五</text>
+    <text x="320" y="286" text-anchor="middle" fill="#6a5a3f" font-size="16" font-family="serif" letter-spacing="6">中元 · 鬼門開</text>
+    <circle cx="320" cy="196" r="118" fill="none" stroke="#a02020" stroke-width="7" opacity=".8"
+      stroke-dasharray="700 60" transform="rotate(-25 320 196)"/>
+    <text x="320" y="330" text-anchor="middle" fill="#8a2f2f" font-size="15" font-family="serif" letter-spacing="4">回 魂 夜</text>
+    <text x="320" y="368" text-anchor="middle" fill="#8a7a5c" font-size="11" font-family="serif">宜：祭祀 · 開井　　忌：照鏡 · 夜泳</text>
+  </g>
+  <text x="320" y="412" text-anchor="middle" fill="#4a4438" font-size="10" font-family="monospace">SCAN 044-C · 沈氏堂 檔案室</text>
+</svg>`;
+
+const svgGym = `
+<svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="健身房镜墙">
+  <defs>
+    <linearGradient id="gymbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#12151c"/><stop offset="1" stop-color="#080a0e"/>
+    </linearGradient>
+    <linearGradient id="mirr" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#232a36"/><stop offset=".5" stop-color="#2e3644"/><stop offset="1" stop-color="#1c222c"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#gymbg)"/>
+  <!-- real room floor -->
+  <rect x="0" y="330" width="640" height="70" fill="#0c0f14"/>
+  <!-- treadmill silhouettes (real side, bottom edge) -->
+  <g fill="#05070a">
+    <rect x="40" y="300" width="120" height="14" rx="4"/><rect x="52" y="240" width="10" height="66"/>
+    <rect x="480" y="300" width="120" height="14" rx="4"/><rect x="492" y="240" width="10" height="66"/>
+  </g>
+  <!-- THE MIRROR WALL -->
+  <rect x="70" y="40" width="500" height="270" fill="url(#mirr)" stroke="#3d4654" stroke-width="4" rx="3"/>
+  <!-- reflection: same treadmills -->
+  <g fill="#0b0e13" opacity=".9">
+    <rect x="100" y="262" width="96" height="11" rx="3"/><rect x="110" y="214" width="8" height="52"/>
+    <rect x="444" y="262" width="96" height="11" rx="3"/><rect x="454" y="214" width="8" height="52"/>
+  </g>
+  <!-- reflection: dim ceiling lights -->
+  <g fill="#8fa2b8" opacity=".25">
+    <rect x="130" y="60" width="80" height="6" rx="3"/><rect x="280" y="60" width="80" height="6" rx="3"/><rect x="430" y="60" width="80" height="6" rx="3"/>
+  </g>
+  <!-- reflection ONLY: a door that does not exist in the real room -->
+  <g>
+    <rect x="292" y="110" width="76" height="164" fill="#1a1410" stroke="#4a3a28" stroke-width="3" rx="2"/>
+    <circle cx="356" cy="196" r="4" fill="#c9a86a"/>
+    <!-- red light seeping under the door -->
+    <rect x="292" y="270" width="76" height="5" fill="#a01020" opacity=".85">
+      <animate attributeName="opacity" values=".85;.3;.85" dur="2.6s" repeatCount="indefinite"/>
+    </rect>
+    <!-- plaque with REVERSED characters -->
+    <rect x="304" y="128" width="52" height="22" fill="#0d0a06" stroke="#4a3a28"/>
+    <text x="-330" y="144" transform="scale(-1,1)" fill="#c9a86a" font-size="13" font-family="serif" letter-spacing="3">沈氏堂</text>
+  </g>
+  <!-- smudged handprint on the mirror glass -->
+  <g fill="#9db4c9" opacity=".10">
+    <ellipse cx="252" cy="180" rx="13" ry="18"/>
+    <ellipse cx="244" cy="158" rx="4" ry="10" transform="rotate(-14 244 158)"/>
+    <ellipse cx="252" cy="154" rx="4" ry="11"/>
+    <ellipse cx="260" cy="156" rx="4" ry="10" transform="rotate(10 260 156)"/>
+    <ellipse cx="268" cy="162" rx="3.5" ry="8" transform="rotate(22 268 162)"/>
+  </g>
+  <text x="24" y="378" fill="#3a4a5a" font-size="11" font-family="monospace">B2 FITNESS · 01:44 AM · 手机拍摄</text>
+</svg>`;
+
+const svgNiche = `
+<svg viewBox="0 0 640 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="镜后暗格">
+  <defs>
+    <radialGradient id="torchlight" cx=".5" cy=".45" r=".62">
+      <stop offset="0" stop-color="#e8d9a8" stop-opacity=".9"/>
+      <stop offset=".55" stop-color="#8a7d54" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="380" fill="#030303"/>
+  <!-- flashlight pool -->
+  <rect width="640" height="380" fill="url(#torchlight)"/>
+  <!-- swung-open mirror door (edge visible at left) -->
+  <g transform="rotate(-8 150 190)">
+    <rect x="90" y="60" width="120" height="260" fill="#1c222c" stroke="#3d4654" stroke-width="3"/>
+    <rect x="98" y="68" width="104" height="244" fill="#2a323e" opacity=".7"/>
+  </g>
+  <!-- recess in the wall -->
+  <rect x="250" y="110" width="220" height="160" fill="#0d0a08" stroke="#2a2018" stroke-width="4" rx="4"/>
+  <rect x="258" y="118" width="204" height="144" fill="#141008" rx="3"/>
+  <!-- red string, coiled -->
+  <g stroke="#b8202a" stroke-width="5" fill="none" stroke-linecap="round">
+    <path d="M300 210 q22 -26 48 -8 q26 18 4 34 q-24 16 -38 -4 q-12 -18 10 -28"/>
+    <path d="M352 226 q20 10 34 2"/>
+  </g>
+  <!-- yellow talisman with birth characters -->
+  <g transform="rotate(6 420 170)">
+    <rect x="392" y="132" width="58" height="86" fill="#c9a53f"/>
+    <rect x="392" y="132" width="58" height="86" fill="none" stroke="#8a6f20"/>
+    <text x="421" y="158" text-anchor="middle" fill="#7a1f1f" font-size="12" font-family="serif" writing-mode="tb" letter-spacing="2">癸未年三月</text>
+    <text x="437" y="158" text-anchor="middle" fill="#7a1f1f" font-size="12" font-family="serif" writing-mode="tb" letter-spacing="2">林氏生辰</text>
+  </g>
+  <!-- a strand of long hair -->
+  <path d="M280 246 q40 10 80 4 q40 -6 76 6" stroke="#0a0806" stroke-width="2" fill="none" opacity=".9"/>
+  <!-- dust motes in the beam -->
+  <g fill="#e8d9a8" opacity=".35">
+    <circle cx="230" cy="120" r="1.2"/><circle cx="330" cy="90" r="1"/><circle cx="410" cy="105" r="1.4"/>
+    <circle cx="470" cy="150" r="1"/><circle cx="290" cy="160" r="1.1"/>
+  </g>
+  <text x="320" y="352" text-anchor="middle" fill="#5a4f38" font-size="11" font-family="monospace">B2 更衣室 · 镜后 · 手电筒照明</text>
+</svg>`;
+
+const svgAlbum = `
+<svg viewBox="0 0 640 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="旧照片：小雅与外婆">
+  <defs>
+    <filter id="oldwarm">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.55 0 0 0 0 0.5 0 0 0 0 0.42 0 0 0 0.1 0"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+  <!-- white photo border -->
+  <rect width="640" height="440" fill="#f2ede2"/>
+  <g filter="url(#oldwarm)">
+    <rect x="30" y="30" width="580" height="340" fill="#c8b998"/>
+    <!-- old house door -->
+    <rect x="380" y="70" width="150" height="300" fill="#6a4a30"/>
+    <rect x="392" y="82" width="126" height="276" fill="#7d5a3a"/>
+    <rect x="440" y="200" width="14" height="26" fill="#3a2a18"/>
+    <!-- door couplet strips -->
+    <rect x="366" y="80" width="16" height="200" fill="#9a3030"/>
+    <rect x="528" y="80" width="16" height="200" fill="#9a3030"/>
+    <!-- grandma: grey bun, dark clothes, holding a yellow talisman -->
+    <g>
+      <circle cx="200" cy="140" r="30" fill="#c9a986"/>
+      <circle cx="200" cy="112" r="14" fill="#8a8a88"/>
+      <path d="M162 172 q38 -22 76 0 l10 128 q-48 14 -96 0 z" fill="#3a3a42"/>
+      <rect x="236" y="220" width="34" height="48" fill="#c9a53f" transform="rotate(8 236 220)"/>
+      <path d="M170 200 q-14 40 -6 96" stroke="#3a3a42" stroke-width="16" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- little girl: pigtails with RED STRING, holding grandma's sleeve -->
+    <g>
+      <circle cx="290" cy="200" r="22" fill="#d8b896"/>
+      <circle cx="272" cy="184" r="8" fill="#2a2018"/><circle cx="308" cy="184" r="8" fill="#2a2018"/>
+      <path d="M268 180 q-6 -10 2 -14 M312 180 q6 -10 -2 -14" stroke="#b8202a" stroke-width="4" fill="none"/>
+      <circle cx="266" cy="170" r="4" fill="#b8202a"/><circle cx="314" cy="170" r="4" fill="#b8202a"/>
+      <path d="M266 218 q24 -14 48 0 l6 84 q-30 10 -60 0 z" fill="#c05060"/>
+      <!-- red string on wrist -->
+      <path d="M262 268 q-8 4 -4 12" stroke="#b8202a" stroke-width="4" fill="none"/>
+      <!-- plush sheep in her arms -->
+      <g>
+        <ellipse cx="330" cy="272" rx="26" ry="18" fill="#ece6d8"/>
+        <circle cx="352" cy="262" r="11" fill="#d8cfc0"/>
+        <circle cx="349" cy="260" r="2" fill="#2a2018"/>
+        <path d="M356 252 q8 -6 4 -12 M348 251 q-8 -6 -4 -12" stroke="#b8a890" stroke-width="3" fill="none"/>
+        <circle cx="312" cy="264" r="6" fill="#ece6d8"/><circle cx="322" cy="258" r="6" fill="#ece6d8"/>
+        <circle cx="336" cy="256" r="6" fill="#ece6d8"/><circle cx="346" cy="278" r="5" fill="#ece6d8"/>
+        <path d="M318 288 v10 M340 288 v10" stroke="#b8a890" stroke-width="4"/>
+      </g>
+    </g>
+    <!-- ground -->
+    <rect x="30" y="330" width="580" height="40" fill="#a89878"/>
+    <!-- grandma's brush writing on the photo -->
+    <text x="66" y="330" fill="#2a2420" font-size="20" font-family="serif" opacity=".8" transform="rotate(-3 66 330)">羊年三月里生的丫头</text>
+  </g>
+  <text x="60" y="408" fill="#8a7c60" font-size="15" font-family="serif">2008 · 夏　外婆家　（那年她五岁）</text>
+  <text x="580" y="408" text-anchor="end" fill="#9a3030" font-size="15" font-family="serif" letter-spacing="3">绳不离身 魂不离窍</text>
+  <!-- ballpoint note, added later, different hand -->
+  <text x="580" y="430" text-anchor="end" fill="#4a5a8a" font-size="12" font-family="serif" transform="rotate(-1 580 430)">（外婆最后一句话：别带她去海边。——我当时没懂）</text>
+</svg>`;
+
+const svgMirrorLift = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="镜中电梯">
+  <defs>
+    <linearGradient id="mlift" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c222c"/><stop offset="1" stop-color="#0c1016"/>
+    </linearGradient>
+    <linearGradient id="mdoor" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3a4250"/><stop offset=".5" stop-color="#252c38"/><stop offset="1" stop-color="#3a4250"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#mlift)"/>
+  <!-- reflective floor -->
+  <rect x="0" y="300" width="640" height="60" fill="#0a0e14"/>
+  <path d="M60 300 L120 360 M580 300 L520 360 M320 300 v60" stroke="#1e2632" stroke-width="2"/>
+  <!-- elevator doors -->
+  <rect x="220" y="60" width="200" height="240" fill="url(#mdoor)" stroke="#4a5462" stroke-width="3"/>
+  <line x1="320" y1="60" x2="320" y2="300" stroke="#0c1016" stroke-width="6"/>
+  <!-- light leaking through the gap -->
+  <rect x="316" y="60" width="8" height="240" fill="#c9a86a" opacity=".25">
+    <animate attributeName="opacity" values=".25;.1;.25" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <!-- mirrored lintel text -->
+  <text x="-320" y="44" transform="scale(-1,1)" text-anchor="middle" fill="#5a6577" font-size="14" font-family="monospace" letter-spacing="6">GLIMMER</text>
+  <!-- side panel: ONE button -->
+  <rect x="452" y="140" width="60" height="110" rx="8" fill="#151a22" stroke="#4a5462"/>
+  <circle cx="482" cy="180" r="17" fill="#1c222c" stroke="#a02020" stroke-width="2">
+    <animate attributeName="stroke-opacity" values="1;.3;1" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <text x="482" y="186" text-anchor="middle" fill="#e08080" font-size="14" font-family="monospace">44</text>
+  <text x="482" y="232" text-anchor="middle" fill="#39404d" font-size="9" font-family="monospace">ONLY UP</text>
+</svg>`;
+
+const svgHall44 = `
+<svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="44层静室">
+  <defs>
+    <linearGradient id="hall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#100d0a"/><stop offset="1" stop-color="#070503"/>
+    </linearGradient>
+    <radialGradient id="candle" cx=".5" cy=".4" r=".8">
+      <stop offset="0" stop-color="#e8b45a" stop-opacity=".7"/><stop offset="1" stop-color="#e8b45a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#hall)"/>
+  <!-- perspective walls with tablet niches -->
+  ${(() => {
+    let out='';
+    for(let i=0;i<7;i++){
+      const t=i/7, lx=40+t*180, rx=600-t*180, y=70+t*90, w=34-t*16, h=48-t*22;
+      out+=`<rect x="${lx}" y="${y}" width="${w}" height="${h}" fill="#1a140c" stroke="#3a2e1c"/>
+            <rect x="${lx+w*0.22}" y="${y+h*0.14}" width="${w*0.56}" height="${h*0.7}" fill="#0d0a06"/>
+            <rect x="${rx-w}" y="${y}" width="${w}" height="${h}" fill="#1a140c" stroke="#3a2e1c"/>
+            <rect x="${rx-w+w*0.22}" y="${y+h*0.14}" width="${w*0.56}" height="${h*0.7}" fill="#0d0a06"/>`;
+    }
+    return out;
+  })()}
+  <!-- red carpet to the desk -->
+  <path d="M240 400 L300 160 L340 160 L400 400 Z" fill="#3a0d10"/>
+  <!-- desk with tablet #45 -->
+  <ellipse cx="320" cy="180" rx="90" ry="60" fill="url(#candle)"/>
+  <rect x="284" y="150" width="72" height="30" fill="#241a10"/>
+  <rect x="300" y="96" width="40" height="58" rx="3" fill="#e8dcc0" stroke="#8a6f20"/>
+  <text x="320" y="114" text-anchor="middle" fill="#7a1f1f" font-size="9" font-family="serif" letter-spacing="1">第四十五號</text>
+  <text x="320" y="128" text-anchor="middle" fill="#2a2015" font-size="8" font-family="serif">供體 林氏</text>
+  <text x="320" y="142" text-anchor="middle" fill="#a02020" font-size="8" font-family="serif">生辰：＿＿＿</text>
+  <!-- brush resting -->
+  <rect x="342" y="146" width="30" height="4" rx="2" fill="#5a2a1a" transform="rotate(12 342 146)"/>
+  <!-- mirrored plaque above -->
+  <rect x="284" y="46" width="72" height="24" fill="#0d0a06" stroke="#4a3a28"/>
+  <text x="-320" y="63" transform="scale(-1,1)" text-anchor="middle" fill="#c9a86a" font-size="13" font-family="serif" letter-spacing="4">靜室</text>
+  <text x="320" y="386" text-anchor="middle" fill="#4a3a28" font-size="11" font-family="monospace">44F · 無字牌位 ×44 · 燭火不搖</text>
+</svg>`;
+
+/* =====================  RESULT RENDERERS  ===================== */
+function card(html, corrupt=false){
+  const el = document.createElement('div');
+  el.className = 'card' + (corrupt?' corrupt':'');
+  el.innerHTML = html;
+  results.prepend(el);
+  results.scrollTop = 0;
+  return el;
+}
+function butler(text){
+  card(`<span class="tag">GLIMMER SERVICE</span><div>${text}</div>
+        <div class="sub" style="margin-top:8px">— 微光管家 · 已为您记录</div>`);
+}
+
+function renderHotelPage(){
+  const el = card(`
+    <span class="tag">SEARCH RESULT · OFFICIAL</span>
+    <h3>微光度假村 The Glimmer Resort —— 现代奢华与自然共生</h3>
+    <div class="imgwrap">${svgPanorama}</div>
+    <div class="caption">▲ 酒店全景延时摄影 · 顶楼无边泳池</div>
+    <p>酒店由国际顶尖团队设计，斥资 15 亿打造，选址于环境优美的北海边，
+    旨在为贵宾提供<span class="flick"><span class="a">洗涤灵魂</span><span class="b">收割灵魂</span></span>的居住体验。
+    始建于 2024 年，地下 2 层、地上 46 层，客梯全楼直达。</p>
+    <ul>
+      <li>恒温泳池（B1）· 顶楼无边泳池（ROOF）</li>
+      <li>云顶餐厅（顶层）· 24小时健身房（B2）</li>
+      <li>深夜静心室（14F）· 全屋智能家居</li>
+    </ul>
+    <p class="sub">附：客用电梯楼层指引 ↓</p>
+    <div class="imgwrap">${svgElevator}</div>
+    <div class="caption">▲ 电梯面板实拍（除 B2 检修梯外，所有客用楼层按键均在图中）。</div>
+    <div class="footer-easter">© 2024 Glimmer Group · 所有进入微光的人，都将成为微光的一部分。</div>
+  `);
+  if(S.stage < 1){
+    S.stage = 1;
+    addClue('宣传页：地下 2 层、地上 46 层，客梯全楼直达');
+    addClue('电梯面板实拍：所有客用楼层按键都在图中');
+    hint(getHint(1));
+  }
+  return el;
+}
+
+function renderDeathLog(){
+  const el = card(`
+    <span class="tag">⚠ UNAUTHORIZED ARCHIVE // 内部死亡记录日志</span>
+    <h3>ERR_FLOOR_NOT_FOUND：44 层不存在。凡询问者，已被记录。</h3>
+    <p class="mono">> 检索请求已拦截……拦截失败。<br>> 载入残页 044 / ???</p>
+    <table class="log-table">
+      <tr><th>档案编号</th><th>姓名</th><th>入住房号</th><th>结案描述</th></tr>
+      <tr><td class="mono">041</td><td><span class="redact">▓▓▓</span></td><td class="mono">0208</td><td>心源性猝死（健身房）</td></tr>
+      <tr><td class="mono">042</td><td><span class="redact">▓▓▓</span></td><td class="mono">0906</td><td>食物过敏（云顶餐厅）</td></tr>
+      <tr><td class="mono">043</td><td><span class="redact">▓▓▓</span></td><td class="mono">1301</td><td>失踪（未结案）</td></tr>
+      <tr><td class="mono">044</td><td><span class="redact">▓▓</span></td><td class="mono"><b>0413</b></td><td>意外溺亡（B1 泳池）</td></tr>
+      <tr><td class="mono">045</td><td>—</td><td class="mono">0413</td><td class="mono">SCHEDULED · 03:33</td></tr>
+    </table>
+    <p>名字全部被抹掉了。但房号还在——0413，<b>是你们现在住的房间。</b><br>
+    而编号 045 的那一栏，登记时间是今晚。</p>
+    <p class="sub">残页末尾有一行手写体：「她还在水里。她们都还在水里。」</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 2){
+    S.stage = 2;
+    addClue('档案 044：0413 房前住客溺亡于 B1 泳池，姓名被抹除');
+    addClue('档案 045 排期今晚 03:33，房号 0413（我们的房间）');
+  }
+  return el;
+}
+
+/* ---------- 0413 房间履历（陈婷谜题·第二跳） ---------- */
+function renderRoomHistory(){
+  const el = card(`
+    <span class="tag">ROOM PROFILE · 0413</span>
+    <h3>房间履历 —— 0413</h3>
+    <p class="mono">> 当前住客：王先生、林小姐<br>
+    > 历史入住记录：<span class="redact">▓▓▓▓▓▓▓▓</span>（已清空 4 次）<br>
+    > 上次深度保洁：<span class="flick"><span class="a">例行打扫</span><span class="b">痕迹清除</span></span> · 用时 6 小时</p>
+    <p><b>遗留物品处理记录：</b></p>
+    <ul>
+      <li>女式发圈 ×1 —— 已焚毁</li>
+      <li>手机（屏碎）×1 —— 已上交 44F</li>
+      <li>床头欢迎卡 ×1 —— <b>回收失败：新卡直接覆写在旧卡纸上</b>，仍在房内床头</li>
+    </ul>
+    <p class="sub">系统备注：纸会记住写过的字。建议更换卡纸。——该建议已被驳回（成本控制）。</p>
+  `);
+  if(!S.seenRoom){
+    S.seenRoom = true;
+    addClue('0413 遗留物品：床头欢迎卡——新卡直接覆写在旧卡纸上');
+  }
+  return el;
+}
+
+/* ---------- 欢迎卡（陈婷谜题·第三跳：压痕藏名） ---------- */
+function renderWelcomeCard(){
+  const el = card(`
+    <span class="tag">ROOM ITEM · 床头欢迎卡</span>
+    <h3>你走到床头，把那张欢迎卡对着灯光斜过来看——</h3>
+    <div class="imgwrap">${svgWelcome}</div>
+    <div class="caption">▲ 卡纸上除了印刷的字，还留着<b>上一张卡的书写压痕</b>。对着光，能看出两个字的笔画。</div>
+    <p class="sub">压痕很深。写字的人，当时一定很用力。</p>
+  `);
+  if(!S.seenCard){
+    S.seenCard = true;
+    addClue('欢迎卡压痕：上任住客的名字（自己辨认笔画）');
+  }
+  return el;
+}
+
+function renderCCTV(){
+  const el = card(`
+    <span class="tag">⚠ CORRUPTED FOOTAGE // 监控残留片段</span>
+    <h3>检索对象：陈婷 —— 找到 1 段被删除的录像</h3>
+    <div class="imgwrap">${svgCCTV}</div>
+    <div class="caption">▲ B1 泳池 · 最后一帧可解析画面 · 03:33:33</div>
+    <p>录像只有 4 秒：她站在池边，一动不动。水面没有倒影。<br>
+    第 4 秒，她不是跳下去的——是水面<b>升上来</b>把她包住的。</p>
+    <p class="sub">此后 0413 房的入住记录被清空过 4 次。</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  S.seenCCTV = true;
+  return el;
+}
+
+function renderAltar(){
+  const el = card(`
+    <span class="tag">⚠ DEEP ARCHIVE // 沈氏私藏</span>
+    <h3>检索对象：水底 —— 建站前影像 · 1 份加密残卷</h3>
+    <div class="imgwrap">${svgOldPhoto}</div>
+    <div class="caption">▲ 光绪二十六年，酒店地基下的祭坛旧址。泳池，就建在这口枯井正上方。</div>
+    <p class="mono" style="line-height:2.2">《回魂夜祭仪残卷》（节选，沈聿手书）：<br>
+    「以居所号数缚其生辰，以池聚阴，以铁械夺阳，以符水浑其神智。<br>
+    三魂离体之刻——<b>寅时二刻又三分（03:33）</b>——旧躯入井，新客回魂。<br>
+    此谓：<b>长生祭坛</b>。」</p>
+    <p>你终于明白了。这不是酒店。这是一座运转了一百多年、刚刚换上现代外壳的<b>祭坛</b>。
+    而档案 045 的「旧躯」，今晚就要入井。</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 4){
+    S.stage = 4;
+    addClue('泳池建在清代枯井祭坛正上方——「长生祭坛」');
+    addClue('仪式时刻：今晚 03:33');
+  }
+  return el;
+}
+
+/* ---------- chapter 2 renderers ---------- */
+function renderSoupPage(){
+  const el = card(`
+    <span class="tag">SEARCH RESULT · OFFICIAL</span>
+    <h3>特供 · <span class="flick"><span class="a">安神</span><span class="b">安魂</span></span>汤 —— 微光的待客之道</h3>
+    <div class="imgwrap">${svgMenu}</div>
+    <div class="caption">▲ 云顶餐厅菜单 · <i>第三道菜好像印刷出错了。</i></div>
+    <p>古法慢炖八小时，每客一盅，免费供应。<br>
+    选料：老母鸡、茯苓、百合、红枣、<b>辰砂一钱</b>、<b>黄表一道（随汤化入）</b>、<b>原井水</b>。</p>
+    <p class="sub">供应商：沈氏堂（创立于光绪年间）· 本品有助睡眠，饮后请勿照镜。</p>
+    <div class="footer-easter">温馨提示：0413 房已连续 2 日未领用。今日已为您双倍配送。</div>
+  `);
+  if(S.stage < 6){
+    S.stage = 6;
+    addClue('汤的选料：辰砂一钱、黄表一道、原井水');
+    addClue('菜单第三道菜印反了——是一行反写的字');
+  }
+  return el;
+}
+
+function renderPurchase(){
+  const el = card(`
+    <span class="tag">⚠ UNAUTHORIZED ARCHIVE // 后厨内部采购单</span>
+    <h3>检索对象：符水 —— 你不该看到这张单子</h3>
+    <table class="log-table">
+      <tr><th>品项</th><th>数量</th><th>去向</th></tr>
+      <tr><td>朱砂符纸（沈氏堂）</td><td class="mono">×44 / 日</td><td>全部在住客房</td></tr>
+      <tr><td>井水（原井直取）</td><td class="mono">×44 盅</td><td>随「安神汤」配送</td></tr>
+      <tr><td>生肉（未检疫）</td><td class="mono">×<span class="redact">▓▓</span> kg</td><td><b>仅限「新客」</b> · B1-C4 区凭 044 牌领取 · 存储 −18°C</td></tr>
+    </table>
+    <p class="mono">> 备注：0413 连续 2 日未饮。已上报楼层主管。<br>> 备注：0413 女性住客改领生肉配额。<b>进度正常。</b></p>
+    <p class="sub">单据背面有一行油笔字：「汤是给旧躯喝的。肉是给新客吃的。」</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 7){
+    S.stage = 7;
+    addClue('符水随安神汤每日 44 盅，配给「旧躯」');
+    addClue('生肉在 B1-C4 区领取，存储 −18°C——可 B1 明明是泳池？');
+  }
+  return el;
+}
+
+function renderFreezer(){
+  const el = card(`
+    <span class="tag">⚠ RESTRICTED AREA // B1 冷库 · 实时画面</span>
+    <h3>检索对象：冷库 —— 4 号挂位不是食材</h3>
+    <div class="imgwrap">${svgFreezer}</div>
+    <div class="caption">▲ 库温 -18.0°C。但 4 号挂位的温度是 36.5°C——人的体温。</div>
+    <p>那是档案 <b>043</b>，上个月「失踪」的住客。他还活着，睁着眼，
+    嘴的位置只有一片平滑的皮肤。他看见了你的镜头，开始用指节敲击挂钩——</p>
+    <p class="mono" style="letter-spacing:.08em">。气精的们你要想他<br>。了到经已，夜魂回</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 8){
+    S.stage = 8;
+    addClue('043 还活着，被吊在冷库——没有嘴');
+    addClue('043 敲出的字：「。气精的们你要想他」「。了到经已，夜魂回」');
+  }
+  return el;
+}
+
+function renderCalendar(){
+  const el = card(`
+    <span class="tag">⚠ DEEP ARCHIVE // 沈氏堂 档案室</span>
+    <h3>检索对象：回魂夜 —— 农历七月十五 · 三日后</h3>
+    <div class="imgwrap">${svgCalendar}</div>
+    <div class="caption">▲ 老黄历的忌栏写着：忌照镜、忌夜泳。这家酒店偏偏劝你天天喝汤、夜夜安眠。</div>
+    <p class="mono" style="line-height:2.2">《回魂夜祭仪残卷 · 下》（沈聿手书）：<br>
+    「《易》曰：<b>精气为物，游魂为变。</b><br>
+    中元之夜，鬼门大开，井开三刻。新客登殿，旧躯入井。<br>
+    欲破此局者——<b>镜可照真，物可缚魂。</b><br>
+    以其本命之物，引其残魂归位；以镜为门，趁 03:33 未至。」</p>
+    <p>三天。你有三天时间找到能把小雅「引回来」的东西。<br>而系统的下一层禁区，在<b>健身房，和每一面镜子里</b>。</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 9){
+    S.stage = 9;
+    addClue('回魂夜＝农历七月十五（三日后）');
+    addClue('破局法：镜可照真，物可缚魂（本命之物）');
+  }
+  return el;
+}
+
+/* ---------- chapter 3 renderers ---------- */
+function renderAlbum(){
+  const el = card(`
+    <span class="tag">LOCAL MEDIA · 手机相册</span>
+    <h3>你翻出了那张照片。2008 年，外婆家门口。</h3>
+    <div class="imgwrap">${svgAlbum}</div>
+    <div class="caption">▲ 辫子上、手腕上都是红头绳，怀里抱着一只布羊。外婆手里捏着一张黄表纸。<br>照片上有外婆的毛笔字。</div>
+    <p>照片是小雅去年整理外婆遗物时翻出来的。她当时哭着说：外婆这辈子没出过远门，
+    却在临终前反反复复只叮嘱一句话——<b>“别带她去海边。”</b></p>
+    <p class="sub">你们现在住的地方，叫北海。</p>
+  `);
+  if(!S.seenAlbum){
+    S.seenAlbum = true;
+    addClue('外婆毛笔字：「羊年三月里生的丫头」（2008 年照片，那年她五岁）');
+    addClue('外婆的话：「绳不离身，魂不离窍」');
+    addClue('外婆临终叮嘱：别带她去海边——而这里就是北海');
+  }
+  return el;
+}
+
+function renderGymMirror(){
+  const el = card(`
+    <span class="tag">⚠ LOCAL PHOTO // 手机相册 · 01:44</span>
+    <h3>你把照片放大到最大——镜子里的房间，多了一扇门。</h3>
+    <div class="imgwrap">${svgGym}</div>
+    <div class="caption">▲ 现实的墙上什么都没有。只有镜子里，那扇门缝下渗着红光。<br>门上的牌子——字是反的。</div>
+    <p>你回头看真实的墙壁：平整的墙纸，连一条缝都没有。<br>
+    再看镜子：那扇门就在那里，安安静静，像一直都在等你注意到它。</p>
+    <p class="sub">玻璃上有一个从<b>里面</b>按上去的掌印。</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 11){
+    S.stage = 11;
+    addClue('镜子里多了一扇现实中不存在的门，门缝渗红光');
+    addClue('门上的牌子是反写的（自己认）');
+  }
+  return el;
+}
+
+function renderShenPortal(){
+  const el = card(`
+    <span class="tag">⚠ SUPPLIER TRACE // 供应商溯源</span>
+    <h3>检索对象：沈氏堂 —— 找到 1 个不该存在的域名</h3>
+    <p class="mono">> 供应商编码：SST-1998<br>
+    > 主营：法事 · 驱邪 · 辰砂 · 黄表 · 原井水 · <span class="redact">▓▓▓▓</span><br>
+    > 关联站点：1998 年上线、从未改版的个人堂口网站。<br>
+    > 站点备案人：沈<span class="redact">▓▓</span>（与本集团<span class="redact">▓▓▓▓▓▓</span>信息重合度 100%，已忽略）<br>
+    > 系统已尝试屏蔽该地址 44 次——<b>全部失败</b>。<br>
+    > 门禁：口令为 <b>4 位西历数字</b>。<br>
+    > 系统破解尝试：2024 ✗ 1998 ✗ 0413 ✗ 0333 ✗ ——<b>已放弃</b>。</p>
+    <button class="portalbtn" onclick="window.open('shenshitang.html','_blank')">▷ 打开旧门户</button>
+  `, true);
+  if(S.stage < 12){
+    S.stage = 12;
+    addClue('沈氏堂旧门户口令：「井成之年」（西历四位）');
+    addClue('哪一年井成？——那张枯井旧照片的落款年号');
+  }
+  return el;
+}
+
+function renderNiche(){
+  const el = card(`
+    <span class="tag">⚠ B2 更衣室 // 镜后暗格</span>
+    <h3>第四面镜像一扇柜门一样，被你撬开了。</h3>
+    <div class="imgwrap">${svgNiche}</div>
+    <div class="caption">▲ 暗格里：一条红头绳、一张写着生辰的黄表、一缕长发。</div>
+    <p>红头绳——小雅从小戴到大的那根。上个月她说弄丢了，还难过了很久。<br>
+    黄表上朱笔写着：<b>癸未年三月 · 林氏生辰</b>。字迹和菜单上"沈氏堂"的落款一模一样。</p>
+    <p class="mono">堂规第七条：「供体本命之物，须镇于镜后，魂不得归窍。」<br>——现在，它在你手里了。</p>
+    <button class="disconnect">▷ 断开连接 DISCONNECT</button>
+  `, true);
+  if(S.stage < 13){
+    S.stage = 13;
+    addClue('取回本命之物：红头绳');
+    addClue('黄表朱笔：癸未年三月 · 林氏生辰（沈氏堂笔迹）');
+  }
+  return el;
+}
+
+/* ---------- chapter 4 renderers ---------- */
+function renderVisit043(){
+  const el = card(`
+    <span class="tag">⚠ B1 冷库 // 二访</span>
+    <h3>他还在那里。他一直在等你回来。</h3>
+    <p>你举起从后厨顺来的钥匙时，他的眼睛动了。<br>
+    他用下巴指了指旁边空着的挂位——<b>044 号</b>的铜牌还挂在钩子上。<br>
+    你取下牌。他又开始敲击挂钩，一下，一下，替你数着节拍。</p>
+    <p class="mono" style="letter-spacing:.08em">。去出带字名的我把<br>。远明周叫我</p>
+    <p class="sub">他的眼睛在你转身时，弯了一下。像在笑。</p>
+  `, true);
+  if(S.stage < 15){
+    S.stage = 15;
+    addClue('拿到 044 铜牌（员工区通行）');
+    addClue('他叫周明远——他要你把名字带出去');
+  }
+  return el;
+}
+
+function renderMirrorEntry(){
+  const el = card(`
+    <span class="tag">MIRROR SIDE // 镜之内</span>
+    <h3>21:45。你的指尖没入镜面，像没入一池静水。</h3>
+    <div class="imgwrap">${svgMirrorLift}</div>
+    <div class="caption">▲ 镜中的走廊尽头，电梯门缝里漏着烛火色的光。面板上只有一个键。</div>
+    <p>镜子这边的酒店和那边一模一样——除了三件事：<br>
+    这里没有声音；这里的灯是从<b>地板</b>往上照的；<br>
+    还有，走廊尽头的电梯，<b>有 44 层的按键了</b>。</p>
+    <p class="sub">你回头看来路：镜面在身后晃了一下，像水面合拢。</p>
+  `);
+  if(S.stage < 16){
+    S.stage = 16;
+    addClue('已进入镜中世界（时间倒着走）');
+    addClue('镜中电梯只有一个键：44');
+  }
+  return el;
+}
+
+function renderHall44(){
+  const el = card(`
+    <span class="tag">MIRROR SIDE // 44F · 静室</span>
+    <h3>四十四座无字牌位，和一座等着写字的。</h3>
+    <div class="imgwrap">${svgHall44}</div>
+    <div class="caption">▲ 烛火一动不动。案上第四十五号牌位：供体林氏——<b>生辰栏空着</b>，朱笔搁在旁边。</div>
+    <p>你明白了：名录上的"生辰待核"，核验就在今夜——<b>井开时，按牌位上的生辰判"旧躯"</b>。</p>
+    <p class="mono">写谁的生辰，谁就是旧躯。<br>笔就在手边。</p>
+  `);
+  if(S.stage < 17){
+    S.stage = 17;
+    addClue('第 45 号牌位生辰栏空着——井开时按牌位判「旧躯」');
+    addClue('写谁的生辰，谁就是旧躯');
+  }
+  return el;
+}
+
+/* =====================  HIJACK FX  ===================== */
+/* mode: 'glitch' 震动变红 | 'blackout' 黑屏→闪脸 | 'fall' 坠落沉水
+        | 'rot' 页面腐烂发霉 | 'freeze' 灯光爆闪→白霜 | 'silence' 万物噤声
+   replay=true 时跳过惊吓动画直接出结果（防止重复刺激脱敏） */
+function hijack(renderFn, after, mode='glitch', replay=false){
+  S.locked = true;
+  if(replay){
+    const themeOf = {rot:'mold', freeze:'cold', fall:'deep', silence:'silent', mirror:'silver', dark:'noir'};
+    /* defined below via hoisting-safe inline: fall through to finish */
+    setTimeout(() => finishReplay(themeOf[mode] || null), 50);
+  }
+  function finishReplay(extraClass){
+    document.body.classList.add('hijacked');
+    if(extraClass) document.body.classList.add(extraClass);
+    const el = renderFn();
+    const btn = el.querySelector('.disconnect');
+    if(btn){
+      btn.onclick = () => {
+        document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir');
+        S.locked = false; if(after) after();
+      };
+    } else { S.locked = false; if(after) after(); }
+  }
+  if(replay) return;
+  const finish = (extraClass, cardClass) => {
+    document.body.classList.add('hijacked');
+    if(extraClass) document.body.classList.add(extraClass);
+    const el = renderFn();
+    if(cardClass) el.classList.add(cardClass);
+    const btn = el.querySelector('.disconnect');
+    if(btn){
+      btn.onclick = () => {
+        document.body.classList.add('glitching');
+        sfxGlitch(.4);
+        setTimeout(() => {
+          document.body.classList.remove('glitching','hijacked','deep','mold','cold','silent','silver','noir');
+          S.locked = false;
+          if(after) after();
+        }, 380);
+      };
+    } else { S.locked = false; if(after) after(); }
+  };
+  if(mode === 'mirror'){
+    /* the whole UI flips like a mirror image, then flips back into a silver world */
+    document.body.classList.add('mirrored');
+    sfxShimmer();
+    setTimeout(() => {
+      document.body.classList.remove('mirrored');
+      setTimeout(() => finish('silver'), 480);
+    }, 1500);
+  } else if(mode === 'dark'){
+    /* lights die; a flashlight beam roams the darkness to your heartbeat */
+    document.body.classList.add('torch');
+    sfxHeart();
+    setTimeout(() => {
+      finish('noir');
+      setTimeout(() => document.body.classList.remove('torch'), 1400);
+    }, 2100);
+  } else if(mode === 'rot'){
+    /* the page you're reading starts to decay */
+    document.body.classList.add('rotting');
+    sfxFlies();
+    setTimeout(() => {
+      document.body.classList.remove('rotting');
+      finish('mold');
+    }, 1700);
+  } else if(mode === 'freeze'){
+    /* lights blow out twice, then frost creeps in */
+    const b = document.body;
+    b.classList.add('blackout');
+    setTimeout(() => { b.classList.remove('blackout');
+    setTimeout(() => { b.classList.add('blackout');
+    setTimeout(() => { b.classList.remove('blackout');
+      sfxFreeze();
+      b.classList.add('cold');
+      setTimeout(() => finish('cold'), 900);
+    }, 160); }, 220); }, 120);
+  } else if(mode === 'silence'){
+    /* no sound at all — everything on screen simply ceases */
+    document.body.classList.add('vanish');
+    setTimeout(() => {
+      results.innerHTML = '';
+      document.body.classList.remove('vanish');
+      finish('silent', 'slowfade');
+    }, 900);
+  } else if(mode === 'blackout'){
+    /* sudden dead screen — a beat of silence — face flash with sting — gone */
+    document.body.classList.add('blackout');
+    setTimeout(() => {
+      document.body.classList.add('faceflash');
+      sfxSting();
+      setTimeout(() => {
+        document.body.classList.remove('faceflash');
+        setTimeout(() => {
+          document.body.classList.remove('blackout');
+          finish();
+        }, 550);
+      }, 220);
+    }, 1100);
+  } else if(mode === 'fall'){
+    /* every card drops off screen, UI sinks into deep water */
+    document.body.classList.add('falling');
+    sfxFall();
+    setTimeout(() => {
+      results.innerHTML = '';
+      document.body.classList.remove('falling');
+      finish('deep');
+    }, 1050);
+  } else {
+    document.body.classList.add('glitching');
+    sfxGlitch(1.3);
+    setTimeout(() => {
+      document.body.classList.remove('glitching');
+      finish();
+    }, 1300);
+  }
+}
+
+/* ghost auto-typing in the search box */
+function ghostType(msg, done){
+  S.locked = true; query.blur(); query.value='';
+  let i = 0;
+  (function step(){
+    if(i < msg.length){
+      query.value += msg[i++]; sfxKey();
+      setTimeout(step, 140 + Math.random()*220);
+    } else {
+      setTimeout(() => { query.value=''; S.locked = false; if(done) done(); }, 1600);
+    }
+  })();
+}
+
+/* =====================  KEYWORD ENGINE  ===================== */
+function norm(s){
+  return s.toLowerCase().replace(/[\s。，、．.,!！?？:：'"“”\-]/g,'');
+}
+function matchAny(q, arr){ return arr.some(k => q === norm(k)); }
+
+const normalServices = [
+  {k:['毛巾','towel','送毛巾'], r:'已为您呼叫客房服务送毛巾，预计 8 分钟送达。'},
+  {k:['送水','水','矿泉水'], r:'已为您安排两瓶依云矿泉水，赠送冰块。'},
+  {k:['订餐','送餐','menu','菜单','吃饭'], r:'云顶餐厅（44F）今日供应：M9和牛、蓝鳍金枪鱼、法式生蚝。<br>另有「本店特供·安神汤」——所有住客免费，<i>强烈推荐每晚饮用</i>。'},
+  {k:['餐厅','自助餐','云顶餐厅'], r:'云顶餐厅位于 <b>44F</b>，营业至 23:00。着装要求：Smart Casual。'},
+  {k:['wifi','无线','网络','上网'], r:'Wi-Fi：GLIMMER_VIP，密码：您的生辰八字已自动绑定，无需输入。'},
+  {k:['空调','温度','冷','热'], r:'室温已根据您的体温实时调节。我们始终在监测您的生理指标。'},
+  {k:['打扫','清洁','客房服务'], r:'客房清洁已预约。温馨提示：清洁期间请勿留在房内照镜子。'},
+  {k:['泳池','游泳','pool'], r:'恒温泳池位于 B1，开放至 22:00。顶楼无边泳池今晚起「例行维护」，仅限受邀住客于凌晨使用。'},
+  {k:['健身房','健身','gym'], r:'24 小时健身房位于 B2。今日您的「活力值」评级：A+。非常适合采集——<span style="opacity:.4">适合锻炼。</span>'},
+  {k:['退房','checkout','离店'], r:'检索不到您的离店权限。您的入住时长为：<b>∞</b>（数据异常，已忽略）。'},
+  {k:['前台','电话','联系'], r:'前台分机 0。请注意：凌晨 3 点后前台无人值守，也请不要拨打。'},
+  {k:['时间','几点','time'], r:'当前时间已显示在屏幕上方。离「维护开始」还有一段时间，请安心休息。'},
+];
+
+function onSearch(){
+  if(S.locked) return;
+  const raw = query.value.trim();
+  if(!raw) return;
+  const q = norm(raw);
+  S.searches++;
+  query.value='';
+
+  /* --- developer mode gate --- */
+  if(q === '开发者模式'){
+    $('devpw').value = '';
+    $('deverr').textContent = '';
+    $('devgate').classList.add('show');
+    setTimeout(() => $('devpw').focus(), 50);
+    return;
+  }
+
+  /* --- meta: two-level hint --- */
+  if(matchAny(q,['提示','hint','帮助我','怎么玩'])){
+    const key = S.stage + '|' + (S.seenRoom?1:0) + (S.seenCard?1:0) + (S.seenGranny?1:0)
+      + (S.seenAlbum?1:0) + (S.sawPerm?1:0) + (S.sawPai?1:0);
+    if(S.hintKey === key){ S.hintLv = 2; } else { S.hintKey = key; S.hintLv = 1; }
+    const lvl = S.hintLv;
+    butler('（系统外·提示' + (lvl===1?'①':'②·答案') + '）' + getHint(lvl)
+      + (lvl===1 ? '<br><span style="opacity:.5">再输一次「提示」直接看答案。</span>' : ''));
+    return;
+  }
+
+  /* --- forbidden chain (gated by stage) --- */
+  if(matchAny(q,['微光','glimmer','微光度假村','theglimmerresort','glimmerresort','酒店','微光酒店'])){
+    renderHotelPage(); return;
+  }
+  if(matchAny(q,['44','44f','44层','四十四','四十四层','44楼','电梯','坐电梯'])){
+    /* ch4 mirror world: the lift with a single key actually works */
+    if(S.stage >= 16){
+      if(S.stage < 17){ renderHall44(); }
+      else { butler('静室的烛火没有摇。它们在等 03:33。'); }
+      return;
+    }
+    if(matchAny(q,['电梯','坐电梯'])){ butler('客用电梯直达各楼层。楼层指引可搜索「微光度假村」查看。'); return; }
+    if(S.stage >= 1){
+      const rp = S.stage >= 2;
+      hijack(renderDeathLog, rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'平板恢复了正常，白得好像什么都没发生过。<br>你的手心全是汗。'},
+          {cls:'narr', text:'浴室门开了。小雅走出来，站在梳妆镜前梳头。<br>你从镜子里对她笑了笑——'},
+          {cls:'narr', text:'镜子里的她还在梳头。<br><b>可现实中的她，手已经放下了。</b>'},
+          {cls:'xiaoya', who:'小雅', text:'“看什么呢？”她转过头，语气客套而冰冷，<br>“对了，明晚别安排活动。<b>我想去夜泳。</b>”'},
+          {cls:'sys', who:'GLIMMER OS', text:'// 名字被抹得干干净净。<br>// 但那个房号……到处都是你们的房号。'},
+        ], () => hint(getHint(1)));
+      }, 'glitch', rp);
+    } else {
+      butler('「44」——未找到相关楼层或服务。本酒店不存在该楼层。');
+      S.fails++;
+    }
+    return;
+  }
+  /* --- 0413 房间履历（第二跳） --- */
+  if(matchAny(q,['0413','413','0413房','房间0413','我的房间','房号'])){
+    if(S.stage >= 2){
+      renderRoomHistory();
+      if(S.stage < 4) hint(getHint(1));
+    } else {
+      butler('0413 是您的房间。需要客房服务吗？'); S.fails++;
+    }
+    return;
+  }
+  /* --- 欢迎卡（第三跳：压痕藏名） --- */
+  if(matchAny(q,['欢迎卡','卡片','床头卡','贺卡','床头欢迎卡','欢迎卡片'])){
+    if(S.seenRoom){
+      renderWelcomeCard();
+      if(S.stage < 4) hint(getHint(1));
+    } else if(S.stage >= 1){
+      butler('每间客房均配有定制欢迎卡。您床头就有一张，是为您与林小姐特别印制的。');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['陈婷','陈婷是谁','查陈婷'])){
+    if(S.seenCard){
+      const rp = !!S.seenCCTV;
+      hijack(() => renderCCTV(), rp ? null : () => {
+        ghostType('月 亮 沉 在 哪 里 ， 我 就 在 哪 里', () => {
+          showStory([
+            {cls:'narr', text:'搜索框自己动了。<br>一个字、一个字地，替你打出了一句话。'},
+            {cls:'sys', who:'???', text:'月亮沉在哪里，<br>我就在哪里。'},
+            {cls:'narr', text:'你抬头看向窗外。今晚的月亮很亮，<br>亮得——在某个地方，有一片倒影。'},
+          ], () => {
+            S.stage = 3;
+            addClue('鬼魂谜语：「月亮沉在哪里，我就在哪里」');
+            hint(getHint(1));
+          });
+        });
+      }, 'blackout', rp);
+    } else {
+      butler('未在住客与员工名录中找到「'+raw+'」。'); S.fails++;
+    }
+    return;
+  }
+  if(matchAny(q,['水底','泳池水底','看水底','池底','聚阴池','泳池底下','井','枯井','月亮','月亮的倒影','泳池'])){
+    if(S.stage >= 3){
+      const rp = S.stage >= 4;
+      hijack(renderAltar, rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'凌晨两点五十九分。你合上平板，转头——<br>小雅不在床上。'},
+          {cls:'xiaoya', who:'小雅', text:'她站在落地窗前，仰头望着顶楼泳池的方向，<br>轻声说：“水在叫我了。”'},
+          {cls:'sys', who:'GLIMMER OS', text:'<b>TONIGHT 03:33</b><br>顶楼泳池 · 维护开始<br><br>// 距离档案 045 结案，还有 34 分钟。'},
+        ], () => showEnd(1));
+      }, 'fall', rp);
+    } else if(matchAny(q,['泳池'])){
+      butler('恒温泳池位于 B1，开放至 22:00。顶楼无边泳池今晚起「例行维护」，仅限受邀住客于凌晨使用。');
+    } else {
+      butler('恒温泳池水深 1.4 米，每日换水消毒，请放心使用。'); S.fails++;
+    }
+    return;
+  }
+
+  /* --- chapter 2 chain --- */
+  if(matchAny(q,['安神汤','特供安神汤','安魂汤','汤','喝汤','特供'])){
+    if(S.stage >= 5){ renderSoupPage(); }
+    else butler('「特供·安神汤」：本店招牌汤品，每客一盅，免费供应，强烈建议每晚饮用。');
+    return;
+  }
+  /* 辰砂/黄表：古称解读的中间反馈 */
+  if(matchAny(q,['辰砂','黄表','黄表纸','朱砂'])){
+    if(S.stage >= 6){
+      card(`<span class="tag">⚠ LEXICON</span>
+        <p class="mono">辰砂——即朱砂。画符、镇物所用。<br>黄表——黄表纸，<b>写符的纸</b>。<br><br>朱砂符化在井水里……这两样东西，每天都在你的汤里。</p>`, true);
+      addClue('辰砂＝朱砂，黄表＝符纸——化进井水，那是一盅什么？');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['符水','符','朱砂符','镇魂','以符镇魂','引客归井','井水','北海井水'])){
+    if(S.stage >= 6){
+      const rp = S.stage >= 7;
+      hijack(() => renderPurchase(), rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'午餐时你偷偷把两盅安神汤都倒进了绿植盆里。<br>十分钟后，服务生端着新的两盅走过来，微笑着，一言不发。'},
+          {cls:'xiaoya', who:'小雅', text:'她当着你的面，把一块几乎全生的肉放进嘴里，<br>细细地嚼。然后看着你：“你的那份，不吃吗？”'},
+        ], () => {});
+      }, 'rot', rp);
+    } else if(S.stage >= 5){ butler('符？您是想预订书法体验课吗？已为您转接文娱中心。'); S.fails++; }
+    else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['冷库','b1冷库','冰库','冷藏库','冷冻库','b1c4','c4','冰柜'])){
+    if(S.stage >= 14){ renderVisit043(); return; }
+    if(S.stage >= 7){
+      const rp = S.stage >= 8;
+      hijack(() => renderFreezer(), rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'断开连接的一瞬间，你听见走廊尽头传来指节敲击金属的声音。<br>三短，三长，三短。'},
+          {cls:'sys', who:'GLIMMER OS', text:'// 检测到未授权检索。<br>// 0413 的「静默处理」申请已提交，等待回魂夜批准。<br><br><span style="opacity:.5">// 他说，回魂夜已经到了。去查那个词。</span>'},
+        ], () => {});
+      }, 'freeze', rp);
+    } else { butler('冷库为员工区域，住客无法进入。需要冰块吗？可以为您送到房间。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['回魂夜','回魂','中元节','中元','七月十五','鬼门开'])){
+    if(S.stage >= 8){
+      const rp = S.stage >= 9;
+      hijack(() => renderCalendar(), rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'你合上平板。窗外，天不知什么时候已经黑透了。'},
+          {cls:'xiaoya', who:'小雅', text:'她背对着你站在落地窗前，没有回头：<br>“在查什么呢？”<br>你说，没什么。<br>她轻轻笑了：“<b>还有三天呢，急什么。</b>”'},
+          {cls:'narr', text:'——你从没告诉过她，还有几天。'},
+          {cls:'sys', who:'GLIMMER OS', text:'回魂夜倒计时 <b>72:00:00</b><br><br>// 第三章 · 镜可照真<br>// 地点：B2 健身房，和每一面镜子里。'},
+        ], () => showEnd(2));
+      }, 'silence', rp);
+    } else { butler('您查询的是本地民俗吗？北海地区素有中元祭祀传统，请文明祭扫。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['043','43号','挂位04','4号挂位','周明远'])){
+    if(S.stage >= 14){ renderVisit043(); return; }
+    if(S.stage >= 8){
+      card(`<span class="tag">⚠ FILE 043</span>
+        <p class="mono">档案 043：入住登记「美食博主」。<br>结案描述：失踪（未结案）。<br>实际状态：<b>库存 · 4 号挂位</b>。<br><br>处理原因：他尝出了汤里的味道。</p>`, true);
+      addClue('043 是美食博主——他尝出了汤里的味道');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+
+  /* --- chapter 3 chain --- */
+  /* ch4: mirrors are shut until you name the exact clock time */
+  if(matchAny(q,['进镜','穿镜','照镜','进入镜子','入镜'])
+     || (S.stage >= 15 && S.stage < 16 && matchAny(q,['镜子','照镜子','镜墙']))){
+    if(S.stage >= 15 && S.stage < 16){
+      card(`<span class="tag">⚠ 0413 · 浴室</span>
+        <p>你站到镜子前，掌心贴上去——<b>纹丝不动</b>。还不到"门"开的时候。</p>
+        <p class="mono">堂规：亥时三刻，诸镜皆门。<br>——亥时三刻，到底是<b>几点几分</b>？<br>算准了，在这里报给我。</p>`, true);
+      addClue('镜门未开——要算出「亥时三刻」的准确钟点，报给系统');
+    } else if(S.stage >= 16){
+      butler('你已经在镜子这一边了。');
+    } else {
+      butler('客房镜面每日消毒。温馨提示：请勿在凌晨照镜。'); S.fails++;
+    }
+    return;
+  }
+  /* ch4: the computed hour opens the door */
+  if(matchAny(q,['2145','21时45','21点45','21点45分','九点四十五','晚上九点四十五'])){
+    if(S.stage === 15){
+      S.locked = true;
+      showStory([
+        {cls:'narr', text:'你回到 0413 房，站在浴室镜前，盯着表。<br>21:44。镜中的你——眨眼比你慢了一整秒。'},
+        {cls:'narr', text:'21:45。<b>亥时三刻。</b><br>镜面上泛起一圈涟漪，像有人从水底吐了一口气。'},
+        {cls:'narr', text:'你把 044 铜牌攥紧，伸出手——'},
+      ], () => {
+        document.body.classList.add('rippling');
+        sfxPlunge();
+        setTimeout(() => {
+          document.body.classList.remove('rippling');
+          document.body.classList.add('mw');
+          S.mw = true;
+          S.locked = false;
+          renderMirrorEntry();
+        }, 1400);
+      });
+    } else if(S.stage === 14){
+      butler('你盯着表算了算时间。——在那之前，你还有一样东西没拿到。');
+    } else if(S.stage >= 16){
+      butler('你已经在镜子这一边了。这边的钟，倒着走。');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  /* wrong hour guesses while the door is shut */
+  if(S.stage === 15 && /^\d{3,4}$/.test(q)){
+    card(`<span class="tag">⚠ 0413 · 浴室</span>
+      <p class="mono">镜面没有动。<br>不是这个时刻。——一个时辰两个钟头，<b>一刻是多少分</b>？旧门户的对照表里写着。</p>`, true);
+    return;
+  }
+  if(matchAny(q,['镜子','健身房','健身','gym','b2','照镜子','镜墙'])){
+    if(S.stage >= 10){
+      const rp = S.stage >= 11;
+      hijack(() => renderGymMirror(), rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'断开连接后，你又去了一趟 B2。<br>你伸手贴上镜面——冰凉。<br>而镜子里那只手，比你的动作<b>慢了半拍</b>。'},
+          {cls:'narr', text:'身后忽然传来响动。一个穿保洁制服的人正在擦更衣室的镜子。<br>你看了十分钟。他一直在擦<b>同一块</b>，同一个动作，同一个弧度。<br>你离开时，他对着镜子里的你，笑了一下。'},
+          {cls:'sys', who:'GLIMMER OS', text:'// 检测到高危检索。<br>// 镜面协议 v1.9.0.0 已启动加固。<br><span style="opacity:.5">// 门上的字是反的。读出来。</span>'},
+        ], () => {});
+      }, 'mirror', rp);
+    } else {
+      butler('24 小时健身房位于 B2。今日您的「活力值」评级：A+。非常适合采集——<span style="opacity:.4">适合锻炼。</span>');
+    }
+    return;
+  }
+  if(matchAny(q,['沈氏堂','shenshitang','旧门户','老网站','沈氏堂门户'])){
+    if(S.stage >= 11){
+      renderShenPortal();
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  /* 中间反馈①：知道"镜后"但不知道哪一面 —— 不能跳关 */
+  if(matchAny(q,['镜后','镜子后面','暗格','镜后暗格'])){
+    if(S.stage >= 12){
+      card(`<span class="tag">⚠ B2 更衣室</span>
+        <p>你半夜溜进更衣室。整面墙都是镜子——<b>一共 44 块镜板</b>，每一块后面都可能是暗格。</p>
+        <p class="mono">撬错一面，整栋楼都会知道。<br>——到底是<b>哪一面</b>？</p>
+        <p class="sub">名录上写位置的地方被虫蛀了。旧门户的「问事」，也许问得出来。</p>`, true);
+      addClue('更衣室有 44 块镜板——必须确定具体是哪一面');
+    } else { butler('客房镜面每日消毒。温馨提示：请勿在凌晨照镜。'); S.fails++; }
+    return;
+  }
+  /* 中间反馈②：红头绳的来历 —— 引向位置谜题 */
+  if(matchAny(q,['红头绳','红绳','本命之物'])){
+    if(S.stage >= 12){
+      card(`<span class="tag">⚠ ITEM TRACE</span>
+        <p class="mono">红头绳：小雅随身佩戴 20 年。<br>入住当日 · 深度保洁时段：<b>已收缴</b>。<br>处置：依堂规第七条，镇于 B2 更衣室镜后。</p>
+        <p>货品页说它「缚者可镇，持者可引」——只要拿回来，它就是你的武器。<br><b>但 44 块镜板，是哪一面？</b></p>`, true);
+      addClue('红头绳入住当天就被收缴，镇于更衣室某面镜后');
+    } else if(S.stage >= 10){ butler('未找到相关商品。您可以到 1F 精品店选购饰品。'); S.fails++; }
+    else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  /* 开暗格：必须给出精确位置（问事批复 / 镜墙照片掌印均指向第 4 面） */
+  if(matchAny(q,['第四面镜','第肆面镜','第4面镜','第四块镜板','第4块镜板','第四块镜'])){
+    if(S.stage >= 12){
+      const rp = S.stage >= 13;
+      hijack(() => renderNiche(), rp ? null : () => {
+        showStory([
+          {cls:'narr', text:'回到房间，你把红头绳攥在手心。<br>小雅忽然回过头——这一次，她的眼睛是<b>活的</b>。'},
+          {cls:'xiaoya', who:'小雅', text:'“……<b>外婆的绳？</b>你怎么会有外婆的绳？”<br>她一把抓住你的手腕，指尖冰凉，<br>“外婆说过，绳在的地方——”<br>她的眼神暗了下去，像被掐灭的烛火。'},
+          {cls:'xiaoya', who:'小雅', text:'客套的微笑重新爬回她脸上：<br>“明晚就是十五了呢。<b>陪我去顶楼看月亮</b>，好不好？”'},
+          {cls:'sys', who:'GLIMMER OS', text:'回魂夜倒计时 <b>24:00:00</b><br><br>// 第四章 · 井开三刻（终章）<br>// 地点：不存在的 44 层。带上那根红绳。'},
+        ], () => showEnd(3));
+      }, 'dark', rp);
+    } else { butler('客房镜面每日消毒。温馨提示：请勿在凌晨照镜。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['相册','照片','旧照片','合影','手机相册'])){
+    if(S.seenGranny){ renderAlbum(); }
+    else { butler('您的相册已同步至云端。所有照片都很安全，我们都看过了——<span style="opacity:.4">都很安全。</span>'); }
+    return;
+  }
+  if(matchAny(q,['外婆','北海阿婆','阿婆','奶奶'])){
+    if(S.stage >= 12){
+      card(`<span class="tag">⚠ FORMER MEMBER // 除名档案</span>
+        <p class="mono">检索对象：北海阿婆<br>堂内旧职：<b>司名录</b>（掌供体生辰簿）<br>
+        状态：叛堂 · 已除名 · 2019 年殁<br><br>
+        备注（沈公朱批）：<b>「她改过一页。查。」</b><br>
+        追记：改动未寻获。</p>
+        <p>改过一页……改的是什么？<br>你忽然想起——小雅手机里存着一张和外婆的旧合影。（搜「<b class="kw" data-kw="相册">相册</b>」）</p>`, true);
+      S.seenGranny = true;
+      addClue('外婆曾是沈氏堂「司名录」——她改过一页，堂里到死没查出来');
+    } else if(S.stage >= 10){
+      butler('未在住客与员工名录中找到相关人员。');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['癸未','癸未年','癸未年三月','羊年'])){
+    if(S.stage === 17){
+      card(`<span class="tag">⚠ MIRROR SIDE</span>
+        <p>笔尖悬在纸上，你猛地停住——<br><b>这是他们等着你写的。</b>写下她的真八字，等于替井亲手核验交割。</p>
+        <p class="mono">要写，就写一个别人的。<br>写一个井"认识"了很久很久的人。</p>`, true);
+      addClue('不能写癸未——那等于亲手核验小雅的交割');
+    } else if(S.stage >= 11){
+      card(`<span class="tag">⚠</span><p class="mono">井历检索：癸未 · 属羊。<br>井喜欢羊。<br><span style="opacity:.5">——这话不该对我说。拿去问该问的地方。</span></p>`, true);
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  /* ch4: writing on tablet #45 */
+  if(matchAny(q,['丁丑','丁丑年','丁丑年生','写丁丑'])){
+    if(S.stage === 17){
+      S.locked = true;
+      S.stage = 18;
+      addClue('牌位生辰已写：丁丑（＝光绪三年＝沈聿）');
+      card(`<span class="tag">MIRROR SIDE // 落笔</span>
+        <h3>你提起朱笔，在生辰栏写下：丁丑。</h3>
+        <p>笔画落定的一瞬间，四十四座无字牌位同时<b>轻轻震了一下</b>，
+        像四十四个人同时吸了一口气。</p>
+        <p class="mono">案上的烛火，百年来第一次——<b>摇了</b>。</p>`, true);
+      setTimeout(() => {
+        S.locked = false;
+        showStory([
+          {cls:'narr', text:'"叮。"<br><br>走廊尽头，电梯响了。<br>这一侧的电梯，只有一个人会用。'},
+          {cls:'narr', text:'你吹熄手边的烛，闪进帷幔后。<br>脚步声很慢，很稳，踩着一百多年的耐心，朝静室走来。'},
+          {cls:'sys', who:'GLIMMER OS', text:'回魂夜 · <b>23:59</b><br>距井开：03:33<br><br>// 第五章 · 井开三刻（终章）<br>// 他上来了。而她，正走向顶楼的水。'},
+        ], () => showEnd(4));
+      }, 2600);
+    } else if(S.stage > 17){
+      butler('牌位上已经写好了。剩下的，交给井。');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['辛巳','辛巳年','辛巳年七月'])){
+    if(S.stage === 17){
+      card(`<span class="tag">⚠ MIRROR SIDE</span>
+        <p class="mono">假八字，井会当场识破——仪式照样进行。<br>要写，就写一个井<b>真正认识</b>的人的生辰。</p>`, true);
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['光绪三年','1877','1997','1937'])){
+    if(S.stage === 17){
+      card(`<span class="tag">⚠ MIRROR SIDE</span>
+        <p class="mono">笔悬住了。<b>牌位只认干支。</b><br>甲子六十年一周天，周而复始——<br>1877 的干支，在那张对照表上，有它的"同岁"。</p>`, true);
+      addClue('1877 的干支＝1937＝1997（六十年一周天）');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['牌位','静室','无字牌位','45号牌位'])){
+    if(S.stage >= 17){ if(S.stage === 17) renderHall44(); else butler('牌位上已经写好了。'); }
+    else if(S.stage >= 16){ renderHall44(); }
+    else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  /* ch4 step1a: check permissions */
+  if(matchAny(q,['房卡','权限','门禁','通行','通行权限'])){
+    if(S.stage >= 15){ butler('044 铜牌在你手里——这栋楼现在拦不住你。'); return; }
+    if(S.stage === 14){
+      S.sawPerm = true;
+      card(`<span class="tag">⚠ ACCESS TABLE // 回魂夜维护期</span>
+        <table class="log-table">
+          <tr><th>通行物</th><th>权限</th><th>状态</th></tr>
+          <tr><td>房卡（住客）</td><td>0413 · 大堂</td><td>已降级</td></tr>
+          <tr><td>员工卡</td><td>—</td><td>今日全员停用</td></tr>
+          <tr><td><b>堂内铜牌</b></td><td><b>全楼 · 最高</b></td><td><b>不受维护影响</b></td></tr>
+        </table>
+        <p class="sub">回魂夜连员工都要清场。整栋楼里畅通无阻的，只剩"堂内"的东西。</p>`, true);
+      addClue('堂内铜牌＝最高权限，不受维护影响');
+    } else { butler('您的房卡权限正常。祝您入住愉快。'); }
+    return;
+  }
+  /* ch4 step1b: trace the bronze tags */
+  if(matchAny(q,['铜牌','堂内铜牌','牌'])){
+    if(S.stage >= 15){ butler('044 铜牌在你手里。'); return; }
+    if(S.stage === 14){
+      S.sawPai = true;
+      card(`<span class="tag">⚠ REGISTRY // 堂内铜牌登记</span>
+        <p class="mono">在册铜牌：001–045（牌号即档案号）<br><br>
+        043 号：随档案 · 状态"库存"<br>
+        044 号：<b>领取后未归还</b> · 最后记录位置：<b>B1 冷库</b><br>
+        045 号：铸造中 · 回魂夜启用</p>
+        <p class="sub">044……你记得这个编号。她已经用不上它了。</p>`, true);
+      addClue('044 铜牌未归还——最后位置：B1 冷库');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['亥时','亥时三刻','诸镜皆门'])){
+    if(S.stage >= 14){
+      card(`<span class="tag">⚠ 堂规 · 第十一条</span>
+        <p class="mono">回魂夜<b>亥时三刻</b>起，诸镜皆门。<br>寅时二刻又三分，井开。</p>
+        <p class="sub">亥时三刻……换成钟点是几点？这套老历法，旧门户里什么都有对照。</p>`, true);
+      addClue('亥时三刻是几点？——旧门户里有对照');
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+  if(matchAny(q,['1900','光绪二十六年','井成之年'])){
+    if(S.stage >= 12){
+      card(`<span class="tag">⚠</span><p class="mono">口令不是对<b>我</b>说的。<br>去门的那一边，对<b>他们</b>说。</p>`, true);
+    } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
+    return;
+  }
+
+  /* --- easter eggs --- */
+  if(matchAny(q,['help','救命','helpme'])){
+    if(S.stage >= 2){
+      /* no shake here — quiet dread, not a jump scare */
+      card(`<span class="tag">⚠ ECHO</span><h3 class="mono">HELP ME TOO. HELP US ALL.</h3>
+            <p class="sub mono">044 / 043 / 042 / 041 / ……… / 001</p>`, true);
+    } else butler('需要帮助吗？您可以搜索「订餐」「毛巾」「泳池」等服务。');
+    return;
+  }
+  if(matchAny(q,['333','0333','3点33','凌晨333'])){
+    if(S.stage >= 2){
+      card(`<span class="tag">⚠</span><p class="mono">那不是营业时间。<br>那是<b>仪式时间</b>。寅时二刻又三分，三魂离体。</p>`, true);
+    } else butler('未找到「'+raw+'」相关服务。');
+    return;
+  }
+  if(matchAny(q,['小雅','林小雅','女朋友'])){
+    if(S.stage >= 2){
+      const extra = S.stage >= 11 ? `
+        <p class="mono">登记证件（居民身份证）：<br><b>2102 8320 0107 1604<span class="redact">▓▓</span></b>（尾号脱敏）</p>` : '';
+      const el = card(`<span class="tag">⚠ GUEST QUERY</span>
+        <p class="mono">0413 房当前登记住客：<br>王先生 ✓<br>林小雅 <span class="redact">▓▓▓▓</span> <b>【数据冲突：检测到 2 个灵魂签名】</b></p>${extra}`, true);
+      if(S.stage >= 11) addClue('小雅身份证号：210283 2001 0716 04▓▓');
+      if(!S.yaScared){
+        /* one-time sudden-grow scare */
+        S.yaScared = true;
+        el.classList.add('zoomscare');
+        sfxSting(.7);
+      }
+      addClue('系统显示：小雅身上有「2 个灵魂签名」');
+    } else butler('林小姐正在享受她的假期。您也请放松。');
+    return;
+  }
+  if(matchAny(q,['沈聿','术士','老板','投资人'])){
+    if(S.stage >= 4){
+      const plot = S.stage === 17
+        ? `<p>光绪三年……你盯着这行字，忽然有了主意。<br><b>写一个井等了一百多年的人。</b></p>`
+        : '';
+      card(`<span class="tag">⚠ FOUNDER</span><p class="mono">沈聿：Glimmer Group 匿名创始股东。<br>出生记录：<b>光绪三年</b>。<br>当前状态：<b>存活 · 44F</b>。</p>${plot}`, true);
+      if(S.stage === 17) addClue('沈聿生于光绪三年——写他的生辰？（牌位只认干支）');
+    } else butler('Glimmer Group 投资方信息未公开。');
+    return;
+  }
+
+  /* --- normal services --- */
+  for(const s of normalServices){
+    if(matchAny(q, s.k)){ butler(s.r); return; }
+  }
+
+  /* --- miss --- */
+  S.fails++;
+  butler('抱歉，未找到「'+raw+'」相关服务。您可以试试：送水、订餐、泳池。');
+  if(S.fails >= 3){
+    S.fails = 0;
+    /* 小字自动提示仅第一章；第二章起只保留「提示」指令 */
+    if(S.stage < 5) setTimeout(() => hint('管家轻声说：迷路了吗？…… ' + getHint(1)), 500);
+  }
+}
+
+$('gobtn').onclick = onSearch;
+query.addEventListener('keydown', e => { if(e.key === 'Enter') onSearch(); });
+
+/* clickable keywords inside cards */
+results.addEventListener('click', e => {
+  const kw = e.target.closest('[data-kw]');
+  if(kw && !S.locked){ query.value = kw.dataset.kw; onSearch(); }
+});
+
+/* =====================  CHAPTER ENDS & CH2 START  ===================== */
+function showEnd(ch){
+  $('endtitle').textContent = ['','第一章 · 完','第二章 · 完','第三章 · 完','第四章 · 完'][ch];
+  $('endtag').textContent  = ['','TONIGHT  03:33','回魂夜 · 72:00:00','回魂夜 · 24:00:00','井开 · 03:33'][ch];
+  $('endquote').textContent = ['',
+    '「所有进入微光的人，都将成为微光的一部分。」',
+    '「汤是给旧躯喝的。肉是给新客吃的。」',
+    '「镜可照真，物可缚魂。」',
+    '「先入者为主，后入者为客。」'][ch];
+  $('endstats').textContent = `你共搜索了 ${S.searches} 次，唤醒了 ${S.clues.length} 条线索。`;
+  const btns = $('endbtns'); btns.innerHTML = '';
+  if(ch === 1){
+    const b = document.createElement('button');
+    b.textContent = '▸ 进入第二章 · 云顶盛宴';
+    b.onclick = startCh2;
+    btns.appendChild(b);
+  } else if(ch === 2){
+    const b = document.createElement('button');
+    b.textContent = '▸ 进入第三章 · 镜可照真';
+    b.onclick = startCh3;
+    btns.appendChild(b);
+  } else if(ch === 3){
+    const b = document.createElement('button');
+    b.textContent = '▸ 进入第四章 · 诸镜皆门';
+    b.onclick = startCh4;
+    btns.appendChild(b);
+  } else {
+    const b = document.createElement('button');
+    b.textContent = '第五章 · 井开三刻（敬请期待）';
+    b.disabled = true;
+    btns.appendChild(b);
+  }
+  const r = document.createElement('button');
+  r.textContent = '重新入住';
+  r.onclick = () => location.reload();
+  btns.appendChild(r);
+  $('endscreen').classList.remove('hidden');
+}
+
+function startCh4(){
+  $('endscreen').classList.add('hidden');
+  document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir');
+  showStory([
+    {cls:'narr', text:'<b>第四章 · 亥时诸镜皆门</b><br><br>回魂夜。清晨你睁开眼——<br>小雅坐在床边看着你，不知道看了多久。'},
+    {cls:'xiaoya', who:'小雅', text:'“今晚的月亮最圆，”她说，声音像浸过井水，<br>“我们去顶楼，好不好？”'},
+    {cls:'narr', text:'你的筹码：贴身收着的红头绳；<br>堂规第十三条——<b>先入者为主</b>；<br>还有天黑前剩下的几个小时。'},
+    {cls:'narr', text:'亥时三刻，诸镜皆门。你要赶在井开之前，先一步进到镜子那边、上到 44 层。<br>你打开平板，想先查一查顶楼的路线——'},
+    {cls:'sys', who:'GLIMMER OS', text:'// 通知：回魂夜例行维护。<br>// 您的<b>房卡权限已临时降级</b>：仅限 0413 房与大堂。<br>祝您今晚愉快。'},
+    {cls:'narr', text:'他们把你锁在了棋盘上。<br>要在这栋楼里自由行动，你需要一样<b>权限比房卡更高的东西</b>。'},
+  ], () => {
+    S.stage = 14;
+    S.fails = 0;
+    hint('');
+    addClue('计划：亥时三刻穿镜，井开（03:33）前上 44 层——亥时三刻是几点？');
+    addClue('房卡被降级：只能进 0413 和大堂');
+    query.focus();
+  });
+}
+
+/* =====================  DEVELOPER MODE  ===================== */
+function devNote(html){
+  return card(`<span class="tag" style="color:#3fdc5f;border-color:#3fdc5f">DEV · 剧情节点</span><div>${html}</div>`);
+}
+const DEVPTS = [
+  {label:'一章 · 开局',        stage:0,
+   r:() => devNote('<b>第一章开局</b>：情侣入住 0413 房，平板上只有一个搜索框。<br>→ 下一步：搜「微光度假村」')},
+  {label:'一章 · 已看酒店页',   stage:1, r:() => renderHotelPage()},
+  {label:'一章 · 已看死亡日志', stage:2, r:() => renderDeathLog()},
+  {label:'一章 · 已看房间履历', stage:2, room:1, r:() => renderRoomHistory()},
+  {label:'一章 · 已看欢迎卡',   stage:2, room:1, card:1, r:() => renderWelcomeCard()},
+  {label:'一章 · 已看监控鬼语', stage:3, room:1, card:1, cctv:1, r:() => renderCCTV()},
+  {label:'一章 · 完（祭坛）',   stage:4, room:1, card:1, cctv:1, r:() => renderAltar()},
+  {label:'二章 · 开局',        stage:5, room:1, card:1, cctv:1,
+   r:() => devNote('<b>第二章开局</b>：03:33 仪式因供体未到场改期回魂夜。小雅只吃带血生肉，每桌一盅必喝的「安神汤」。<br>→ 下一步：搜「安神汤」')},
+  {label:'二章 · 已看菜单页',   stage:6, room:1, card:1, cctv:1, r:() => renderSoupPage()},
+  {label:'二章 · 已看采购单',   stage:7, room:1, card:1, cctv:1, r:() => renderPurchase()},
+  {label:'二章 · 已看冷库',     stage:8, room:1, card:1, cctv:1, r:() => renderFreezer()},
+  {label:'二章 · 完（黄历）',   stage:9, room:1, card:1, cctv:1, r:() => renderCalendar()},
+  {label:'三章 · 开局',        stage:10, room:1, card:1, cctv:1,
+   r:() => devNote('<b>第三章开局</b>：距回魂夜两天，镜子接连异常，照片里镜中房间多了一扇门。<br>→ 下一步：搜「镜子」')},
+  {label:'三章 · 已看镜墙照片', stage:11, room:1, card:1, cctv:1, r:() => renderGymMirror()},
+  {label:'三章 · 已获旧门户',   stage:12, room:1, card:1, cctv:1, r:() => renderShenPortal()},
+  {label:'三章 · 完（红绳）',   stage:13, room:1, card:1, cctv:1, r:() => renderNiche()},
+  {label:'四章 · 开局',        stage:14, room:1, card:1, cctv:1,
+   r:() => devNote('<b>第四章开局</b>：回魂夜当天。计划：拿通行牌→21:45 穿镜→44 层。<br>→ 下一步：搜「冷库」')},
+  {label:'四章 · 拿到044牌',   stage:15, room:1, card:1, cctv:1, r:() => renderVisit043()},
+  {label:'四章 · 镜中世界',     stage:16, room:1, card:1, cctv:1, mwx:1, r:() => renderMirrorEntry()},
+  {label:'四章 · 44层牌位',     stage:17, room:1, card:1, cctv:1, mwx:1, r:() => renderHall44()},
+  {label:'四章 · 完（丁丑）',   stage:18, room:1, card:1, cctv:1, mwx:1,
+   r:() => devNote('<b>第四章完</b>：牌位生辰已写「丁丑」（＝光绪三年＝沈聿）。电梯响了，他上来了。<br>第五章待开发。')},
+];
+function devJump(i){
+  const p = DEVPTS[i];
+  /* clean any fx / overlay state so the jump is always safe */
+  document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir',
+    'glitching','mirrored','torch','blackout','faceflash','vanish','falling','rotting','mw','rippling');
+  $('boot').classList.add('hidden');
+  const ov = $('story'); ov.classList.add('hidden'); ov.onclick = null;
+  $('endscreen').classList.add('hidden');
+  S.locked = false;
+  S.stage = p.stage;
+  S.seenRoom = !!p.room;
+  S.seenCard = !!p.card;
+  S.seenCCTV = !!p.cctv;
+  S.seenGranny = p.stage >= 13;
+  S.seenAlbum = p.stage >= 13;
+  S.mw = !!p.mwx;
+  if(S.mw) document.body.classList.add('mw');
+  S.fails = 0; S.hintKey = ''; S.hintLv = 0;
+  hint('');
+  $('devlabel').textContent = p.label;
+  /* live-render this checkpoint's content (no scare animations) */
+  results.innerHTML = '';
+  if(p.r){
+    const el = p.r();
+    /* re-assert checkpoint state: renderers may bump stage/flags */
+    S.stage = p.stage; S.seenRoom = !!p.room; S.seenCard = !!p.card; S.seenCCTV = !!p.cctv;
+    hint('');
+    if(el && el.querySelector){
+      const b = el.querySelector('.disconnect');
+      if(b && b.remove) b.remove();   /* corrupt cards shown inline, no disconnect needed */
+    }
+  }
+  query.focus();
+}
+$('devok').onclick = () => {
+  if($('devpw').value === '0916'){
+    $('devgate').classList.remove('show');
+    document.body.classList.add('dev');
+    /* sync slider to current progress */
+    let idx = 0;
+    for(let i = 0; i < DEVPTS.length; i++){ if(DEVPTS[i].stage <= S.stage) idx = i; }
+    if(S.stage === 2){ idx = 2 + (S.seenRoom?1:0) + (S.seenCard?1:0); }
+    $('devrange').value = idx;
+    $('devlabel').textContent = DEVPTS[idx].label;
+  } else {
+    $('deverr').textContent = 'ACCESS DENIED';
+    $('devpw').value = '';
+  }
+};
+$('devcancel').onclick = () => $('devgate').classList.remove('show');
+$('devpw').addEventListener('keydown', e => { if(e.key === 'Enter') $('devok').onclick(); });
+/* real-time jump while dragging (120ms debounce so it doesn't thrash) */
+let devT = null;
+function devSlide(e){
+  const i = +e.target.value;
+  $('devlabel').textContent = DEVPTS[i].label;
+  clearTimeout(devT);
+  devT = setTimeout(() => devJump(i), 120);
+}
+$('devrange').addEventListener('input', devSlide);
+$('devrange').addEventListener('change', devSlide);
+$('devclose').onclick = () => document.body.classList.remove('dev');
+
+function startCh3(){
+  $('endscreen').classList.add('hidden');
+  document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir');
+  showStory([
+    {cls:'narr', text:'<b>第三章 · 镜可照真</b><br><br>距回魂夜还有两天。你开始留意每一面镜子。'},
+    {cls:'narr', text:'电梯的镜面里，你身后的走廊比现实<b>长了一截</b>。<br>浴室的镜子起雾时，雾气总是从<b>里侧</b>先凝上。'},
+    {cls:'narr', text:'深夜，小雅说要去 B2 健身房。<br>凌晨一点，她在跑步机上跑了两个小时——正对着镜墙，<b>一次也没有眨眼</b>。'},
+    {cls:'narr', text:'你站在门口，隔着玻璃举起手机拍了一张。<br>照片里，镜中的房间——好像比真实的房间，<b>多了一样东西</b>。'},
+    {cls:'sys', who:'GLIMMER OS', text:'// 新目标：查一查那面镜子。'},
+  ], () => {
+    S.stage = 10;
+    S.fails = 0;
+    hint('');
+    addClue('小雅对着镜墙跑了两小时，没有眨眼');
+    addClue('手机照片：镜子里的房间多了一样东西');
+    query.focus();
+  });
+}
+
+function startCh2(){
+  $('endscreen').classList.add('hidden');
+  document.body.classList.remove('hijacked','deep','mold','cold','silent');
+  showStory([
+    {cls:'narr', text:'<b>第二章 · 云顶盛宴</b><br><br>那晚，你谎称自己发了高烧，死死拉着小雅陪你到天亮。'},
+    {cls:'narr', text:'03:33。门外传来水滴声。<br>嗒。嗒。嗒。一路滴到你们门口——停住了。<br>过了很久很久，它退了回去。'},
+    {cls:'sys', who:'GLIMMER OS', text:'档案 045 · <b>结案失败</b><br>原因：供体未到场<br>// 已改期：<b>回魂夜</b>'},
+    {cls:'narr', text:'清晨。小雅的脸色白得发亮。<br>自助餐厅里，她把十成熟的牛排推了回去。'},
+    {cls:'xiaoya', who:'小雅', text:'“要带血的。越生越好。”<br>她转头看你，笑得很客气：“这里的饭菜，<b>没有生气</b>。”<br>服务生毫不惊讶，仿佛见惯了。'},
+    {cls:'narr', text:'你注意到：每一张餐桌上，都摆着一盅深色的汤。<br>标签写着「特供·安神汤」。免费。<br>而且服务生会盯着每一位客人，直到喝完。'},
+    {cls:'sys', who:'GLIMMER OS', text:'// 新目标：查一查那碗汤。<br><span style="opacity:.5">// 本章不再提供自动提示。卡住时输入「提示」看方向，连续输两次直接看答案。</span>'},
+  ], () => {
+    S.stage = 5;
+    S.fails = 0;
+    hint('');
+    addClue('小雅只吃带血的生肉，说饭菜「没有生气」');
+    addClue('每桌一盅「特供·安神汤」，必须喝完');
+    query.focus();
+  });
+}
+</script>
+</body>
+</html>

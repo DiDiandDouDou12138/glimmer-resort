@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>沈氏堂 -- 百年老号 冥货一站</title>
+<style>
+  /* 刻意的 1998 年审美 */
+  body{
+    margin:0; background:#e8e0c8;
+    background-image:repeating-linear-gradient(45deg, #e8e0c8 0 12px, #e3dabf 12px 24px);
+    font-family:"SimSun","宋体",serif; font-size:14px; color:#222;
+  }
+  a{color:#0000cc; text-decoration:underline; cursor:pointer}
+  a:visited{color:#551a8b}
+  #wrap{width:780px; margin:8px auto; background:#f5efdc; border:2px outset #c9bd96}
+  #banner{
+    background:#7a1f1f; color:#f2e2a8; text-align:center; padding:14px 8px 10px;
+    border-bottom:4px double #c9a53f;
+  }
+  #banner h1{margin:0; font-size:30px; letter-spacing:14px; font-weight:bold}
+  #banner .en{font-size:11px; letter-spacing:4px; color:#d8b96a; font-family:"Times New Roman",serif}
+  marquee{background:#3a3320; color:#ffd98e; font-size:13px; padding:3px 0}
+  #nav{background:#c9bd96; padding:4px 8px; border-bottom:1px solid #8a7c50; text-align:center}
+  #nav a{margin:0 10px; font-weight:bold}
+  #nav a.cur{color:#7a1f1f; text-decoration:none}
+  .page{padding:16px 24px; min-height:420px; display:none; line-height:1.9}
+  .page.show{display:block}
+  h2{font-size:18px; color:#7a1f1f; border-bottom:1px dashed #8a7c50; padding-bottom:4px}
+  table.tb{border-collapse:collapse; width:100%; background:#fffdf2}
+  table.tb td, table.tb th{border:1px solid #8a7c50; padding:5px 9px; font-size:13px}
+  table.tb th{background:#e0d3a0; color:#4a3a10}
+  .blink{animation:bl 1s steps(1) infinite}
+  @keyframes bl{50%{opacity:0}}
+  .counter{
+    font-family:"Courier New",monospace; background:#000; color:#3f3;
+    padding:2px 6px; letter-spacing:3px; border:1px inset #666;
+  }
+  #footer{
+    text-align:center; font-size:11px; color:#6a5f40; padding:12px;
+    border-top:1px solid #8a7c50; background:#efe7cc;
+  }
+  /* 口令门 */
+  #gate{padding:60px 24px; text-align:center; display:block}
+  #gate .lockbox{
+    display:inline-block; background:#fffdf2; border:2px inset #c9bd96; padding:28px 44px;
+  }
+  #gate input{
+    font-family:"Courier New",monospace; font-size:18px; letter-spacing:6px;
+    width:130px; text-align:center; border:2px inset #999; padding:4px; background:#fff;
+  }
+  #gate button{
+    font-family:inherit; font-size:14px; padding:4px 18px; margin-left:8px;
+    background:#d5c99a; border:2px outset #c9bd96; cursor:pointer;
+  }
+  #gate button:active{border-style:inset}
+  #gateerr{color:#c00; font-size:13px; min-height:20px; margin-top:10px}
+  .seal{
+    display:inline-block; border:3px solid #a02020; color:#a02020; padding:2px 8px;
+    font-size:13px; transform:rotate(-8deg); font-weight:bold; letter-spacing:2px;
+  }
+  .msg{border-bottom:1px dotted #8a7c50; padding:8px 2px; font-size:13px}
+  .msg .m-head{color:#6a5f40; font-size:11px}
+  .old-img{
+    background:#d8d0b4; border:1px solid #8a7c50; text-align:center; color:#7a6f4c;
+    font-size:12px; padding:6px;
+  }
+  .old-img svg{display:block; width:100%; height:auto}
+  /* 第十三条：黑纸黑字，选中（反白）方可辨认 */
+  .hidden13{color:#f5efdc; background:#f5efdc; padding:2px 4px}
+  .hidden13::selection{background:#7a1f1f; color:#f2e2a8}
+  .hidden13::-moz-selection{background:#7a1f1f; color:#f2e2a8}
+  #askout{
+    min-height:60px; background:#fffdf2; border:1px inset #c9bd96;
+    padding:12px 16px; margin-top:12px; font-size:13px; line-height:2;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="banner">
+    <h1>沈 氏 堂</h1>
+    <div class="en">SHEN SHI TANG · EST. 1998</div>
+  </div>
+  <marquee scrollamount="4">本堂承接：法事 驱邪 辰砂 黄表 原井水 红头绳 一应冥货 ★ 一九九八年开张 网上订法事头一家 ★ 中元将至 诸事勿问 ★</marquee>
+
+  <!-- ============ 口令门 ============ -->
+  <div id="gate">
+    <div class="lockbox">
+      <p style="font-size:16px">生 人 止 步</p>
+      <input id="pw" maxlength="4" autocomplete="off">
+      <button onclick="tryPw()">进 堂</button>
+      <div id="gateerr"></div>
+      <p style="font-size:11px;margin-top:26px">
+        <a id="forgot" onclick="document.getElementById('forgotans').style.display='inline';this.style.display='none'" style="color:#9a8f6c">忘记口令？</a><span id="forgotans" style="display:none;color:#9a8f6c">去问井。</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ 站内 ============ -->
+  <div id="site" style="display:none">
+    <div id="nav">
+      <a class="cur" data-p="p1" onclick="go('p1',this)">[堂史]</a>
+      <a data-p="p2" onclick="go('p2',this)">[堂规]</a>
+      <a data-p="p3" onclick="go('p3',this)">[货品]</a>
+      <a data-p="p4" onclick="go('p4',this)">[客户名录]</a>
+      <a data-p="p6" onclick="go('p6',this)">[问事]</a>
+      <a data-p="p5" onclick="go('p5',this)">[留言板]</a>
+    </div>
+
+    <div class="page show" id="p1">
+      <h2>◆ 关于本堂</h2>
+      <p>本堂承接：<b>法事 · 驱邪 · 超度 · 问事 · 冥货订购</b>（辰砂、黄表、原井水、红头绳等，详见货品页）。</p>
+      <p>一九九八年设此网上堂口。冥货可留言订购；法事不出堂，须本人来北海。</p>
+      <p>堂主幼承家学，操持这门手艺——<b>百余年了。</b>（笑谈耳，客人莫怪。）</p>
+      <div class="old-img">
+        <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg">
+          <rect width="700" height="180" fill="#b9ac88"/>
+          <ellipse cx="350" cy="130" rx="120" ry="26" fill="#5a4f38"/>
+          <ellipse cx="350" cy="122" rx="120" ry="26" fill="none" stroke="#8a7c50" stroke-width="10"/>
+          <ellipse cx="350" cy="130" rx="76" ry="15" fill="#241f14"/>
+          <g stroke="#4a4030" stroke-width="5" fill="none"><path d="M130 140 v-80 M130 80 q-20 -14 -34 -34"/></g>
+          <text x="350" y="40" text-anchor="middle" fill="#5a4f38" font-size="15" font-family="serif" letter-spacing="8">堂 口 守 井 （存 照）</text>
+        </svg>
+        [图：北海老井 · 井成于光绪二十六年]
+      </div>
+      <p>堂口设在北海边，守着一口老井。井成于<b>光绪二十六年</b>。守井的差事是祖上传下来的——传到我这里，也该收尾了。</p>
+      <p>本堂只做一门生意：<b>替走不掉的人，安置走得掉的魂。</b></p>
+      <p style="color:#9a8f6c;font-size:12px">堂主近年少上线。楼起来了，井也快醒了。</p>
+    </div>
+
+    <div class="page" id="p2">
+      <h2>◆ 堂规（节抄）</h2>
+      <p>第一条　井为堂本。井开之夜，阖堂静默。</p>
+      <p>第二条　辰砂不过手，黄表不落地。</p>
+      <p>第三条　汤饭不过夜。<b>剩汤须回井。</b></p>
+      <p>第五条　配对既成，供体之物不得归还。</p>
+      <p style="background:#fff8d8;border:1px dashed #a02020;padding:6px 10px">
+        第七条　<b>供体本命之物，须镇于镜后，魂不得归窍。</b><br>
+        <span style="font-size:12px;color:#8a5f20">（镜者门也。物在镜后，如人在门外。）</span>
+      </p>
+      <p>第九条　生人勿近 C4。</p>
+      <p>第十一条　<b>回魂夜亥时三刻起，诸镜皆门。</b>寅时二刻又三分，井开。</p>
+      <p class="hidden13">第十三条　镜门开时，先入者为主，后入者为客。主客既定，井不改判。切记，切记。</p>
+      <p style="color:#9a8f6c;font-size:12px">——余条不录。问者自重。（第十三条墨污漫漶，不可辨。）</p>
+    </div>
+
+    <div class="page" id="p3">
+      <h2>◆ 货品</h2>
+      <table class="tb">
+        <tr><th>货名</th><th>用途</th><th>备考</th></tr>
+        <tr><td>辰砂（上等）</td><td>画符 镇物</td><td>每钱配黄表一道</td></tr>
+        <tr><td>黄表纸</td><td>书符</td><td>朱笔 井水化服</td></tr>
+        <tr><td>原井水</td><td>浑神智 利附身</td><td>仅供「微光」 日供四十四担</td></tr>
+        <tr><td><b>红头绳</b></td><td><b>缚魂 引魂</b></td><td><b>本命之物首选。缚者可镇，持者可引。</b></td></tr>
+        <tr><td>无字牌位</td><td>候客</td><td>常年备四十四座</td></tr>
+      </table>
+      <p style="font-size:12px;color:#8a5f20">※ 红头绳既能「镇」亦能「引」——镇于镜后则魂不得归；<b>持于亲者之手，则可引魂归窍</b>。慎之。</p>
+    </div>
+
+    <div class="page" id="p4">
+      <h2>◆ 客户名录（本季）</h2>
+      <table class="tb">
+        <tr><th>客户</th><th>配对供体</th><th>本命之物</th><th>状态</th></tr>
+        <tr><td>第四十三号</td><td>某（男 尝味者）</td><td>—（改库存）</td><td>候用 C4</td></tr>
+        <tr><td>第四十四号</td><td>陈氏（女）</td><td>银锁片</td><td><b>已归井</b></td></tr>
+        <tr><td style="background:#fff8d8">第四十五号</td><td style="background:#fff8d8"><b>林氏（女 生辰▓▓ 待核）</b></td><td style="background:#fff8d8"><b>红头绳 · 已镇于 B2 更衣室▓▓▓▓（此处虫蛀）</b></td><td style="background:#fff8d8"><span class="blink" style="color:#a02020">回魂夜 交割</span></td></tr>
+        <tr><td>贵客 沈公</td><td colspan="2">候于四十四层 静室</td><td>百年常客</td></tr>
+      </table>
+      <p style="font-size:12px;color:#9a8f6c">名录仅存本季。往季名录，四十四页，不外示。<br>
+      ※ 四十五号生辰与藏物处虫蛀不可辨。核验生辰者，往<b>[问事]</b>报来。<br>
+      ※ 生辰不明者，自查其<b>登记证件</b>——住店的人，柜上都留了号。</p>
+    </div>
+
+    <div class="page" id="p6">
+      <h2>◆ 问事</h2>
+      <p>报上<b>生辰</b>与所问之事，堂内自会批复。诚则灵。</p>
+      <input id="askin" style="width:320px;font-family:inherit;font-size:14px;border:2px inset #999;padding:5px 8px;background:#fff" autocomplete="off">
+      <button onclick="ask()" style="font-family:inherit;font-size:14px;padding:5px 16px;background:#d5c99a;border:2px outset #c9bd96;cursor:pointer">问</button>
+      <div id="askout">（批复显示于此。）</div>
+
+      <h2 style="margin-top:28px">◆ 附：六十甲子·西历对照（节选）</h2>
+      <p style="font-size:12px;color:#9a8f6c">井不认西历。生辰须以干支报，不知干支者对照此表。<br>※ 甲子六十年一周天，周而复始。表外之年，加减六十可得。</p>
+      <table class="tb">
+        <tr><th>西历</th><th>干支</th><th>生肖</th><th>西历</th><th>干支</th><th>生肖</th></tr>
+        <tr><td>1995</td><td>乙亥</td><td>猪</td><td>2003</td><td>癸未</td><td>羊</td></tr>
+        <tr><td>1996</td><td>丙子</td><td>鼠</td><td>2004</td><td>甲申</td><td>猴</td></tr>
+        <tr><td>1997</td><td>丁丑</td><td>牛</td><td>2005</td><td>乙酉</td><td>鸡</td></tr>
+        <tr><td>1998</td><td>戊寅</td><td>虎</td><td>2006</td><td>丙戌</td><td>狗</td></tr>
+        <tr><td>1999</td><td>己卯</td><td>兔</td><td>2007</td><td>丁亥</td><td>猪</td></tr>
+        <tr><td>2000</td><td>庚辰</td><td>龙</td><td>2008</td><td>戊子</td><td>鼠</td></tr>
+        <tr><td>2001</td><td>辛巳</td><td>蛇</td><td>2009</td><td>己丑</td><td>牛</td></tr>
+        <tr><td>2002</td><td>壬午</td><td>马</td><td>2010</td><td>庚寅</td><td>虎</td></tr>
+      </table>
+
+      <h2 style="margin-top:28px">◆ 附：十二时辰</h2>
+      <p style="font-size:12px;color:#9a8f6c">堂内一切时刻皆以时辰记。一时辰八刻，<b>一刻一十五分</b>。</p>
+      <table class="tb">
+        <tr><th>时辰</th><th>钟点</th><th>时辰</th><th>钟点</th><th>时辰</th><th>钟点</th></tr>
+        <tr><td>子</td><td>23–01</td><td>辰</td><td>07–09</td><td>申</td><td>15–17</td></tr>
+        <tr><td>丑</td><td>01–03</td><td>巳</td><td>09–11</td><td>酉</td><td>17–19</td></tr>
+        <tr><td>寅</td><td>03–05</td><td>午</td><td>11–13</td><td>戌</td><td>19–21</td></tr>
+        <tr><td>卯</td><td>05–07</td><td>未</td><td>13–15</td><td><b>亥</b></td><td><b>21–23</b></td></tr>
+      </table>
+    </div>
+
+    <div class="page" id="p5">
+      <h2>◆ 留言板</h2>
+      <div class="msg"><div class="m-head">1999-08-25 · 访客 0009</div>贵堂可发外埠？家父急用。</div>
+      <div class="msg"><div class="m-head">1999-08-26 · 堂内回复</div>不发外埠。井水离井三里即腐。</div>
+      <div class="msg"><div class="m-head">2001-03-19 · <b style="color:#7a1f1f">北海阿婆</b></div>井里的数目，一笔一笔都是你叫我记进名录的。你夜里睡得着么？</div>
+      <div class="msg"><div class="m-head">2001-03-20 · 堂内回复</div><b>叛堂之人</b>，少来搅局。名录上添谁、减谁，由不得你了。</div>
+      <div class="msg"><div class="m-head">2004-08-07 · <b style="color:#7a1f1f">北海阿婆</b></div><b>那孩子的八字</b>，你死了这条心。我既<b>改得了纸上的</b>，就护得住身上的。</div>
+      <div class="msg"><div class="m-head">2004-08-09 · 堂内回复</div>绳护得了一时。人，总归要回北海的。井等得起。</div>
+      <div class="msg"><div class="m-head">2008-07-15 · 访客 0021</div>昨夜路过北海边，听见井里有人数数，数到四十四就停。</div>
+      <div class="msg"><div class="m-head">2008-07-16 · 堂内回复</div>数到四十五就轮到你了。勿夜行。</div>
+      <div class="msg"><div class="m-head">2019-04-05 · 访客 0031</div>请问红头绳真能引魂吗？我想我妈妈了。</div>
+      <div class="msg"><div class="m-head">2019-04-07 · 堂内回复</div>能。但引魂要在「门」开时——镜前，井开之前。</div>
+      <div class="msg"><div class="m-head">2019-06-30 · <b style="color:#7a1f1f">北海阿婆</b></div><b>我孙女的绳，我自己续。</b></div>
+      <div class="msg"><div class="m-head">2019-07-02 · 堂内回复</div>阿婆走好。<b>名录留了页。</b></div>
+      <div class="msg"><div class="m-head">2023-11-02 · 访客 0038</div>师傅还接活吗？留言半年没人回。</div>
+      <div class="msg"><div class="m-head">2024-01-15 · 堂内回复</div>堂主忙一桩大买卖，在井上盖楼。小事勿扰。</div>
+      <div class="msg"><div class="m-head">2025-10-03 · 访客 0044</div>月亮沉下去的地方好冷。救我。救我。救我。</div>
+      <div class="msg"><div class="m-head">2025-10-04 · 堂内回复</div>已归井。勿再留言。</div>
+      <div class="msg" style="color:#9a8f6c" id="typingmsg"><div class="m-head">刚刚 · 访客 0045</div><span class="blink">（正在输入……）</span></div>
+    </div>
+
+    <div id="footer">
+      沈氏堂 © 1998－2025 · 最佳分辨率 800×600 · 建议使用 Netscape 4.0 · 本站从未改版<br>
+      您是第 <span class="counter">0000045</span> 位访客 · <span style="color:#a02020">中元将至 早备早安</span>
+    </div>
+  </div>
+</div>
+
+<!-- 044：她还在水里。 -->
+<script>
+function tryPw(){
+  var v = document.getElementById('pw').value.trim();
+  if(v === '1900'){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('site').style.display = 'block';
+  } else {
+    var e = document.getElementById('gateerr');
+    e.innerHTML = '口令不对。';
+    document.getElementById('pw').value = '';
+  }
+}
+document.getElementById('pw').addEventListener('keydown', function(ev){
+  if(ev.key === 'Enter') tryPw();
+});
+/* ◆ 问事：真八字（癸未）出隐藏批复并触发全站变质；假八字（辛巳）被识破 */
+function ask(){
+  var v = document.getElementById('askin').value;
+  var out = document.getElementById('askout');
+  if(v.indexOf('癸未') > -1 && v.indexOf('三月') > -1){
+    out.innerHTML = '<b>批复：</b>癸未年三月……好八字。井念了她二十年。<br>' +
+      '她的绳，镇于 B2 更衣室 <b>第肆面镜</b>之后。<br>' +
+      '<span style="color:#a02020">问到这一步，就回不了头了。</span>';
+    corruptSite();
+  } else if(v.indexOf('癸未') > -1){
+    out.innerHTML = '<b>批复：</b>癸未……年份不差。<br><b>月呢？</b>井要听全。生辰报一半，批复也只有一半。';
+  } else if(v.indexOf('辛巳') > -1){
+    out.innerHTML = '<b>批复：</b>辛巳年七月？<br>户籍上的东西，骗得了活人，骗不了井。<br>报<b>真的</b>来。';
+  } else if(/\d/.test(v)){
+    out.innerHTML = '<b>批复：</b>井不认西历。<br>生辰以<b>干支</b>报来。不知干支者，对照下方甲子表。';
+  } else if(v.replace(/\s/g,'') === ''){
+    out.innerHTML = '生辰未报，不批。<br><span style="font-size:12px;color:#9a8f6c">（不知她的生辰？住店的人，登记证件上都写着。）</span>';
+  } else {
+    var r = ['所问之事，天机不可泄。改日再来。',
+             '签曰：云深不知处。生辰报全（干支），再问。',
+             '此事勿问我。问井。'];
+    out.innerHTML = r[Math.floor(Math.random()*r.length)];
+  }
+}
+function corruptSite(){
+  if(window.__corrupted) return;
+  window.__corrupted = true;
+  var mq = document.querySelector('marquee');
+  if(mq) mq.innerHTML = '你不该问的 ★ 你不该问的 ★ 你不该问的 ★ 名录该添新页了 ★';
+  var c = document.querySelector('.counter');
+  if(c){ c.textContent = '0000046'; c.classList.add('blink'); }
+  var t = document.getElementById('typingmsg');
+  if(t) t.innerHTML = '<div class="m-head">刚刚 · 访客 0045</div><span style="color:#a02020">他已经知道你在看了。快。</span>';
+}
+document.getElementById('askin') && document.getElementById('askin').addEventListener('keydown', function(ev){
+  if(ev.key === 'Enter') ask();
+});
+function go(id, a){
+  var ps = document.querySelectorAll('.page');
+  for(var i=0;i<ps.length;i++) ps[i].className = 'page';
+  document.getElementById(id).className = 'page show';
+  var as = document.querySelectorAll('#nav a');
+  for(var j=0;j<as.length;j++) as[j].className = '';
+  a.className = 'cur';
+}
+</script>
+</body>
+</html>
