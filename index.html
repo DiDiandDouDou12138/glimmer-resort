@@ -1620,8 +1620,8 @@ function afterVisit043(){
   showStory([
     {cls:'narr', text:'你把 044 铜牌塞进贴身的口袋，掩上冷库的门。<br>走廊尽头的挂钟：<b>20:51</b>。'},
     {cls:'narr', text:'堂规第十一条在你脑子里过了一遍：<br>「回魂夜<b>亥时三刻</b>起，诸镜皆门。」<br><br>——亥时三刻，换成钟点，到底是<b>几点几分</b>？'},
-    {cls:'sys', who:'GLIMMER OS', text:'// 通行权限：最高。<br>// 下一步：算出"门"开的钟点，回 0413 的镜子前，<b>把时刻报给系统</b>。'},
-  ], () => {});
+    {cls:'sys', who:'GLIMMER OS', text:'// 通行权限：最高。'},
+  ], () => { addClue('走廊挂钟：20:51'); });
 }
 
 function renderMirrorEntry(){
@@ -2001,8 +2001,8 @@ function onSearch(){
     if(S.stage >= 15 && S.stage < 16){
       card(`<span class="tag">⚠ 0413 · 浴室</span>
         <p>你站到镜子前，掌心贴上去——<b>纹丝不动</b>。还不到"门"开的时候。</p>
-        <p class="mono">堂规：亥时三刻，诸镜皆门。<br>——亥时三刻，到底是<b>几点几分</b>？<br>算准了，在这里报给我。</p>`, true);
-      addClue('镜门未开——要算出「亥时三刻」的准确钟点，报给系统');
+        <p class="mono">（几点几分？报来。）</p>`, true);
+      addClue('堂规十一：亥时三刻，诸镜皆门');
     } else if(S.stage >= 16){
       butler('你已经在镜子这一边了。');
     } else {
@@ -2039,7 +2039,7 @@ function onSearch(){
   /* wrong hour guesses while the door is shut */
   if(S.stage === 15 && /^\d{3,4}$/.test(q)){
     card(`<span class="tag">⚠ 0413 · 浴室</span>
-      <p class="mono">镜面没有动。<br>不是这个时刻。——一个时辰两个钟头，<b>一刻是多少分</b>？旧门户的对照表里写着。</p>`, true);
+      <p class="mono">镜面没有动。不是这个时刻。<br>——<b>刻</b>，你算错了。</p>`, true);
     return;
   }
   if(matchAny(q,['镜子','健身房','健身','gym','b2','照镜子','镜墙'])){
@@ -2187,8 +2187,7 @@ function onSearch(){
           <tr><td>房卡（住客）</td><td>0413 · 大堂</td><td>已降级</td></tr>
           <tr><td>员工卡</td><td>—</td><td>今日全员停用</td></tr>
           <tr><td><b>堂内铜牌</b></td><td><b>全楼 · 最高</b></td><td><b>不受维护影响</b></td></tr>
-        </table>
-        <p class="sub">回魂夜连员工都要清场。整栋楼里畅通无阻的，只剩"堂内"的东西。</p>`, true);
+        </table>`, true);
       addClue('堂内铜牌＝最高权限，不受维护影响');
     } else { butler('您的房卡权限正常。祝您入住愉快。'); }
     return;
@@ -2211,9 +2210,8 @@ function onSearch(){
   if(matchAny(q,['亥时','亥时三刻','诸镜皆门'])){
     if(S.stage >= 14){
       card(`<span class="tag">⚠ 堂规 · 第十一条</span>
-        <p class="mono">回魂夜<b>亥时三刻</b>起，诸镜皆门。<br>寅时二刻又三分，井开。</p>
-        <p class="sub">亥时三刻……换成钟点是几点？这套老历法，旧门户里什么都有对照。</p>`, true);
-      addClue('亥时三刻是几点？——旧门户里有对照');
+        <p class="mono">回魂夜<b>亥时三刻</b>起，诸镜皆门。<br>寅时二刻又三分，井开。</p>`, true);
+      addClue('堂规十一：亥时三刻，诸镜皆门');
     } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
     return;
   }
@@ -2344,7 +2342,7 @@ function startCh4(){
     S.stage = 14;
     S.fails = 0;
     hint('');
-    addClue('计划：亥时三刻穿镜，井开（03:33）前上 44 层——亥时三刻是几点？');
+    addClue('计划：亥时三刻穿镜，井开（03:33）前上 44 层');
     addClue('房卡被降级：只能进 0413 和大堂');
     query.focus();
   });
