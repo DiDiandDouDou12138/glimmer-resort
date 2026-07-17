@@ -348,6 +348,20 @@
   body.mw #cluebtn{background:#1a2029;color:#8fa8c8}
   body.mw #cluepanel{background:#141821;border-color:#39404d;color:#ccd6e4}
 
+  /* ---------- ch5: countdown & rooftop ritual ---------- */
+  #clock.kt{color:#ff5470;animation:pulse 1.2s infinite;font-weight:600}
+  .dimmerwrap{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:var(--sub)}
+  .dimmerwrap input[type=range]{flex:1;accent-color:var(--accent)}
+  .ritebtns{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .ritebtn{
+    flex:1;min-width:110px;padding:14px 8px;background:transparent;cursor:pointer;
+    border:1px solid var(--accent);color:var(--accent);border-radius:10px;
+    font-family:"SF Mono",Consolas,monospace;font-size:14px;letter-spacing:.25em;
+    transition:all .25s;
+  }
+  .ritebtn:hover{background:var(--accent);color:#fff}
+  .ritelog{margin-top:12px;font-size:13px;line-height:1.9;min-height:26px}
+
   /* ---------- developer mode ---------- */
   #devgate{
     position:absolute;inset:0;z-index:95;display:none;align-items:center;justify-content:center;
@@ -519,7 +533,7 @@
   </div>
   <div id="devbar">
     <span>DEV</span>
-    <input type="range" id="devrange" min="0" max="20" step="1" value="0">
+    <input type="range" id="devrange" min="0" max="24" step="1" value="0">
     <span id="devlabel">第一章 · 开局</span>
     <button id="devclose" title="退出开发者模式">×</button>
   </div>
@@ -540,10 +554,21 @@ const S = {
   seenAlbum: false,  // grandma photo viewed
   seenGranny: false, // grandma's expelled-member archive viewed
   mw: false,         // inside the mirror world (ch4)
+  ktOn: false,       // ch5 hard countdown running
+  kt: 210,           // minutes left until 03:33 (one search = one 刻 = 15 min)
+  seenPool: false,   // ch5: rooftop scene viewed
+  seenMoon: false,   // ch5: water-is-mirror card viewed
+  seenEyes: false,   // ch5: brightness slider pulled to max
+  named43: false,    // ch5: 周明远's name given to the well
+  morse: false,      // ch5: well-bottom knocking egg used (+一刻)
+  riteStep: 0,       // ch5: ritual progress (rope→moon→name)
+  ch5done: false,    // ch5: soul guided back
   hintKey: '',       // two-level hint tracking
   hintLv: 0,
   clues: [],
 };
+/* fresh boot = fresh timeline: clear cross-window ending marks */
+try{ localStorage.removeItem('glimmer_end'); localStorage.removeItem('sst_pai'); }catch(e){}
 const $ = id => document.getElementById(id);
 const results = $('results'), query = $('query'), hintline = $('hintline');
 
@@ -677,14 +702,26 @@ function sfxKey(){
 $('mutebtn').onclick = () => { S.muted = !S.muted; $('mutebtn').textContent = S.muted?'🔇':'🔊'; };
 
 /* =====================  CLOCK  ===================== */
-(function tick(){
+const TITLE0 = document.title;
+function updateClock(){
   const el = $('clock');
+  if(S.ktOn){
+    /* ch5 hard countdown: one search = one 刻 (15 min), 03:33 the well opens */
+    const h = Math.floor(S.kt/60), m = String(S.kt%60).padStart(2,'0');
+    el.textContent = '距井开 ' + h + ':' + m;
+    el.classList.add('kt');
+    document.title = '【距井开 ' + h + ':' + m + '】微光管家';
+    return;
+  }
+  el.classList.remove('kt');
+  if(S.stage >= 19){ el.textContent = '03:33'; document.title = TITLE0; return; }
   // fictional in-game evening clock, creeps toward 03:33 as stages advance
   const base = [ '21:47','22:31','23:58','01:12','02:59','08:12','10:26','13:40','16:55','18:03','09:12','13:26','20:41','23:57','19:05','21:40','21:45','22:47','23:59' ][Math.min(S.stage,18)];
-  /* in the mirror world, time runs backwards */
+  /* in the mirror world, time runs backwards — the title too */
   el.textContent = S.mw ? base.split('').reverse().join('') : base;
-  setTimeout(tick, 4000);
-})();
+  document.title = S.mw ? TITLE0.split('').reverse().join('') : TITLE0;
+}
+(function tick(){ updateClock(); setTimeout(tick, 4000); })();
 
 /* =====================  CLUES  ===================== */
 function addClue(text){
@@ -775,7 +812,15 @@ function getHint(level){
   if(st === 15) return level===1 ? '亥时三刻，诸镜皆门——可"亥时三刻"是几点几分？旧门户的对照表不止甲子那一张。' : '十二时辰表：亥时＝21:00–23:00，一刻＝十五分 → 亥时三刻＝21:45。回来搜「21:45」。';
   if(st === 16) return level===1 ? '镜中的电梯，面板上只有一个键。' : '搜索「44」（或「电梯」）。';
   if(st === 17) return level===1 ? '牌位的生辰栏空着——井开时按它判"旧躯"。写谁，谁就是旧躯。写一个井等了很久的人。（甲子六十年一周天。）' : '沈聿生于光绪三年＝1877。1877＋120＝1997，查旧门户甲子表：1997＝丁丑 → 搜索「丁丑」。';
-  return '（第四章线索已全部解开）';
+  if(st === 18) return '（第四章线索已全部解开）';
+  if(st === 19) return level===1 ? '她已经在顶楼了。先看清楚现场——那池水今晚不对劲。' : '搜索「泳池」（或「顶楼」）。';
+  if(st === 20) return level===1 ? '引魂要在「镜前」，可顶楼没有镜子。——月亮沉在哪里，她就在哪里。' : '搜索「月亮」。水面即镜。';
+  if(st === 21){
+    if(!S.seenEyes) return level===1 ? '水面那张照片太暗了。把它调亮——一直亮到水底。' : '拖动照片下方的亮度滑块，拉到最右。';
+    return level===1 ? '绳在手里，镜在水面。差一份仪轨——堂里对持牌的人，不设防。' : '打开旧门户：导航多了一页「堂内」（没有的话，去「问事」报牌号 044）。读完仪轨，回来搜「引魂」。';
+  }
+  if(st === 22) return level===1 ? '仪轨三步，顺序在「堂内」那一页写着。错一步，费一刻。' : '按顺序点：红绳 → 月影 → 她的名字。';
+  return '（终章已完）';
 }
 
 /* =====================  SVG ART  ===================== */
@@ -1291,6 +1336,114 @@ const svgHall44 = `
 </svg>`;
 
 /* =====================  RESULT RENDERERS  ===================== */
+/* ---------- chapter 5 art ---------- */
+const svgRoofPool = `
+<svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="顶楼无边泳池">
+  <defs>
+    <linearGradient id="rsky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#04070f"/><stop offset=".7" stop-color="#0a1424"/><stop offset="1" stop-color="#122036"/>
+    </linearGradient>
+    <linearGradient id="rwater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1a2c"/><stop offset="1" stop-color="#050c16"/>
+    </linearGradient>
+    <radialGradient id="rmoonglow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#f4f1de" stop-opacity=".5"/><stop offset="1" stop-color="#f4f1de" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="340" fill="url(#rsky)"/>
+  <g fill="#fff" opacity=".4">
+    <circle cx="60" cy="50" r="1.2"/><circle cx="150" cy="26" r="1"/><circle cx="250" cy="64" r="1.1"/>
+    <circle cx="560" cy="36" r="1.3"/><circle cx="610" cy="90" r="1"/><circle cx="360" cy="30" r="1"/>
+  </g>
+  <circle cx="470" cy="72" r="46" fill="url(#rmoonglow)"/>
+  <circle cx="470" cy="72" r="26" fill="#f4f1de"/>
+  <!-- infinity pool, dead still -->
+  <rect x="0" y="200" width="640" height="90" fill="url(#rwater)"/>
+  <rect x="0" y="200" width="640" height="3" fill="#bdd8ea" opacity=".38"/>
+  <!-- moon sunk in the water, sharper than the sky one -->
+  <circle cx="470" cy="252" r="24" fill="#e8e4cf" opacity=".9"/>
+  <!-- pool deck -->
+  <rect x="0" y="290" width="640" height="50" fill="#0d1118"/>
+  <rect x="0" y="290" width="640" height="2" fill="#1e2836"/>
+  <!-- Xiaoya, barefoot at the east edge, facing the moon -->
+  <g>
+    <path d="M132 196 q-3 -22 8 -30 q14 -8 20 6 q4 12 -2 26 l-2 92 h-6 l-3 -58 l-5 58 h-6 Z" fill="#05070b"/>
+    <path d="M138 168 q-10 26 -16 60" stroke="#05070b" stroke-width="5" fill="none"/>
+    <circle cx="146" cy="160" r="11" fill="#05070b"/>
+    <path d="M137 154 q-8 30 -4 52" stroke="#03050a" stroke-width="7" fill="none"/>
+  </g>
+  <!-- her reflection: standing perfectly straight even where she leans -->
+  <g opacity=".5">
+    <path d="M132 306 q-3 22 8 30 q14 8 20 -6 q4 -12 -2 -26" fill="#0a1220" transform="translate(0,-100)"/>
+    <circle cx="146" cy="216" r="11" fill="#0a1220"/>
+    <path d="M140 227 l0 60" stroke="#0a1220" stroke-width="14"/>
+  </g>
+  <text x="320" y="326" text-anchor="middle" fill="#2a3546" font-size="10" font-family="monospace" letter-spacing="4">ROOFTOP · MAINTENANCE 00:00–04:00</text>
+</svg>`;
+
+const svgMoonWater = `
+<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="水面月影">
+  <defs>
+    <radialGradient id="mwglow" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#f4f1de" stop-opacity=".85"/><stop offset=".7" stop-color="#e8e4cf" stop-opacity=".5"/><stop offset="1" stop-color="#e8e4cf" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="300" fill="#050b13"/>
+  <!-- hidden layer: what lives under the water (revealed by brightness) -->
+  <g class="uwhid" opacity="0">
+    ${(() => {
+      let out='';
+      /* 44 pairs of eyes, packed in the dark */
+      for(let i=0;i<44;i++){
+        const x = 40 + ((i*137)%560), y = 60 + ((i*89)%210);
+        if(Math.abs(x-330)<70 && Math.abs(y-150)<60) continue; /* keep the moon spot clear */
+        out += `<g fill="#cfd8c8" opacity=".8">
+          <ellipse cx="${x}" cy="${y}" rx="4.5" ry="2.6"/><ellipse cx="${x+13}" cy="${y}" rx="4.5" ry="2.6"/>
+          <circle cx="${x}" cy="${y}" r="1.2" fill="#090c08"/><circle cx="${x+13}" cy="${y}" r="1.2" fill="#090c08"/></g>`;
+      }
+      return out;
+    })()}
+    <!-- a pale hand under the moon shadow, holding it in place -->
+    <g stroke="#dfe3d2" stroke-width="4" fill="none" opacity=".9">
+      <path d="M310 210 q6 -22 12 -34"/><path d="M324 214 q3 -24 7 -38"/>
+      <path d="M338 214 q1 -24 2 -40"/><path d="M352 210 q-2 -22 -6 -36"/>
+      <path d="M300 224 q20 14 62 2"/>
+    </g>
+  </g>
+  <!-- the moon, sunk dead-centre -->
+  <circle cx="330" cy="150" r="40" fill="url(#mwglow)"/>
+  <circle cx="330" cy="150" r="25" fill="#efeada"/>
+  <!-- faint surface ripples -->
+  <g stroke="#16273c" fill="none" opacity=".8">
+    <path d="M60 90 q40 -6 80 0"/><path d="M480 110 q40 -6 80 0"/>
+    <path d="M100 240 q40 -6 80 0"/><path d="M440 250 q40 -6 80 0"/>
+  </g>
+</svg>`;
+
+const svgRite = `
+<svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="池沿引魂">
+  <rect width="640" height="260" fill="#04080f"/>
+  <!-- water & moon shadow -->
+  <rect x="0" y="90" width="640" height="130" fill="#081426"/>
+  <rect x="0" y="90" width="640" height="2" fill="#9dbdd4" opacity=".3"/>
+  <circle cx="400" cy="152" r="30" fill="#e8e4cf" opacity=".92"/>
+  <!-- pool deck -->
+  <rect x="0" y="220" width="640" height="40" fill="#0c1017"/>
+  <!-- your hand, the red string wound three times -->
+  <g>
+    <path d="M96 232 q22 -28 52 -30 q16 -1 18 12 q1 10 -14 12 q-26 4 -40 20 Z" fill="#182027"/>
+    <path d="M118 216 q18 -8 34 -4 M116 224 q18 -8 36 -4 M118 232 q16 -6 32 -4" stroke="#b3202e" stroke-width="3.5" fill="none"/>
+    <path d="M148 210 q10 6 2 18" stroke="#b3202e" stroke-width="2.5" fill="none"/>
+  </g>
+  <!-- her, beside you, eyes on nothing -->
+  <g>
+    <path d="M560 130 q-2 -16 8 -22 q12 -6 16 6 q3 10 -2 20 l-2 96 h-5 l-3 -54 l-4 54 h-5 Z" fill="#060a10"/>
+    <circle cx="572" cy="102" r="9" fill="#060a10"/>
+    <path d="M565 96 q-6 24 -3 44" stroke="#04070c" stroke-width="6" fill="none"/>
+  </g>
+  <text x="320" y="34" text-anchor="middle" fill="#22314a" font-size="10" font-family="monospace" letter-spacing="6">03:33 INCOMING</text>
+</svg>`;
+
 function card(html, corrupt=false){
   const el = document.createElement('div');
   el.className = 'card' + (corrupt?' corrupt':'');
@@ -1612,6 +1765,8 @@ function renderVisit043(){
     addClue('拿到 044 铜牌（员工区通行）');
     addClue('他叫周明远——他要你把名字带出去');
   }
+  /* the tag in your pocket — the old portal can feel it */
+  try{ localStorage.setItem('sst_pai','044'); }catch(e){}
   return el;
 }
 
@@ -1659,6 +1814,196 @@ function renderHall44(){
     addClue('静室主座的椅背上刻着一个「沈」字');
   }
   return el;
+}
+
+/* ---------- chapter 5 renderers ---------- */
+function renderRoofPool(){
+  const el = card(`
+    <span class="tag">ROOFTOP // 井口之上</span>
+    <h3>无边泳池。水面平得像一块刚擦过的玻璃。</h3>
+    <div class="imgwrap">${svgRoofPool}</div>
+    <div class="caption">▲ 她赤脚站在东沿，面朝月亮。倒影里的她站得笔直——<b>和她本人的姿势不一样</b>。</div>
+    <p>你把整个天台走了一圈：躺椅、栏杆、泵房的铁门——<b>没有一面镜子</b>。</p>
+    <p class="sub">很深很深的地方，有谁在一下、一下地敲着井壁。</p>
+  `);
+  if(S.stage < 20){
+    S.stage = 20;
+    S.seenPool = true;
+    addClue('顶楼没有一面镜子——可引魂要在「镜前」');
+    addClue('水面平得反常；池底深处有敲击声');
+  }
+  return el;
+}
+
+function renderMoonWater(){
+  const el = card(`
+    <span class="tag">LOCAL PHOTO // 顶楼水面 · 刚刚拍下</span>
+    <h3>月亮沉在水中央。纹丝不动。</h3>
+    <div class="imgwrap">${svgMoonWater}</div>
+    <div class="caption mwcap">▲ 水面照出月亮、照出她、照出你——<b>水面即镜</b>。照片太暗，水底看不清。</div>
+    <div class="dimmerwrap">亮度 <input type="range" class="dimmer" min="0" max="100" value="12"></div>
+  `);
+  const hid = el.querySelector('.uwhid'), slider = el.querySelector('.dimmer'),
+        cap = el.querySelector('.mwcap'), img = el.querySelector('.imgwrap svg');
+  slider.addEventListener('input', () => {
+    const v = +slider.value;
+    img.style.filter = 'brightness(' + (0.75 + v/80) + ')';
+    hid.style.opacity = v < 55 ? 0 : ((v-55)/45).toFixed(2);
+    if(v >= 96 && !S.seenEyes){
+      S.seenEyes = true;
+      cap.innerHTML = '▲ 拉到最亮：水底密密麻麻，全是<b>睁着的眼睛</b>。月影正下方有一只手托着——像在替你把月亮按在原地。';
+      addClue('水底 44 双眼睛都睁着；月影被一只手按在水中央');
+    }
+  });
+  if(S.stage < 21){
+    S.stage = 21;
+    S.seenMoon = true;
+    addClue('水面即镜——月影沉在水中央');
+  }
+  return el;
+}
+
+function renderRite(){
+  const el = card(`
+    <span class="tag">ROOFTOP // 池沿 · 引魂</span>
+    <h3>你攥着红绳走到池沿。她跟着你，眼睛空着。</h3>
+    <div class="imgwrap">${svgRite}</div>
+    <div class="caption">▲ 镜在水面，月影在水中央，绳在你手里。</div>
+    <p class="mono">仪轨三步。错一步，费一刻。</p>
+    <div class="ritebtns">
+      <button class="ritebtn" data-rite="moon">月 影</button>
+      <button class="ritebtn" data-rite="name">她的名字</button>
+      <button class="ritebtn" data-rite="rope">红 绳</button>
+    </div>
+    <div class="ritelog mono"></div>
+  `);
+  const log = el.querySelector('.ritelog');
+  const STEPS = ['rope','moon','name'];
+  const LINES = [
+    '你把红绳在掌心绕了三圈，攥紧。',
+    '月影在水中央定住了——水底那只手，替你按着它。',
+    '你对着水面，喊出她的名字。'
+  ];
+  el.querySelectorAll('.ritebtn').forEach(btn => {
+    btn.onclick = () => {
+      if(S.locked || S.ch5done) return;
+      if(btn.dataset.rite === STEPS[S.riteStep]){
+        log.innerHTML += LINES[S.riteStep] + '<br>';
+        S.riteStep++;
+        if(S.riteStep >= 3){ S.ch5done = true; endingA(); }
+      } else {
+        S.riteStep = 0;
+        if(!costKe()) return;
+        log.innerHTML += '<span style="opacity:.6">……乱了。水底的眼睛一齐闭上，又一齐睁开。从头来。（费一刻）</span><br>';
+      }
+    };
+  });
+  if(S.stage < 22) S.stage = 22;
+  return el;
+}
+
+/* ---------- chapter 5 countdown & endings ---------- */
+function costKe(){
+  if(!S.ktOn) return true;
+  S.kt -= 15;
+  updateClock();
+  if(S.kt <= 0){ badEnd(); return false; }
+  return true;
+}
+
+function endingA(){
+  S.ktOn = false; S.kt = 0; S.stage = 23;
+  updateClock();
+  try{ localStorage.setItem('glimmer_end','A'); }catch(e){}
+  sfxShimmer();
+  const beats = [
+    {cls:'narr', text:'名字出口的一瞬间——水面所有的纹路，同时停了。'},
+    {cls:'narr', text:'红绳从你掌心自己松开，缠上她的手腕，<br>打了一个很旧、很熟练的结。'},
+    {cls:'narr', text:'她眨了眨眼。<br>这一次，水里的倒影和她，是<b>同时</b>眨的。'},
+    {cls:'narr', text:'<b>03:33。井开。</b><br>整栋楼向下沉了一寸。泳池中央凹出一个漩涡——<br>牌位上的生辰已经写好了，井照单收人。'},
+    {cls:'narr', text:'漩涡合拢前，你听见电梯「叮」了一声。<br>这一次，是<b>下行</b>。'},
+    {cls:'xiaoya', who:'小雅', text:'“……好冷。”<br>她攥着腕上的红绳缩进你怀里，声音是活人的温度：<br>“我梦见外婆了。她说，<b>到家了</b>。”'},
+    {cls:'sys', who:'GLIMMER OS', text:'档案 045 · 结案：<b>归窍</b><br>名录 · 本季闭页<br><br><span style="opacity:.5">// 天快亮了。</span>'},
+    {cls:'narr', text:'天亮。大堂空无一人，正门敞着。<br>走出去之前，你回头看了一眼——搜索框在黑屏上，闪了最后一次。'},
+  ];
+  if(S.named43){
+    beats.push({cls:'narr', text:'楼后的海边，枯井旧址被人连夜填平了。<br>土上立着一块新石，凿痕还新：<b>周明远</b>。'});
+  }
+  beats.push({cls:'narr', text:'那个 1998 年的旧网页还开着。<br>你刷新了一下——<b>留言板多了一行</b>。'});
+  showStory(beats, () => showEnd5('A'));
+}
+
+function badEnd(){
+  S.ktOn = false; S.kt = 0;
+  updateClock();
+  try{ localStorage.setItem('glimmer_end','B'); }catch(e){}
+  sfxPlunge();
+  showStory([
+    {cls:'narr', text:'<b>03:33。</b><br>你还没有做完。水面正中，无风自裂。'},
+    {cls:'narr', text:'月影碎成四十四片。<br>每一片里，都睁着眼睛。'},
+    {cls:'xiaoya', who:'小雅', text:'她转过身来，笑容标准得像前台。<br>“先生，久等了。”她说，<br>“手续，<b>办完了</b>。”'},
+    {cls:'sys', who:'GLIMMER OS', text:'名录 · 已添新页<br><b>第四十六号 · 供体 王某</b><br>访客计数：0000046'},
+  ], () => {
+    ghostType('欢迎成为微光的一部分。', () => showEnd5('B'));
+  });
+}
+
+function showEnd5(kind){
+  $('endtitle').textContent = kind === 'A' ? '终章 · 归窍' : '终章 · 添页';
+  $('endtag').textContent  = kind === 'A' ? 'ENDING A · 井已闭' : 'ENDING B · 0000046';
+  $('endquote').textContent = kind === 'A' ? '「绳不离身，魂不离窍。」' : '「欢迎成为微光的一部分。」';
+  $('endstats').textContent = `你共搜索了 ${S.searches} 次，唤醒了 ${S.clues.length} 条线索。`;
+  const btns = $('endbtns'); btns.innerHTML = '';
+  if(kind === 'B'){
+    const b = document.createElement('button');
+    b.textContent = '▸ 回到回魂夜';
+    b.onclick = backToCh4;
+    btns.appendChild(b);
+  }
+  const r = document.createElement('button');
+  r.textContent = '重新入住';
+  r.onclick = () => location.reload();
+  btns.appendChild(r);
+  $('endscreen').classList.remove('hidden');
+}
+
+/* bad-end retry: rewind to the start of chapter 4 (回魂夜) */
+function backToCh4(){
+  S.ktOn = false; S.kt = 210;
+  S.seenPool = S.seenMoon = S.seenEyes = S.named43 = S.morse = S.ch5done = false;
+  S.riteStep = 0;
+  S.mw = false;
+  document.body.classList.remove('mw');
+  try{ localStorage.removeItem('glimmer_end'); }catch(e){}
+  results.innerHTML = '';
+  updateClock();
+  startCh4();
+}
+
+function startCh5(){
+  $('endscreen').classList.add('hidden');
+  document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir');
+  showStory([
+    {cls:'narr', text:'<b>第五章 · 寅时井开三刻</b><br><br>帷幔后，你听见他在案前坐下。<br>他没有看牌位——一百多年里，没有人进得来这间屋子。<br>他阖上眼。等。'},
+    {cls:'narr', text:'你贴着墙根退出静室，摸黑走下四十四层楼梯，<br>从 B2 的镜墙里，一步跨了出来。'},
+    {cls:'narr', text:'现实的冷气砸在脸上。走廊挂钟：<b>00:03</b>。<br>顶楼的门，没有锁。'},
+    {cls:'sys', who:'GLIMMER OS', text:'回魂夜 · 距井开 <b>3:30</b><br><br>状态栏已切换为倒计时。<br>您的每一次检索，将消耗<b>一刻</b>。<br>微光与您一同倒数。'},
+  ], () => {
+    S.stage = 19;
+    S.fails = 0;
+    S.mw = false;
+    document.body.classList.remove('mw');
+    S.ktOn = true; S.kt = 210;
+    updateClock();
+    hint('');
+    addClue('倒计时：每搜索一次耗一刻（十五分钟），03:33 井开');
+    addClue('小雅在顶楼池沿——引魂要在井开之前');
+    try{
+      console.log('%c「绳不离身，魂不离窍。」','color:#c9a53f;font-size:16px;font-family:serif');
+      console.log('%c——好孩子，别怕黑。阿婆看着呢。','color:#9a8f6c;font-size:12px;font-family:serif');
+    }catch(e){}
+    query.focus();
+  });
 }
 
 /* =====================  HIJACK FX  ===================== */
@@ -1831,15 +2176,86 @@ function onSearch(){
     return;
   }
 
-  /* --- meta: two-level hint --- */
+  /* --- meta: two-level hint (free — no 刻 cost) --- */
   if(matchAny(q,['提示','hint','帮助我','怎么玩'])){
     const key = S.stage + '|' + (S.seenRoom?1:0) + (S.seenCard?1:0) + (S.seenGranny?1:0)
-      + (S.seenAlbum?1:0) + (S.sawPerm?1:0) + (S.sawPai?1:0);
+      + (S.seenAlbum?1:0) + (S.sawPerm?1:0) + (S.sawPai?1:0)
+      + (S.seenPool?1:0) + (S.seenMoon?1:0) + (S.seenEyes?1:0);
     if(S.hintKey === key){ S.hintLv = 2; } else { S.hintKey = key; S.hintLv = 1; }
     const lvl = S.hintLv;
     butler('（系统外·提示' + (lvl===1?'①':'②·答案') + '）' + getHint(lvl)
       + (lvl===1 ? '<br><span style="opacity:.5">再输一次「提示」直接看答案。</span>' : ''));
     return;
+  }
+
+  /* --- chapter 5: rooftop, hard countdown --- */
+  if(S.stage >= 19 && S.stage <= 22){
+    if(!costKe()) return; /* 03:33 — the well opens on whatever you were typing */
+    if(matchAny(q,['泳池','顶楼','天台','无边泳池','顶楼泳池','顶楼无边泳池','roof'])){
+      renderRoofPool(); return;
+    }
+    if(matchAny(q,['月亮','月影','水面','水','月亮的倒影','水面即镜','井','枯井','水底','池底'])){
+      if(S.stage >= 20){ renderMoonWater(); }
+      else { butler('你还站在天台门口。先到池边去。'); }
+      return;
+    }
+    if(matchAny(q,['红头绳','红绳','本命之物'])){
+      card(`<span class="tag">⚠ ITEM // 红头绳</span>
+        <p>绳在你手心里。货品页写着：<b>「持于亲者之手，则可引魂归窍。」</b></p>
+        <p class="mono">可怎么个引法——那一页仪轨，你从没见过。<br>你现在是<b>持牌</b>的人。</p>`, true);
+      addClue('引魂的仪轨在堂内——旧门户对持牌者不设防');
+      return;
+    }
+    if(matchAny(q,['引魂','仪轨','引魂归窍','交割仪轨','引魂之仪'])){
+      if(S.stage >= 21){ renderRite(); }
+      else {
+        card(`<span class="tag">⚠</span><p class="mono">往哪引？<br>引魂要在「镜前」——顶楼连一面镜子都没有。</p>`, true);
+      }
+      return;
+    }
+    if(matchAny(q,['周明远','043','传名','43号'])){
+      if(!S.named43){
+        S.named43 = true;
+        card(`<span class="tag">传名</span>
+          <p>你俯在池沿，一字一字，把这个名字报给了井：<b>周、明、远。</b></p>
+          <p class="mono">水底极深处，那个敲击声停了一拍——<br>然后，轻轻地，回了你一下。</p>`, true);
+        addClue('已把周明远的名字传给井');
+      } else { butler('名字已经传下去了。'); }
+      return;
+    }
+    if(matchAny(q,['敲击','敲击声','敲墙','井底的声音','敲','听','摩斯','摩斯密码','sos'])){
+      if(!S.morse){
+        S.morse = true;
+        sfxHeart();
+        S.kt = Math.min(S.kt + 30, 210);
+        updateClock();
+        card(`<span class="tag">⚠ 井底 · 敲击</span>
+          <p>你趴在池沿听。三短，三长，三短——不急，不乱。<br>你认得这个节奏，也认得敲的人。</p>
+          <p class="mono">他在替你数拍子。心稳了，手就快。<b>（多出一刻）</b></p>`, true);
+      } else { butler('敲击声还在。一下，一下。'); }
+      return;
+    }
+    if(matchAny(q,['小雅','林小雅','女朋友'])){
+      card(`<span class="tag">⚠ GUEST QUERY</span>
+        <p>她站在池沿，一动不动。你在她眼前挥了挥手——<b>瞳孔没有跟</b>。</p>
+        <p class="mono">窍是空的。魂在别处，等一个引路的人。</p>`, true);
+      return;
+    }
+    if(matchAny(q,['陈婷','044'])){
+      card(`<span class="tag">⚠ 水底</span>
+        <p class="mono">那只手没有抓过谁。<br>它只是托着月影，稳稳的，一直托到现在。</p>`, true);
+      return;
+    }
+    if(matchAny(q,['镜子','镜','照镜','镜面','进镜','穿镜'])){
+      butler('顶楼没有镜子。今晚的门，不在玻璃里。');
+      return;
+    }
+    if(matchAny(q,['沈聿','沈','沈公','老板','投资人'])){
+      card(`<span class="tag">44F</span>
+        <p class="mono">静室的烛，还亮着。<br>他坐在椅子里，阖着眼，等井开。<br>他没有看牌位。</p>`, true);
+      return;
+    }
+    /* anything else falls through — and the 刻 is already spent */
   }
 
   /* --- forbidden chain (gated by stage) --- */
@@ -2318,8 +2734,8 @@ function showEnd(ch){
     btns.appendChild(b);
   } else {
     const b = document.createElement('button');
-    b.textContent = '第五章 · 井开三刻（敬请期待）';
-    b.disabled = true;
+    b.textContent = '▸ 进入第五章 · 寅时井开三刻';
+    b.onclick = startCh5;
     btns.appendChild(b);
   }
   const r = document.createElement('button');
@@ -2379,7 +2795,13 @@ const DEVPTS = [
   {label:'四章 · 镜中世界',     stage:16, room:1, card:1, cctv:1, mwx:1, r:() => renderMirrorEntry()},
   {label:'四章 · 44层牌位',     stage:17, room:1, card:1, cctv:1, mwx:1, r:() => renderHall44()},
   {label:'四章 · 完（丁丑）',   stage:18, room:1, card:1, cctv:1, mwx:1,
-   r:() => devNote('<b>第四章完</b>：牌位生辰已写「丁丑」（＝光绪三年＝沈聿）。电梯响了，他上来了。<br>第五章待开发。')},
+   r:() => devNote('<b>第四章完</b>：牌位生辰已写「丁丑」（＝光绪三年＝沈聿）。电梯响了，他上来了。<br>→ 结算页进入第五章。')},
+  {label:'五章 · 开局(顶楼)',   stage:19, room:1, card:1, cctv:1, kt:210,
+   r:() => devNote('<b>第五章开局</b>：00:03 回到现实侧，小雅在顶楼池沿。倒计时 3:30，每搜一刻。<br>→ 下一步：搜「泳池」')},
+  {label:'五章 · 水面即镜',     stage:21, room:1, card:1, cctv:1, kt:180, pool:1, moon:1, r:() => renderMoonWater()},
+  {label:'五章 · 引魂仪',       stage:22, room:1, card:1, cctv:1, kt:150, pool:1, moon:1, eyes:1, r:() => renderRite()},
+  {label:'终 · 归窍(A)',        stage:23, room:1, card:1, cctv:1,
+   r:() => devNote('<b>终章 · 归窍（结局A）</b>：引魂三步完成，井按牌位收走沈聿，小雅归窍。<br>坏结局（B·添页）＝倒计时耗尽即触发。')},
 ];
 function devJump(i){
   const p = DEVPTS[i];
@@ -2398,6 +2820,14 @@ function devJump(i){
   S.seenAlbum = p.stage >= 13;
   S.mw = !!p.mwx;
   if(S.mw) document.body.classList.add('mw');
+  /* ch5 state */
+  S.seenPool = !!p.pool; S.seenMoon = !!p.moon; S.seenEyes = !!p.eyes;
+  S.named43 = false; S.morse = false; S.riteStep = 0;
+  S.ch5done = p.stage >= 23;
+  S.ktOn = p.stage >= 19 && p.stage < 23;
+  S.kt = p.kt || 210;
+  if(p.stage >= 15){ try{ localStorage.setItem('sst_pai','044'); }catch(e){} }
+  updateClock();
   S.fails = 0; S.hintKey = ''; S.hintLv = 0;
   hint('');
   $('devlabel').textContent = p.label;
@@ -2484,5 +2914,6 @@ function startCh2(){
   });
 }
 </script>
+<!-- 045：名录留的那一页，还空着。空着，就是活路。 -->
 </body>
 </html>

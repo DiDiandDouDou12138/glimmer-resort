@@ -105,6 +105,7 @@
       <a data-p="p4" onclick="go('p4',this)">[客户名录]</a>
       <a data-p="p6" onclick="go('p6',this)">[问事]</a>
       <a data-p="p5" onclick="go('p5',this)">[留言板]</a>
+      <a id="navtn" data-p="p7" onclick="go('p7',this)" style="display:none;color:#a02020">[堂内]</a>
     </div>
 
     <div class="page show" id="p1">
@@ -159,12 +160,12 @@
 
     <div class="page" id="p4">
       <h2>◆ 客户名录（本季）</h2>
-      <table class="tb">
+      <table class="tb" id="minglu">
         <tr><th>客户</th><th>配对供体</th><th>本命之物</th><th>状态</th></tr>
         <tr><td>第四十三号</td><td>某（男 尝味者）</td><td>—（改库存）</td><td>候用 C4</td></tr>
         <tr><td>第四十四号</td><td>陈氏（女）</td><td>银锁片</td><td><b>已归井</b></td></tr>
-        <tr><td style="background:#fff8d8">第四十五号</td><td style="background:#fff8d8"><b>林氏（女 生辰▓▓ 待核）</b></td><td style="background:#fff8d8"><b>红头绳 · 已镇于 B2 更衣室▓▓▓▓（此处虫蛀）</b></td><td style="background:#fff8d8"><span class="blink" style="color:#a02020">回魂夜 交割</span></td></tr>
-        <tr><td>贵客 沈公</td><td colspan="2">候于四十四层 静室</td><td>百年常客</td></tr>
+        <tr><td style="background:#fff8d8">第四十五号</td><td style="background:#fff8d8"><b>林氏（女 生辰▓▓ 待核）</b></td><td style="background:#fff8d8"><b>红头绳 · 已镇于 B2 更衣室▓▓▓▓（此处虫蛀）</b></td><td style="background:#fff8d8" id="st45"><span class="blink" style="color:#a02020">回魂夜 交割</span></td></tr>
+        <tr><td>贵客 沈公</td><td colspan="2" id="whshen">候于四十四层 静室</td><td id="stshen">百年常客</td></tr>
       </table>
       <p style="font-size:12px;color:#9a8f6c">名录仅存本季。往季名录，四十四页，不外示。<br>
       ※ 四十五号生辰与藏物处虫蛀不可辨。核验生辰者，往<b>[问事]</b>报来。<br>
@@ -201,6 +202,26 @@
         <tr><td>寅</td><td>03–05</td><td>午</td><td>11–13</td><td>戌</td><td>19–21</td></tr>
         <tr><td>卯</td><td>05–07</td><td>未</td><td>13–15</td><td><b>亥</b></td><td><b>21–23</b></td></tr>
       </table>
+    </div>
+
+    <div class="page" id="p7">
+      <h2>◆ 堂内 · 仪轨（持牌者阅）</h2>
+      <p style="font-size:12px;color:#9a8f6c">此页不入导航，不外示。牌在，门开。</p>
+      <p><b>《交割仪轨》（回魂夜）</b></p>
+      <p>一、亥时三刻，诸镜皆门。<br>
+      二、寅时二刻又三分，井开。<b>井开三刻，三刻既尽，井闭判定。</b><br>
+      三、判旧躯：<b>以牌位生辰为凭</b>。生辰是谁，旧躯是谁，井不改判。<br>
+      四、新客回魂：<b>入无主之窍</b>。窍中有主者，新客不得入。</p>
+      <p style="background:#fff8d8;border:1px dashed #a02020;padding:6px 10px">
+        <b>《引魂之仪》</b>（叛堂者旧法，录以为戒——切勿使供体亲族知之）<br>
+        一、<b>执缚魂之物</b>（绳）于掌。<br>
+        二、<b>俟月影定于水面</b>（月影者，门枢也）。<br>
+        三、<b>呼其本名</b>。<br>
+        三步既成，魂归其窍，新客无隙。三步乱一步，皆费一刻。
+      </p>
+      <p><b>主客之辨</b>：先入镜者为主。<b>主呼名，井不能夺。</b></p>
+      <p><b>传名</b>：井开之际，有代亡者传名于井者，井录其名，<b>勒石井畔</b>。</p>
+      <p style="color:#9a8f6c;font-size:12px">——此页阅后即忘。忘不掉的，井会帮你忘。</p>
     </div>
 
     <div class="page" id="p5">
@@ -260,6 +281,10 @@ function ask(){
     out.innerHTML = '<b>批复：</b>癸未……年份不差。<br><b>月呢？</b>井要听全。生辰报一半，批复也只有一半。';
   } else if(v.indexOf('辛巳') > -1){
     out.innerHTML = '<b>批复：</b>辛巳年七月？<br>户籍上的东西，骗得了活人，骗不了井。<br>报<b>真的</b>来。';
+  } else if(v.indexOf('044') > -1){
+    out.innerHTML = '<b>批复：</b>牌是真的。<br>持牌者，堂内的门为你开了。（导航栏）';
+    try{ localStorage.setItem('sst_pai','044'); }catch(e){}
+    showTn();
   } else if(/\d/.test(v)){
     out.innerHTML = '<b>批复：</b>井不认西历。<br>生辰以<b>干支</b>报来。不知干支者，对照下方甲子表。';
   } else if(v.replace(/\s/g,'') === ''){
@@ -292,6 +317,38 @@ function go(id, a){
   for(var j=0;j<as.length;j++) as[j].className = '';
   a.className = 'cur';
 }
+/* ◆ 堂内：持牌者（localStorage 铜牌）可见；无牌者往[问事]报牌号 */
+function showTn(){
+  document.getElementById('navtn').style.display = 'inline';
+}
+try{ if(localStorage.getItem('sst_pai') === '044') showTn(); }catch(e){}
+/* ◆ 结局回写：微光那边落幕后，这边的纸页也会变 */
+try{
+  var END = localStorage.getItem('glimmer_end');
+  if(END === 'A'){
+    document.getElementById('st45').innerHTML = '<b>已归窍 · 除名</b>';
+    document.getElementById('whshen').innerHTML = '—';
+    document.getElementById('stshen').innerHTML = '<b style="color:#a02020">已归井</b>';
+    var tA = document.getElementById('typingmsg');
+    if(tA){
+      tA.style.color = '';
+      tA.innerHTML = '<div class="m-head">刚刚 · <b style="color:#7a1f1f">北海阿婆</b></div><b>好孩子。</b>';
+    }
+  } else if(END === 'B'){
+    var cB = document.querySelector('.counter');
+    if(cB){ cB.textContent = '0000046'; cB.classList.remove('blink'); }
+    var mB = document.querySelector('marquee');
+    if(mB) mB.innerHTML = '名录已添新页 ★ 名录已添新页 ★ 欢迎成为微光的一部分 ★';
+    var tbB = document.getElementById('minglu');
+    if(tbB) tbB.insertAdjacentHTML('beforeend',
+      '<tr><td><b>第四十六号</b></td><td>王氏（男）</td><td>—</td><td><b style="color:#a02020">已交割</b></td></tr>');
+    var tB = document.getElementById('typingmsg');
+    if(tB){
+      tB.style.color = '';
+      tB.innerHTML = '<div class="m-head">刚刚 · 访客 0046</div><span style="color:#a02020">（正在输入……）</span>';
+    }
+  }
+}catch(e){}
 </script>
 </body>
 </html>
