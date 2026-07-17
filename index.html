@@ -811,7 +811,7 @@ function getHint(level){
   }
   if(st === 15) return level===1 ? '亥时三刻，诸镜皆门——可"亥时三刻"是几点几分？旧门户的对照表不止甲子那一张。' : '十二时辰表：亥时＝21:00–23:00，一刻＝十五分 → 亥时三刻＝21:45。回来搜「21:45」。';
   if(st === 16) return level===1 ? '镜中的电梯，面板上只有一个键。' : '搜索「44」（或「电梯」）。';
-  if(st === 17) return level===1 ? '牌位的生辰栏空着——井开时按它判"旧躯"。写谁，谁就是旧躯。写一个井等了很久的人。（甲子六十年一周天。）' : '沈聿生于光绪三年＝1877。1877＋120＝1997，查旧门户甲子表：1997＝丁丑 → 搜索「丁丑」。';
+  if(st === 17) return level===1 ? '写谁的生辰，谁就是旧躯。这间静室在等谁？——旧门户的名录写过它的主人。' : '名录：沈公「候于四十四层静室 · 百年常客」→ 搜「沈」得出生记录光绪三年＝1877。牌位只认干支：甲子表外加减六十，1877＋120＝1997＝丁丑 → 搜索「丁丑」。';
   if(st === 18) return '（第四章线索已全部解开）';
   if(st === 19) return level===1 ? '她已经在顶楼了。先看清楚现场——那池水今晚不对劲。' : '搜索「泳池」（或「顶楼」）。';
   if(st === 20) return level===1 ? '引魂要在「镜前」，可顶楼没有镜子。——月亮沉在哪里，她就在哪里。' : '搜索「月亮」。水面即镜。';
@@ -1805,13 +1805,11 @@ function renderHall44(){
     <div class="imgwrap">${svgHall44}</div>
     <div class="caption">▲ 烛火一动不动。案上第四十五号牌位：供体林氏——<b>生辰栏空着</b>，朱笔搁在旁边。</div>
     <p>你明白了：名录上的"生辰待核"，核验就在今夜——<b>井开时，按牌位上的生辰判"旧躯"</b>。</p>
-    <p>案后设着一把披裘的旧圈椅，椅背上刻着一个字：<b>沈</b>。</p>
     <p class="mono">写谁的生辰，谁就是旧躯。<br>笔就在手边。</p>
   `);
   if(S.stage < 17){
     S.stage = 17;
     addClue('第 45 号牌位生辰栏空着——井开时按牌位判「旧躯」');
-    addClue('静室主座的椅背上刻着一个「沈」字');
   }
   return el;
 }
@@ -2582,8 +2580,8 @@ function onSearch(){
   if(matchAny(q,['光绪三年','1877','1997','1937'])){
     if(S.stage === 17){
       card(`<span class="tag">⚠ MIRROR SIDE</span>
-        <p class="mono">笔悬住了。<b>牌位只认干支。</b><br>甲子六十年一周天，周而复始——<br>1877 的干支，在那张对照表上，有它的"同岁"。</p>`, true);
-      addClue('1877 的干支＝1937＝1997（六十年一周天）');
+        <p class="mono">笔悬住了。<b>牌位只认干支。</b></p>`, true);
+      addClue('牌位只认干支');
     } else { butler('未找到「'+raw+'」相关服务。'); S.fails++; }
     return;
   }
@@ -2673,11 +2671,8 @@ function onSearch(){
   }
   if(matchAny(q,['沈聿','沈','沈公','术士','老板','投资人'])){
     if(S.stage >= 4){
-      const plot = S.stage === 17
-        ? `<p>光绪三年……你盯着这行字，忽然有了主意。<br><b>写一个井等了一百多年的人。</b></p>`
-        : '';
-      card(`<span class="tag">⚠ FOUNDER</span><p class="mono">沈聿：Glimmer Group 匿名创始股东。<br>出生记录：<b>光绪三年</b>。<br>当前状态：<b>存活 · 44F</b>。</p>${plot}`, true);
-      if(S.stage === 17) addClue('沈聿生于光绪三年——写他的生辰？（牌位只认干支）');
+      card(`<span class="tag">⚠ FOUNDER</span><p class="mono">沈聿：Glimmer Group 匿名创始股东。<br>出生记录：<b>光绪三年</b>。<br>当前状态：<b>存活 · 44F</b>。</p>`, true);
+      if(S.stage === 17) addClue('沈聿出生记录：光绪三年');
     } else butler('Glimmer Group 投资方信息未公开。');
     return;
   }
