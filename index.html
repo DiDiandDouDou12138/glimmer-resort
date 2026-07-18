@@ -816,7 +816,7 @@ function getHint(level){
   if(st === 19) return level===1 ? '她已经在顶楼了。先看清楚现场——那池水今晚不对劲。' : '搜索「泳池」（或「顶楼」）。';
   if(st === 20) return level===1 ? '引魂要在「镜前」，可顶楼没有镜子。——月亮沉在哪里，她就在哪里。' : '搜索「月亮」。水面即镜。';
   if(st === 21){
-    if(!S.seenEyes) return level===1 ? '水面那张照片太暗了。把它调亮——一直亮到水底。' : '拖动照片下方的亮度滑块，拉到最右。';
+    if(!S.seenEyes) return level===1 ? '倒影被波纹切成了三段。三条校正各有一个对的位置——盯着月影，调到接上为止。' : '三条校正大约拖到 28 / 64 / 81，月影拼成一根完整的光柱就对了。';
     return level===1 ? '绳在手里，镜在水面。差一份仪轨——堂里对持牌的人，不设防。' : '打开旧门户：导航多了一页「堂内」（没有的话，去「问事」报牌号 044）。读完仪轨，回来搜「引魂」。';
   }
   if(st === 22) return level===1 ? '仪轨三步，顺序在「堂内」那一页写着。错一步，费一刻。' : '按顺序点：红绳 → 月影 → 她的名字。';
@@ -1381,44 +1381,53 @@ const svgRoofPool = `
   <text x="320" y="326" text-anchor="middle" fill="#2a3546" font-size="10" font-family="monospace" letter-spacing="4">ROOFTOP · MAINTENANCE 00:00–04:00</text>
 </svg>`;
 
-const svgMoonWater = `
+const svgMoonWater = (() => {
+  /* one underwater scene, stamped into three ripple-cut strips (jigsaw slices) */
+  let eyes = '';
+  for(let i=0;i<44;i++){
+    const x = 40 + ((i*137)%560), y = 40 + ((i*89)%230);
+    if(Math.abs(x-330)<80) continue; /* keep the moon column clear */
+    eyes += `<g fill="#cfd8c8" opacity=".75">
+      <ellipse cx="${x}" cy="${y}" rx="4.5" ry="2.6"/><ellipse cx="${x+13}" cy="${y}" rx="4.5" ry="2.6"/>
+      <circle cx="${x}" cy="${y}" r="1.2" fill="#090c08"/><circle cx="${x+13}" cy="${y}" r="1.2" fill="#090c08"/></g>`;
+  }
+  const scene = `
+    <ellipse cx="330" cy="140" rx="44" ry="102" fill="url(#mwglow)"/>
+    <ellipse cx="330" cy="140" rx="27" ry="88" fill="#efeada" opacity=".92"/>
+    ${eyes}
+    <!-- a pale hand under the moon column, holding it in place -->
+    <g stroke="#dfe3d2" stroke-width="4" fill="none" opacity=".9">
+      <path d="M310 262 q6 -20 12 -32"/><path d="M324 266 q3 -22 7 -36"/>
+      <path d="M338 266 q1 -22 2 -38"/><path d="M352 262 q-2 -20 -6 -34"/>
+      <path d="M300 276 q20 12 62 1"/>
+    </g>
+    <g stroke="#16273c" fill="none" opacity=".8">
+      <path d="M60 60 q40 -6 80 0"/><path d="M480 84 q40 -6 80 0"/>
+      <path d="M100 226 q40 -6 80 0"/><path d="M440 248 q40 -6 80 0"/>
+    </g>`;
+  /* initial strip offsets = (init − target) × 2.4 : sliders 55/20/60, targets 28/64/81 */
+  const off = [64.8, -105.6, -50.4];
+  const strips = off.map((o,i) => `
+    <g class="strip" clip-path="url(#mwc${i})" transform="translate(${o},0)">${scene}</g>`).join('');
+  return `
 <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="水面月影">
   <defs>
     <radialGradient id="mwglow" cx=".5" cy=".5" r=".5">
       <stop offset="0" stop-color="#f4f1de" stop-opacity=".85"/><stop offset=".7" stop-color="#e8e4cf" stop-opacity=".5"/><stop offset="1" stop-color="#e8e4cf" stop-opacity="0"/>
     </radialGradient>
+    <clipPath id="mwc0"><rect x="-260" y="0" width="1160" height="100"/></clipPath>
+    <clipPath id="mwc1"><rect x="-260" y="100" width="1160" height="100"/></clipPath>
+    <clipPath id="mwc2"><rect x="-260" y="200" width="1160" height="100"/></clipPath>
   </defs>
   <rect width="640" height="300" fill="#050b13"/>
-  <!-- hidden layer: what lives under the water (revealed by brightness) -->
-  <g class="uwhid" opacity="0">
-    ${(() => {
-      let out='';
-      /* 44 pairs of eyes, packed in the dark */
-      for(let i=0;i<44;i++){
-        const x = 40 + ((i*137)%560), y = 60 + ((i*89)%210);
-        if(Math.abs(x-330)<70 && Math.abs(y-150)<60) continue; /* keep the moon spot clear */
-        out += `<g fill="#cfd8c8" opacity=".8">
-          <ellipse cx="${x}" cy="${y}" rx="4.5" ry="2.6"/><ellipse cx="${x+13}" cy="${y}" rx="4.5" ry="2.6"/>
-          <circle cx="${x}" cy="${y}" r="1.2" fill="#090c08"/><circle cx="${x+13}" cy="${y}" r="1.2" fill="#090c08"/></g>`;
-      }
-      return out;
-    })()}
-    <!-- a pale hand under the moon shadow, holding it in place -->
-    <g stroke="#dfe3d2" stroke-width="4" fill="none" opacity=".9">
-      <path d="M310 210 q6 -22 12 -34"/><path d="M324 214 q3 -24 7 -38"/>
-      <path d="M338 214 q1 -24 2 -40"/><path d="M352 210 q-2 -22 -6 -36"/>
-      <path d="M300 224 q20 14 62 2"/>
-    </g>
-  </g>
-  <!-- the moon, sunk dead-centre -->
-  <circle cx="330" cy="150" r="40" fill="url(#mwglow)"/>
-  <circle cx="330" cy="150" r="25" fill="#efeada"/>
-  <!-- faint surface ripples -->
-  <g stroke="#16273c" fill="none" opacity=".8">
-    <path d="M60 90 q40 -6 80 0"/><path d="M480 110 q40 -6 80 0"/>
-    <path d="M100 240 q40 -6 80 0"/><path d="M440 250 q40 -6 80 0"/>
+  ${strips}
+  <!-- 拼合后才显形：她划在水面内侧的字 -->
+  <g class="mwmsg" opacity="0" style="transition:opacity 1.2s">
+    <text x="64" y="60" fill="#dfe3d2" font-size="20" font-family="serif" letter-spacing="4">月影，我替你按住。</text>
+    <text x="64" y="94" fill="#dfe3d2" font-size="20" font-family="serif" letter-spacing="4">绳，在你手里。</text>
   </g>
 </svg>`;
+})();
 
 const svgRite = `
 <svg viewBox="0 0 640 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="池沿引魂">
@@ -1836,23 +1845,36 @@ function renderRoofPool(){
 function renderMoonWater(){
   const el = card(`
     <span class="tag">LOCAL PHOTO // 顶楼水面 · 刚刚拍下</span>
-    <h3>月亮沉在水中央。纹丝不动。</h3>
+    <h3>月亮沉在水中央——倒影被波纹切成了三段。</h3>
     <div class="imgwrap">${svgMoonWater}</div>
-    <div class="caption mwcap">▲ 水面照出月亮、照出她、照出你——<b>水面即镜</b>。照片太暗，水底看不清。</div>
-    <div class="dimmerwrap">亮度 <input type="range" class="dimmer" min="0" max="100" value="12"></div>
+    <div class="caption mwcap">▲ 水面照出月亮、照出她、照出你——<b>水面即镜</b>。手机的去纹校正开着三条通道。</div>
+    <div class="dimmerwrap">校正 Ⅰ <input type="range" class="mwslider" data-i="0" data-t="28" min="0" max="100" value="55"></div>
+    <div class="dimmerwrap">校正 Ⅱ <input type="range" class="mwslider" data-i="1" data-t="64" min="0" max="100" value="20"></div>
+    <div class="dimmerwrap">校正 Ⅲ <input type="range" class="mwslider" data-i="2" data-t="81" min="0" max="100" value="60"></div>
   `);
-  const hid = el.querySelector('.uwhid'), slider = el.querySelector('.dimmer'),
-        cap = el.querySelector('.mwcap'), img = el.querySelector('.imgwrap svg');
-  slider.addEventListener('input', () => {
-    const v = +slider.value;
-    img.style.filter = 'brightness(' + (0.75 + v/80) + ')';
-    hid.style.opacity = v < 55 ? 0 : ((v-55)/45).toFixed(2);
-    if(v >= 96 && !S.seenEyes){
+  const strips = el.querySelectorAll('.strip'), sliders = el.querySelectorAll('.mwslider'),
+        cap = el.querySelector('.mwcap'), msg = el.querySelector('.mwmsg');
+  const done = () => {
+    sliders.forEach(s => { s.disabled = true; });
+    strips.forEach(st => { if(st.setAttribute) st.setAttribute('transform','translate(0,0)'); });
+    if(msg && msg.style) msg.style.opacity = 1;
+    cap.innerHTML = '▲ 三段月影接成了一根完整的光柱。水底密密麻麻，全是<b>睁着的眼睛</b>。<br>月影正下方有一只手托着它——手指在水面内侧，划出两行字。';
+    if(!S.seenEyes){
       S.seenEyes = true;
-      cap.innerHTML = '▲ 拉到最亮：水底密密麻麻，全是<b>睁着的眼睛</b>。月影正下方有一只手托着——像在替你把月亮按在原地。';
-      addClue('水底 44 双眼睛都睁着；月影被一只手按在水中央');
+      sfxShimmer();
+      addClue('水底拼图：44 双眼睛睁着；一只手替你按住月影——「绳，在你手里」');
     }
+  };
+  sliders.forEach(s => {
+    s.addEventListener('input', () => {
+      const v = +s.value, t = +s.dataset.t, i = +s.dataset.i;
+      if(strips[i] && strips[i].setAttribute) strips[i].setAttribute('transform','translate(' + ((v-t)*2.4).toFixed(1) + ',0)');
+      let hit = true;
+      sliders.forEach(x => { if(Math.abs(+x.value - +x.dataset.t) > 5) hit = false; });
+      if(hit) done();
+    });
   });
+  if(S.seenEyes) done(); /* replay: already assembled */
   if(S.stage < 21){
     S.stage = 21;
     S.seenMoon = true;
