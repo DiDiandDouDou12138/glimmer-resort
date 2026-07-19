@@ -567,8 +567,8 @@ const S = {
   hintLv: 0,
   clues: [],
 };
-/* fresh boot = fresh timeline: clear cross-window ending marks */
-try{ localStorage.removeItem('glimmer_end'); localStorage.removeItem('sst_pai'); }catch(e){}
+/* fresh boot = fresh timeline: clear cross-window progress marks */
+try{ localStorage.removeItem('glimmer_end'); localStorage.removeItem('sst_pai'); localStorage.removeItem('glimmer_ch4'); }catch(e){}
 const $ = id => document.getElementById(id);
 const results = $('results'), query = $('query'), hintline = $('hintline');
 
@@ -2765,6 +2765,8 @@ function showEnd(ch){
 function startCh4(){
   $('endscreen').classList.add('hidden');
   document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir');
+  /* ch4 begins — the old portal's 时辰 table has a reason to exist now */
+  try{ localStorage.setItem('glimmer_ch4','1'); }catch(e){}
   showStory([
     {cls:'narr', text:'<b>第四章 · 亥时诸镜皆门</b><br><br>回魂夜。清晨你睁开眼——<br>小雅坐在床边看着你，不知道看了多久。'},
     {cls:'xiaoya', who:'小雅', text:'“今晚的月亮最圆，”她说，声音像浸过井水，<br>“我们去顶楼，好不好？”'},
@@ -2843,6 +2845,7 @@ function devJump(i){
   S.ch5done = p.stage >= 23;
   S.ktOn = p.stage >= 19 && p.stage < 23;
   S.kt = p.kt || 210;
+  if(p.stage >= 14){ try{ localStorage.setItem('glimmer_ch4','1'); }catch(e){} }
   if(p.stage >= 15){ try{ localStorage.setItem('sst_pai','044'); }catch(e){} }
   updateClock();
   S.fails = 0; S.hintKey = ''; S.hintLv = 0;
