@@ -280,7 +280,9 @@ function ask(){
   } else if(v.indexOf('癸未') > -1){
     out.innerHTML = '<b>批复：</b>癸未……年份不差。<br><b>月呢？</b>井要听全。生辰报一半，批复也只有一半。';
   } else if(v.indexOf('辛巳') > -1){
-    out.innerHTML = '<b>批复：</b>辛巳年七月？<br>户籍上的东西，骗得了活人，骗不了井。<br>报<b>真的</b>来。';
+    out.innerHTML = v.indexOf('七月') > -1
+      ? '<b>批复：</b>辛巳年七月？<br>户籍上的东西，骗得了活人，骗不了井。<br>报<b>真的</b>来。'
+      : '<b>批复：</b>辛巳？——户籍上的年份。<br>骗得了活人，骗不了井。<br>报<b>真的</b>来。';
   } else if(v.indexOf('044') > -1){
     out.innerHTML = '<b>批复：</b>牌是真的。<br>持牌者，堂内的门为你开了。（导航栏）';
     try{ localStorage.setItem('sst_pai','044'); }catch(e){}
