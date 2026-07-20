@@ -718,9 +718,10 @@ const TITLE0 = document.title;
 function updateClock(){
   const el = $('clock');
   if(S.ktOn){
-    /* ch5 hard countdown: one search = one 刻 (15 min), 03:33 the well opens */
+    /* ch5 hard countdown: one search = one 刻 (15 min), the well opens at 03:33 (= minute 213) */
     const h = Math.floor(S.kt/60), m = String(S.kt%60).padStart(2,'0');
-    el.textContent = '距井开 ' + h + ':' + m;
+    const wm = 213 - S.kt, wall = String(Math.floor(wm/60)).padStart(2,'0') + ':' + String(wm%60).padStart(2,'0');
+    el.textContent = wall + ' · 距井开 ' + h + ':' + m;
     el.classList.add('kt');
     document.title = '【距井开 ' + h + ':' + m + '】微光管家';
     return;
