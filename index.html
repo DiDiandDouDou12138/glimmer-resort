@@ -362,53 +362,95 @@
   .ritebtn:hover{background:var(--accent);color:#fff}
   .ritelog{margin-top:12px;font-size:13px;line-height:1.9;min-height:26px}
 
-  /* ---------- prologue: the winning email ---------- */
+  /* ---------- prologue: on his phone (iOS lock → Gmail → mobile web) ---------- */
   #prologue{
-    position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#dfe6ee,#c9d4e0);
+    position:fixed;inset:0;z-index:200;
+    background:radial-gradient(120% 80% at 30% 15%,#2a3652 0%,#141a29 60%,#0a0d16 100%);
     display:flex;align-items:center;justify-content:center;
+    font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
   }
   #prologue.hidden{display:none}
   #phone{
-    width:min(380px,92vw);height:min(86vh,780px);background:#0d0f13;border-radius:34px;
-    border:8px solid #1b1e24;position:relative;overflow:hidden;
-    box-shadow:0 30px 80px rgba(30,45,70,.4);
+    width:min(338px,90vw);height:min(90vh,716px);background:#000;
+    border-radius:46px;position:relative;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px #2c2e33;
   }
-  .pnotch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:110px;height:16px;background:#1b1e24;border-radius:10px;z-index:3}
-  .pscreen{position:absolute;inset:0;padding:44px 18px 18px;display:none;overflow-y:auto;background:#f2f4f8;color:#2a3038}
+  #pscreens{position:absolute;inset:6px;border-radius:40px;overflow:hidden;background:#000}
+  .pisland{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:92px;height:25px;background:#000;border-radius:16px;z-index:20}
+  .pstatus{
+    position:absolute;top:0;left:0;right:0;height:46px;z-index:15;pointer-events:none;
+    display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 5px;
+    color:#fff;font-size:14px;font-weight:600;letter-spacing:.02em;
+  }
+  .pstatus.dark{color:#111}
+  .pstatus .sig{display:flex;gap:5px;align-items:center}
+  .phome{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);width:124px;height:5px;border-radius:3px;background:rgba(255,255,255,.55);z-index:18}
+  .phome.dark{background:rgba(0,0,0,.32)}
+  .pscreen{position:absolute;inset:0;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .pscreen.show{display:block}
-  .pappbar{font-size:17px;font-weight:700;margin:8px 2px 14px}
-  .pmail{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;font-size:13px;line-height:1.8}
-  .pmail.unread{border-left:4px solid #4a90d9}
-  .pmail.dim{opacity:.45}
-  .pm-top{display:flex;justify-content:space-between;font-size:13px}
-  .pm-top span{color:#8a94a3;font-size:11px}
-  .pm-sub{font-weight:600;margin:4px 0}
-  .pm-from{color:#8a94a3;font-size:11px;margin-bottom:8px}
-  .pbtn{
-    display:block;width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;
-    background:#4a90d9;color:#fff;font-size:15px;cursor:pointer;font-family:inherit;
+
+  /* lock screen */
+  #ps0{background:linear-gradient(200deg,#21324f 0%,#3a2b4d 55%,#4a2b3c 100%);color:#fff}
+  .lock-time{text-align:center;margin-top:82px;font-size:78px;font-weight:300;letter-spacing:-2px;line-height:1;text-shadow:0 2px 22px rgba(0,0,0,.28)}
+  .lock-date{text-align:center;font-size:16px;font-weight:500;opacity:.92;margin-top:6px}
+  .ios-notif{
+    margin:56px 12px 0;padding:12px 13px;border-radius:20px;display:flex;gap:11px;cursor:pointer;
+    background:rgba(72,74,84,.44);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+    border:.5px solid rgba(255,255,255,.16);box-shadow:0 10px 28px rgba(0,0,0,.24);
+    animation:notifIn .55s cubic-bezier(.2,.9,.3,1.25) .35s both;
   }
-  .purlbar{
-    position:absolute;top:34px;left:12px;right:12px;background:#e3e7ee;border-radius:10px;
-    padding:7px 12px;font-size:11px;color:#5a6472;font-family:"SF Mono",Consolas,monospace;z-index:2;
-  }
-  .pland{padding-top:40px;font-size:13px;line-height:1.9}
-  .phero{border-radius:12px;overflow:hidden;line-height:0;margin-bottom:10px}
+  @keyframes notifIn{from{opacity:0;transform:translateY(-26px) scale(.95)}to{opacity:1;transform:none}}
+  .ios-notif:active{transform:scale(.975)}
+  .notif-icon{width:38px;height:38px;border-radius:9px;background:#fff;flex:none;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .notif-body{flex:1;min-width:0}
+  .notif-head{display:flex;justify-content:space-between;font-size:11px;opacity:.72;letter-spacing:.04em}
+  .notif-title{font-weight:600;font-size:14px;margin:2px 0 1px}
+  .notif-msg{font-size:13px;line-height:1.36;opacity:.94;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .lock-hint{position:absolute;bottom:34px;left:0;right:0;text-align:center;color:rgba(255,255,255,.58);font-size:12px}
+
+  /* gmail email */
+  #ps1{background:#fff;color:#202124}
+  .gm-bar{position:sticky;top:0;background:#fff;padding:46px 16px 6px;display:flex;align-items:center;justify-content:space-between}
+  .gm-back{font-size:27px;color:#5f6368;line-height:1}
+  .gm-tools{color:#5f6368;font-size:17px;letter-spacing:7px}
+  .gm-body{padding:4px 18px 26px}
+  .gm-subject{font-size:21px;line-height:1.32;font-weight:400;margin:6px 0 16px}
+  .gm-sender{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+  .gm-avatar{width:40px;height:40px;border-radius:50%;background:#c0392b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+  .gm-meta{flex:1;min-width:0}
+  .gm-name{font-size:14px;font-weight:600}
+  .gm-name span{float:right;font-weight:400;color:#5f6368;font-size:12px}
+  .gm-to{font-size:12px;color:#5f6368;margin-top:1px}
+  .gm-star{color:#dadce0;font-size:22px}
+  .gm-content{font-size:15px;line-height:1.72;color:#3c4043}
+  .gm-content p{margin:0 0 12px}
+  .gm-cta{display:inline-block;margin-top:4px;padding:11px 24px;border-radius:22px;background:#1a73e8;color:#fff;font-size:15px;border:none;cursor:pointer;font-family:inherit}
+
+  /* mobile browser (landing + form) */
+  .pbrowser{background:#f2f2f7;color:#1c1c1e}
+  .pchrome{position:sticky;top:0;z-index:5;background:#f7f7fa;padding:46px 12px 8px;border-bottom:.5px solid #dcdce1}
+  .paddr{background:#e5e5ea;border-radius:11px;height:36px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:13px;color:#3c3c43;font-family:-apple-system,"SF Mono",sans-serif}
+  .pbody{padding:14px 16px 34px;font-size:13px;line-height:1.85}
+  .phero{border-radius:14px;overflow:hidden;line-height:0;margin-bottom:12px}
   .phero svg{width:100%;height:auto}
-  .pslogan{text-align:center;letter-spacing:.3em;color:#8a94a3;font-size:12px;margin-bottom:12px}
-  .plucky{text-align:center;font-size:18px;margin:10px 0}
-  .plucky b{color:#4a90d9;font-size:26px}
-  .pperks{background:#fff;border-radius:12px;padding:12px 16px;text-align:center}
-  .pfine{font-size:10px;color:#a7b0bd;text-align:center;margin-top:10px;line-height:1.7}
-  .pfield{background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px}
-  .pfield span{color:#8a94a3;font-size:11px;display:block}
-  .pfield i{font-style:normal;color:#8a94a3;font-size:11px;display:block;font-family:"SF Mono",Consolas,monospace}
-  .pdone{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-size:22px;text-align:center;line-height:2}
-  .pdone span{font-size:13px;color:#8a94a3;letter-spacing:.2em}
-  #pskip{position:absolute;right:16px;bottom:12px;font-size:11px;color:#8a94a3;cursor:pointer;z-index:4;user-select:none}
+  .pslogan{text-align:center;letter-spacing:.32em;color:#8a8a8e;font-size:12px;margin-bottom:14px}
+  .plucky{text-align:center;font-size:16px;color:#3c3c43;margin:12px 0}
+  .plucky b{color:#c0392b;font-size:30px;display:block;margin-top:3px;letter-spacing:.03em}
+  .pperks{background:#fff;border-radius:14px;padding:15px 16px;text-align:center;line-height:1.9;box-shadow:0 1px 5px rgba(0,0,0,.05)}
+  .pperks b{color:#1c1c1e}
+  .pweb-cta{display:block;width:100%;margin-top:16px;padding:15px;border:none;border-radius:14px;background:#c0392b;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+  .pfine{font-size:10px;color:#a4a4a9;text-align:center;margin-top:12px;line-height:1.7}
+  .pform-title{font-size:19px;font-weight:700;margin:6px 2px 14px}
+  .pfield{background:#fff;border-radius:12px;padding:13px 16px;margin-bottom:10px;box-shadow:0 1px 5px rgba(0,0,0,.05)}
+  .pfield span{color:#8a8a8e;font-size:11px;display:block;margin-bottom:3px}
+  .pfield b{font-size:16px}
+  .pfield i{font-style:normal;color:#a4a4a9;font-size:12px;display:block;margin-top:3px;font-family:"SF Mono",Consolas,monospace}
+  .pdone{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#fff;color:#1c1c1e;font-size:23px;text-align:center;line-height:1.9}
+  .pdone .ok{width:66px;height:66px;border-radius:50%;background:#34c759;color:#fff;font-size:36px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 24px rgba(52,199,89,.35)}
+  .pdone span{font-size:13px;color:#8a8a8e;letter-spacing:.15em}
+  #pskip{position:absolute;right:14px;bottom:22px;z-index:30;font-size:11px;color:#fff;cursor:pointer;user-select:none;background:rgba(0,0,0,.3);padding:5px 12px;border-radius:20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   #ptrans{
     position:absolute;inset:0;background:#000;color:#cfd6e2;display:flex;align-items:center;justify-content:center;
-    letter-spacing:.4em;font-size:16px;opacity:0;pointer-events:none;transition:opacity .9s;z-index:5;
+    letter-spacing:.42em;font-size:16px;opacity:0;pointer-events:none;transition:opacity .9s;z-index:40;
   }
   #ptrans.show{opacity:1;pointer-events:auto}
 
@@ -532,51 +574,100 @@
 <!-- prologue: two weeks earlier, on his phone -->
 <div id="prologue">
   <div id="phone">
-    <div class="pnotch"></div>
-    <!-- screen 1: inbox -->
-    <div class="pscreen show" id="ps1">
-      <div class="pappbar">收件箱</div>
-      <div class="pmail unread">
-        <div class="pm-top"><b>Glimmer Group</b><span>03:33</span></div>
-        <div class="pm-sub">恭喜！您与同行人已被抽中 —— 微光度假村双人免费之旅</div>
-        <div class="pm-from">no-reply@glimmer-resort.cn</div>
-        <p>尊敬的贵宾：<br>「微光度假村」开业回馈月抽奖已结束。<br>您与一位同行人获得<b>免费三晚</b>入住资格。</p>
-        <button class="pbtn" id="pgo2">查看详情 ▸</button>
+    <div id="pscreens">
+      <div class="pisland"></div>
+      <div class="pstatus" id="pstatus">
+        <span>3:33</span>
+        <span class="sig">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" width="3" height="11" rx="1"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 2.4c2.4 0 4.6.9 6.3 2.5l1.3-1.5A11 11 0 0 0 8 .4 11 11 0 0 0 .4 3.4l1.3 1.5A9 9 0 0 1 8 2.4z"/><path d="M8 6c1.3 0 2.6.5 3.5 1.4l1.3-1.4A7 7 0 0 0 8 3.9a7 7 0 0 0-4.8 2.1l1.3 1.4A5 5 0 0 1 8 6z"/><circle cx="8" cy="9.2" r="1.6"/></svg>
+          <svg width="27" height="12" viewBox="0 0 27 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="currentColor" stroke-opacity=".4"/><rect x="3" y="3" width="16" height="6" rx="1.5" fill="currentColor"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="currentColor" fill-opacity=".4"/></svg>
+        </span>
       </div>
-      <div class="pmail dim"><div class="pm-top">信用卡账单提醒<span>昨天</span></div></div>
-      <div class="pmail dim"><div class="pm-top">您的睡眠周报已生成<span>周一</span></div></div>
-    </div>
-    <!-- screen 2: promo landing page -->
-    <div class="pscreen" id="ps2">
-      <div class="purlbar">🔒 glimmer-resort.cn/lucky</div>
-      <div class="pland">
-        <div class="phero" id="phero"></div>
-        <div class="pslogan">微光，知你所求。</div>
-        <div class="plucky">幸运住客 <b>No.045</b></div>
-        <div class="pperks">免费三晚 · 双人自助餐 · 顶楼无边泳池<br>尊享房号 <b>0413</b>（已为您排定）</div>
-        <button class="pbtn" id="pgo3">立即领取 ▸</button>
-        <div class="pfine">奖项最终解释权归 Glimmer Group 所有 · 中奖者信息以登记证件为准</div>
-        <div class="pfine">© 2025 Glimmer Group · 所有进入微光的人，都将成为微光的一部分。</div>
+
+      <!-- ps0: iOS lock screen -->
+      <div class="pscreen show" id="ps0">
+        <div class="lock-time">3:33</div>
+        <div class="lock-date">7月3日 星期四</div>
+        <div class="ios-notif" id="pgo1">
+          <span class="notif-icon">
+            <svg width="24" height="18" viewBox="0 0 49 36">
+              <path fill="#4285F4" d="M3 36h8V16L0 8v25a3 3 0 0 0 3 3z"/>
+              <path fill="#34A853" d="M38 36h8a3 3 0 0 0 3-3V8l-11 8z"/>
+              <path fill="#FBBC04" d="M38 3v13l11-8V6a3 3 0 0 0-4.8-2.4z"/>
+              <path fill="#EA4335" d="M11 16V3l13.5 10L38 3v13L24.5 26z"/>
+              <path fill="#C5221F" d="M0 6v2l11 8V3L4.8.6A3 3 0 0 0 0 6z"/>
+            </svg>
+          </span>
+          <div class="notif-body">
+            <div class="notif-head"><span>GMAIL</span><span>现在</span></div>
+            <div class="notif-title">Glimmer Group</div>
+            <div class="notif-msg">恭喜！您与同行人已被抽中 —— 微光度假村双人免费之旅</div>
+          </div>
+        </div>
+        <div class="lock-hint">轻点通知查看 ›</div>
       </div>
-    </div>
-    <!-- screen 3: claim form, already filled in -->
-    <div class="pscreen" id="ps3">
-      <div class="purlbar">🔒 glimmer-resort.cn/lucky/claim</div>
-      <div class="pland">
-        <div class="pappbar">领取登记</div>
-        <div class="pfield"><span>住客一</span><b>王先生</b><i>证件 210204▓▓▓▓▓▓▓▓33▓▓</i></div>
-        <div class="pfield"><span>住客二</span><b>林小雅</b><i>证件 210283▓▓▓▓▓▓▓▓04▓▓</i></div>
-        <div class="pfield"><span>入住安排</span><b>0413 · 三晚</b></div>
-        <button class="pbtn" id="psubmit">确认领取</button>
+
+      <!-- ps1: Gmail email -->
+      <div class="pscreen" id="ps1">
+        <div class="gm-bar"><span class="gm-back">‹</span><span class="gm-tools">↩ ⋮</span></div>
+        <div class="gm-body">
+          <div class="gm-subject">恭喜！您与同行人已被抽中 —— 微光度假村双人免费之旅</div>
+          <div class="gm-sender">
+            <div class="gm-avatar">G</div>
+            <div class="gm-meta">
+              <div class="gm-name">Glimmer Group <span>3:33</span></div>
+              <div class="gm-to">发送至 我 ▾</div>
+            </div>
+            <div class="gm-star">☆</div>
+          </div>
+          <div class="gm-content">
+            <p>尊敬的贵宾：</p>
+            <p>「微光度假村」开业回馈月抽奖已圆满结束。经系统随机抽选，您与一位同行人共同获得<b>免费三晚</b>入住资格。</p>
+            <p>名额有限，请点击下方按钮确认领取。</p>
+            <button class="gm-cta" id="pgo2">查看活动详情</button>
+            <p style="color:#9aa0a6;font-size:12px;margin-top:18px">no-reply@glimmer-resort.cn · 请勿直接回复此邮件</p>
+          </div>
+        </div>
       </div>
+
+      <!-- ps2: promo landing page (mobile browser) -->
+      <div class="pscreen pbrowser" id="ps2">
+        <div class="pchrome"><div class="paddr">🔒 glimmer-resort.cn/lucky</div></div>
+        <div class="pbody">
+          <div class="phero" id="phero"></div>
+          <div class="pslogan">微光，知你所求。</div>
+          <div class="plucky">幸运住客 <b>No.045</b></div>
+          <div class="pperks">免费三晚 · 双人自助餐 · 顶楼无边泳池<br>尊享房号 <b>0413</b>（已为您排定）</div>
+          <button class="pweb-cta" id="pgo3">立即领取</button>
+          <div class="pfine">奖项最终解释权归 Glimmer Group 所有 · 中奖者信息以登记证件为准</div>
+          <div class="pfine">© 2025 Glimmer Group · 所有进入微光的人，都将成为微光的一部分。</div>
+        </div>
+      </div>
+
+      <!-- ps3: claim form, already filled in -->
+      <div class="pscreen pbrowser" id="ps3">
+        <div class="pchrome"><div class="paddr">🔒 glimmer-resort.cn/lucky/claim</div></div>
+        <div class="pbody">
+          <div class="pform-title">领取登记</div>
+          <div class="pfield"><span>住客一</span><b>王先生</b><i>证件 210204▓▓▓▓▓▓▓▓33▓▓</i></div>
+          <div class="pfield"><span>住客二</span><b>林小雅</b><i>证件 210283▓▓▓▓▓▓▓▓04▓▓</i></div>
+          <div class="pfield"><span>入住安排</span><b>0413 · 三晚</b></div>
+          <button class="pweb-cta" id="psubmit">确认领取</button>
+          <div class="pfine">提交即代表您已阅读并同意《入住协议》</div>
+        </div>
+      </div>
+
+      <!-- ps4: done -->
+      <div class="pscreen" id="ps4">
+        <div class="pdone"><div class="ok">✓</div>登记成功<br><span>恭喜成为微光的贵宾</span></div>
+      </div>
+
+      <a id="pskip">跳过 ›</a>
+      <div class="phome" id="phome"></div>
+      <div id="ptrans">两周后 · 北海</div>
     </div>
-    <!-- screen 4: done -->
-    <div class="pscreen" id="ps4">
-      <div class="pdone">登记成功<br><span>恭喜成为微光的贵宾</span></div>
-    </div>
-    <a id="pskip">跳过序章 ▸</a>
   </div>
-  <div id="ptrans">两周后 · 北海</div>
 </div>
 
 <div id="tablet">
@@ -2979,8 +3070,12 @@ function startCh4(){
 (function initPrologue(){
   $('phero').innerHTML = svgPanorama;
   const go = id => {
-    ['ps1','ps2','ps3','ps4'].forEach(s => $(s).classList.remove('show'));
+    ['ps0','ps1','ps2','ps3','ps4'].forEach(s => $(s).classList.remove('show'));
     $(id).classList.add('show');
+    $(id).scrollTop = 0;
+    /* dark status-bar/home-indicator glyphs on the light screens, light on the lock screen */
+    if(id === 'ps0'){ $('pstatus').classList.remove('dark'); $('phome').classList.remove('dark'); }
+    else { $('pstatus').classList.add('dark'); $('phome').classList.add('dark'); }
   };
   const finish = played => {
     if(played){
@@ -2993,6 +3088,7 @@ function startCh4(){
       $('prologue').classList.add('hidden');
     }
   };
+  $('pgo1').onclick = () => go('ps1');
   $('pgo2').onclick = () => go('ps2');
   $('pgo3').onclick = () => go('ps3');
   $('psubmit').onclick = () => { go('ps4'); setTimeout(() => finish(true), 1400); };
