@@ -362,6 +362,18 @@
   .ritebtn:hover{background:var(--accent);color:#fff}
   .ritelog{margin-top:12px;font-size:13px;line-height:1.9;min-height:26px}
 
+  /* ---------- ch3: front-desk registry ---------- */
+  .reglist{margin-top:10px}
+  .regitem{
+    padding:10px 14px;border:1px solid var(--line);border-radius:10px;margin:6px 0;
+    cursor:pointer;font-family:"SF Mono",Consolas,monospace;font-size:13px;
+    display:flex;justify-content:space-between;transition:all .2s;
+  }
+  .regitem:hover{border-color:var(--accent);color:var(--accent)}
+  body.hijacked .regitem{border-color:var(--evil-line)}
+  body.hijacked .regitem:hover{border-color:var(--evil-accent);color:var(--evil-accent)}
+  .regdetail{padding:8px 14px 4px;font-size:13px}
+
   /* ---------- developer mode ---------- */
   #devgate{
     position:absolute;inset:0;z-index:95;display:none;align-items:center;justify-content:center;
@@ -797,11 +809,11 @@ function getHint(level){
   if(st === 11) return level===1 ? '镜中那扇门上挂着牌子，字是反写的。读出来，去搜它。' : '搜索「沈氏堂」。';
   if(st === 12){
     if(level === 1){
-      if(!S.seenGranny) return '口令：4 位西历，「去问井」。进门后问事要生辰——先拿证件上的试。若井说那是假的：留言板里有位「北海阿婆」，说自己"改得了纸上的东西"……她是谁？在这边搜搜她。';
+      if(!S.seenGranny) return '口令：4 位西历，「去问井」。进门后问事要生辰——生辰不明？名录说了：柜上留了号。回微光搜「登记证件」，先拿证件上的试。若井说那是假的：留言板里有位「北海阿婆」，说自己"改得了纸上的东西"……她是谁？在这边搜搜她。';
       if(!S.seenAlbum) return '外婆改过的那"一页"，就是户口。真生日不在任何系统里——去搜「相册」。';
       return '毛笔字：羊年、三月；2008 年时五岁 → 哪一年生？问事页下面的甲子表能换成干支。';
     }
-    return '1900 进门 → 证件生日 2001-07 → 甲子表＝辛巳 → 问事被驳回 → 微光搜「外婆」→ 搜「相册」：羊年三月、2008 年五岁 → 2003＝癸未 → 问事「癸未年三月」→ 搜「第十三面镜」。';
+    return '1900 进门 → 微光搜「登记证件」点开林小雅：生日 2001-07 → 甲子表＝辛巳 → 问事被驳回 → 微光搜「外婆」→ 搜「相册」：羊年三月、2008 年五岁 → 2003＝癸未 → 问事「癸未年三月」→ 搜「第十三面镜」。';
   }
   if(st === 13) return '（第三章线索已全部解开）';
   if(st === 14){
@@ -1336,6 +1348,38 @@ const svgHall44 = `
 </svg>`;
 
 /* =====================  RESULT RENDERERS  ===================== */
+/* ---------- ch3 art: Xiaoya's scanned ID card ---------- */
+const svgIdYa = `
+<svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="林小雅身份证扫描件">
+  <defs>
+    <linearGradient id="idbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#dfe8f2"/><stop offset=".5" stop-color="#cddaf0"/><stop offset="1" stop-color="#d8e4f4"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="230" fill="#20242c"/>
+  <rect x="40" y="18" width="560" height="194" rx="14" fill="url(#idbg)"/>
+  <g font-family="serif" fill="#22303e">
+    <text x="78" y="62" font-size="15">姓　名　<tspan font-size="19" font-weight="bold">林小雅</tspan></text>
+    <text x="78" y="92" font-size="15">性　别　女　　民　族　汉</text>
+    <text x="78" y="122" font-size="15">出　生　2001 年 07 月 16 日</text>
+    <text x="78" y="152" font-size="15">住　址　辽宁省大连市▓▓区▓▓路▓▓号</text>
+    <text x="78" y="192" font-size="14">公民身份号码　<tspan font-size="17" letter-spacing="2" font-family="monospace">210283 2001 0716 04▓▓</tspan></text>
+  </g>
+  <!-- portrait -->
+  <rect x="470" y="46" width="100" height="120" fill="#e8edf4" stroke="#b8c4d4"/>
+  <g fill="#3a4450">
+    <circle cx="520" cy="88" r="20"/>
+    <path d="M488 166 q6 -42 32 -42 q26 0 32 42 Z"/>
+  </g>
+  <!-- front-desk stamp -->
+  <g transform="rotate(-12 545 190)" opacity=".8">
+    <circle cx="545" cy="190" r="26" fill="none" stroke="#a02020" stroke-width="2"/>
+    <text x="545" y="187" text-anchor="middle" fill="#a02020" font-size="9" font-family="serif">微光前台</text>
+    <text x="545" y="199" text-anchor="middle" fill="#a02020" font-size="9" font-family="serif">登记留存</text>
+  </g>
+  <text x="52" y="226" fill="#4a5462" font-size="10" font-family="monospace">SCAN · FRONT DESK · 尾号已按隐私条例脱敏</text>
+</svg>`;
+
 /* ---------- chapter 5 art ---------- */
 const svgRoofPool = `
 <svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="顶楼无边泳池">
@@ -1696,6 +1740,43 @@ function renderAlbum(){
     addClue('外婆的话：「绳不离身，魂不离窍」');
     addClue('外婆临终叮嘱：别带她去海边——而这里就是北海');
   }
+  return el;
+}
+
+/* ---------- ch3: front-desk registry archive ---------- */
+function renderRegistry(){
+  const REGS = [
+    {k:'liu',  row:'0306 · 刘先生',
+     d:'<p class="mono">刘 ▓　男<br>公民身份号码　210381 1979 0402 11▓▓<br>入住 3 日 · 安神汤领用：正常</p>'},
+    {k:'wang', row:'0413 · 王先生',
+     d:'<p class="mono">王 ▓　男<br>公民身份号码　210204 1998 1123 33▓▓<br>入住 4 日 · 安神汤领用：<b>连续未领</b></p>'},
+    {k:'ya',   row:'0413 · 林小雅',
+     d:`<div class="imgwrap">${svgIdYa}</div><p class="mono">备注：<span class="redact">▓▓▓▓▓▓</span></p>`},
+    {k:'a44',  row:'0413 · ▓▓（已结案 · 档案044）',
+     d:'<p class="mono">证件已随档案归档。<br>调阅权限：堂内。</p>'},
+    {k:'zhang',row:'0521 · 张女士',
+     d:'<p class="mono">张 ▓▓　女<br>公民身份号码　211202 1990 0518 26▓▓<br>入住 2 日 · 安神汤领用：正常</p>'},
+    {k:'wu',   row:'0722 · 吴先生',
+     d:'<p class="mono">吴 ▓　男<br>公民身份号码　210711 1983 1201 57▓▓<br>入住 1 日 · 安神汤领用：正常</p>'},
+    {k:'a43',  row:'1301 · ▓▓▓（已结案 · 档案043）',
+     d:'<p class="mono">证件已随档案归档。<br>调阅权限：堂内。</p>'},
+  ];
+  const el = card(`
+    <span class="tag">⚠ FRONT DESK ARCHIVE // 登记证件存档</span>
+    <h3>柜上留的号，一张不少。</h3>
+    <p class="sub">在住 5 人 · 归档 2 人 · 点开查看</p>
+    <div class="reglist">
+      ${REGS.map(r => `<div class="regitem" data-reg="${r.k}"><span>${r.row}</span><span>▸</span></div>
+        <div class="regdetail" data-regd="${r.k}" style="display:none">${r.d}</div>`).join('')}
+    </div>
+  `, true);
+  el.querySelectorAll('.regitem').forEach(it => {
+    it.onclick = () => {
+      const d = el.querySelector('[data-regd="' + it.dataset.reg + '"]');
+      if(d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+      if(it.dataset.reg === 'ya') addClue('小雅登记证件：210283 2001 0716 04▓▓（户籍生日 2001-07-16）');
+    };
+  });
   return el;
 }
 
@@ -2537,6 +2618,12 @@ function onSearch(){
     } else { butler('客房镜面每日消毒。温馨提示：请勿在凌晨照镜。'); S.fails++; }
     return;
   }
+  /* ch3: front-desk registry (名录页指路：「自查其登记证件」) */
+  if(matchAny(q,['登记证件','证件','登记','身份证','住客登记','登记信息'])){
+    if(S.stage >= 12){ renderRegistry(); }
+    else { butler('住客登记信息由前台保管，恕不查询。'); S.fails++; }
+    return;
+  }
   if(matchAny(q,['相册','照片','旧照片','合影','手机相册'])){
     if(S.seenGranny){ renderAlbum(); }
     else { butler('您的相册已同步至云端。所有照片都很安全，我们都看过了——<span style="opacity:.4">都很安全。</span>'); }
@@ -2677,10 +2764,9 @@ function onSearch(){
   if(matchAny(q,['小雅','林小雅','女朋友'])){
     if(S.stage >= 2){
       const extra = S.stage >= 11 ? `
-        <p class="mono">登记证件（居民身份证）：<br><b>2102 8320 0107 1604<span class="redact">▓▓</span></b>（尾号脱敏）</p>` : '';
+        <p class="mono">登记证件：已归档（前台）。</p>` : '';
       const el = card(`<span class="tag">⚠ GUEST QUERY</span>
         <p class="mono">0413 房当前登记住客：<br>王先生 ✓<br>林小雅 <span class="redact">▓▓▓▓</span> <b>【数据冲突：检测到 2 个灵魂签名】</b></p>${extra}`, true);
-      if(S.stage >= 11) addClue('小雅身份证号：210283 2001 0716 04▓▓');
       if(!S.yaScared){
         /* one-time sudden-grow scare */
         S.yaScared = true;
