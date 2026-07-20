@@ -362,6 +362,56 @@
   .ritebtn:hover{background:var(--accent);color:#fff}
   .ritelog{margin-top:12px;font-size:13px;line-height:1.9;min-height:26px}
 
+  /* ---------- prologue: the winning email ---------- */
+  #prologue{
+    position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#dfe6ee,#c9d4e0);
+    display:flex;align-items:center;justify-content:center;
+  }
+  #prologue.hidden{display:none}
+  #phone{
+    width:min(380px,92vw);height:min(86vh,780px);background:#0d0f13;border-radius:34px;
+    border:8px solid #1b1e24;position:relative;overflow:hidden;
+    box-shadow:0 30px 80px rgba(30,45,70,.4);
+  }
+  .pnotch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:110px;height:16px;background:#1b1e24;border-radius:10px;z-index:3}
+  .pscreen{position:absolute;inset:0;padding:44px 18px 18px;display:none;overflow-y:auto;background:#f2f4f8;color:#2a3038}
+  .pscreen.show{display:block}
+  .pappbar{font-size:17px;font-weight:700;margin:8px 2px 14px}
+  .pmail{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;font-size:13px;line-height:1.8}
+  .pmail.unread{border-left:4px solid #4a90d9}
+  .pmail.dim{opacity:.45}
+  .pm-top{display:flex;justify-content:space-between;font-size:13px}
+  .pm-top span{color:#8a94a3;font-size:11px}
+  .pm-sub{font-weight:600;margin:4px 0}
+  .pm-from{color:#8a94a3;font-size:11px;margin-bottom:8px}
+  .pbtn{
+    display:block;width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;
+    background:#4a90d9;color:#fff;font-size:15px;cursor:pointer;font-family:inherit;
+  }
+  .purlbar{
+    position:absolute;top:34px;left:12px;right:12px;background:#e3e7ee;border-radius:10px;
+    padding:7px 12px;font-size:11px;color:#5a6472;font-family:"SF Mono",Consolas,monospace;z-index:2;
+  }
+  .pland{padding-top:40px;font-size:13px;line-height:1.9}
+  .phero{border-radius:12px;overflow:hidden;line-height:0;margin-bottom:10px}
+  .phero svg{width:100%;height:auto}
+  .pslogan{text-align:center;letter-spacing:.3em;color:#8a94a3;font-size:12px;margin-bottom:12px}
+  .plucky{text-align:center;font-size:18px;margin:10px 0}
+  .plucky b{color:#4a90d9;font-size:26px}
+  .pperks{background:#fff;border-radius:12px;padding:12px 16px;text-align:center}
+  .pfine{font-size:10px;color:#a7b0bd;text-align:center;margin-top:10px;line-height:1.7}
+  .pfield{background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px}
+  .pfield span{color:#8a94a3;font-size:11px;display:block}
+  .pfield i{font-style:normal;color:#8a94a3;font-size:11px;display:block;font-family:"SF Mono",Consolas,monospace}
+  .pdone{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-size:22px;text-align:center;line-height:2}
+  .pdone span{font-size:13px;color:#8a94a3;letter-spacing:.2em}
+  #pskip{position:absolute;right:16px;bottom:12px;font-size:11px;color:#8a94a3;cursor:pointer;z-index:4;user-select:none}
+  #ptrans{
+    position:absolute;inset:0;background:#000;color:#cfd6e2;display:flex;align-items:center;justify-content:center;
+    letter-spacing:.4em;font-size:16px;opacity:0;pointer-events:none;transition:opacity .9s;z-index:5;
+  }
+  #ptrans.show{opacity:1;pointer-events:auto}
+
   /* ---------- ch3: front-desk registry ---------- */
   .reglist{margin-top:10px}
   .regitem{
@@ -477,6 +527,56 @@
     </g>
     <rect width="400" height="420" fill="url(#fvig)"/>
   </svg>
+</div>
+
+<!-- prologue: two weeks earlier, on his phone -->
+<div id="prologue">
+  <div id="phone">
+    <div class="pnotch"></div>
+    <!-- screen 1: inbox -->
+    <div class="pscreen show" id="ps1">
+      <div class="pappbar">收件箱</div>
+      <div class="pmail unread">
+        <div class="pm-top"><b>Glimmer Group</b><span>03:33</span></div>
+        <div class="pm-sub">恭喜！您与同行人已被抽中 —— 微光度假村双人免费之旅</div>
+        <div class="pm-from">no-reply@glimmer-resort.cn</div>
+        <p>尊敬的贵宾：<br>「微光度假村」开业回馈月抽奖已结束。<br>您与一位同行人获得<b>免费三晚</b>入住资格。</p>
+        <button class="pbtn" id="pgo2">查看详情 ▸</button>
+      </div>
+      <div class="pmail dim"><div class="pm-top">信用卡账单提醒<span>昨天</span></div></div>
+      <div class="pmail dim"><div class="pm-top">您的睡眠周报已生成<span>周一</span></div></div>
+    </div>
+    <!-- screen 2: promo landing page -->
+    <div class="pscreen" id="ps2">
+      <div class="purlbar">🔒 glimmer-resort.cn/lucky</div>
+      <div class="pland">
+        <div class="phero" id="phero"></div>
+        <div class="pslogan">微光，知你所求。</div>
+        <div class="plucky">幸运住客 <b>No.045</b></div>
+        <div class="pperks">免费三晚 · 双人自助餐 · 顶楼无边泳池<br>尊享房号 <b>0413</b>（已为您排定）</div>
+        <button class="pbtn" id="pgo3">立即领取 ▸</button>
+        <div class="pfine">奖项最终解释权归 Glimmer Group 所有 · 中奖者信息以登记证件为准</div>
+        <div class="pfine">© 2025 Glimmer Group · 所有进入微光的人，都将成为微光的一部分。</div>
+      </div>
+    </div>
+    <!-- screen 3: claim form, already filled in -->
+    <div class="pscreen" id="ps3">
+      <div class="purlbar">🔒 glimmer-resort.cn/lucky/claim</div>
+      <div class="pland">
+        <div class="pappbar">领取登记</div>
+        <div class="pfield"><span>住客一</span><b>王先生</b><i>证件 210204▓▓▓▓▓▓▓▓33▓▓</i></div>
+        <div class="pfield"><span>住客二</span><b>林小雅</b><i>证件 210283▓▓▓▓▓▓▓▓04▓▓</i></div>
+        <div class="pfield"><span>入住安排</span><b>0413 · 三晚</b></div>
+        <button class="pbtn" id="psubmit">确认领取</button>
+      </div>
+    </div>
+    <!-- screen 4: done -->
+    <div class="pscreen" id="ps4">
+      <div class="pdone">登记成功<br><span>恭喜成为微光的贵宾</span></div>
+    </div>
+    <a id="pskip">跳过序章 ▸</a>
+  </div>
+  <div id="ptrans">两周后 · 北海</div>
 </div>
 
 <div id="tablet">
@@ -2875,6 +2975,30 @@ function startCh4(){
   });
 }
 
+/* =====================  PROLOGUE  ===================== */
+(function initPrologue(){
+  $('phero').innerHTML = svgPanorama;
+  const go = id => {
+    ['ps1','ps2','ps3','ps4'].forEach(s => $(s).classList.remove('show'));
+    $(id).classList.add('show');
+  };
+  const finish = played => {
+    if(played){
+      $('ptrans').classList.add('show');
+      setTimeout(() => {
+        $('prologue').classList.add('hidden');
+        addClue('“中奖”邮件：幸运住客 No.045 · 指定 0413 房');
+      }, 2200);
+    } else {
+      $('prologue').classList.add('hidden');
+    }
+  };
+  $('pgo2').onclick = () => go('ps2');
+  $('pgo3').onclick = () => go('ps3');
+  $('psubmit').onclick = () => { go('ps4'); setTimeout(() => finish(true), 1400); };
+  $('pskip').onclick = () => finish(false);
+})();
+
 /* =====================  DEVELOPER MODE  ===================== */
 function devNote(html){
   return card(`<span class="tag" style="color:#3fdc5f;border-color:#3fdc5f">DEV · 剧情节点</span><div>${html}</div>`);
@@ -2919,6 +3043,7 @@ function devJump(i){
   document.body.classList.remove('hijacked','deep','mold','cold','silent','silver','noir',
     'glitching','mirrored','torch','blackout','faceflash','vanish','falling','rotting','mw','rippling');
   $('boot').classList.add('hidden');
+  $('prologue').classList.add('hidden');
   const ov = $('story'); ov.classList.add('hidden'); ov.onclick = null;
   $('endscreen').classList.add('hidden');
   S.locked = false;
