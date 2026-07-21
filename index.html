@@ -362,6 +362,28 @@
   .ritebtn:hover{background:var(--accent);color:#fff}
   .ritelog{margin-top:12px;font-size:13px;line-height:1.9;min-height:26px}
 
+  /* ch5: 井开三刻 · 夺魂 (long-press red-string tug) */
+  .tug-shen{min-height:22px;margin-top:10px;color:#c98090;font-size:13px;line-height:1.7}
+  .tug-wrap{margin-top:14px}
+  .tug-bar{position:relative;height:16px;border-radius:8px;background:linear-gradient(90deg,#3a1520,#1c2733);overflow:hidden;border:1px solid #39404d}
+  .tug-fill{position:absolute;top:0;left:0;height:100%;width:34%;background:linear-gradient(90deg,#b3202e,#e0607a);transition:width .12s linear}
+  .tug-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:4px;letter-spacing:.1em}
+  .tug-time{height:5px;border-radius:3px;background:#2a1016;overflow:hidden;margin-top:12px}
+  .tug-timefill{height:100%;width:100%;background:#ff5470;transition:width .12s linear}
+  .tug-grip{
+    display:block;width:100%;margin-top:16px;padding:20px;border:none;border-radius:14px;cursor:pointer;
+    background:#8a1622;color:#f4d9dd;font-family:"SF Mono",Consolas,monospace;font-size:16px;letter-spacing:.3em;
+    user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .08s,background .15s;
+  }
+  .tug-grip.down{background:#c1121f;color:#fff;transform:scale(.98)}
+  .tug-lure{
+    display:block;width:100%;margin-top:12px;padding:13px;border:1px dashed #c98090;border-radius:12px;cursor:pointer;
+    background:rgba(193,18,31,.14);color:#e0a0aa;font-size:14px;letter-spacing:.1em;
+    animation:lurePulse 1s ease-in-out infinite;font-family:inherit;
+  }
+  @keyframes lurePulse{0%,100%{opacity:.55;box-shadow:0 0 0 rgba(224,96,122,0)}50%{opacity:1;box-shadow:0 0 18px rgba(224,96,122,.4)}}
+  .tug-hint{margin-top:12px}
+
   /* ---------- prologue: on his phone (iOS lock → Gmail → mobile web) ---------- */
   #prologue{
     position:fixed;inset:0;z-index:200;
@@ -736,7 +758,7 @@
   </div>
   <div id="devbar">
     <span>DEV</span>
-    <input type="range" id="devrange" min="0" max="24" step="1" value="0">
+    <input type="range" id="devrange" min="0" max="25" step="1" value="0">
     <span id="devlabel">第一章 · 开局</span>
     <button id="devclose" title="退出开发者模式">×</button>
   </div>
@@ -766,6 +788,10 @@ const S = {
   morse: false,      // ch5: well-bottom knocking egg used (+一刻)
   riteStep: 0,       // ch5: ritual progress (rope→moon→name)
   ch5done: false,    // ch5: soul guided back
+  tugOn: false,      // ch5: 井开三刻 confrontation active
+  tug: 34,           // ch5: pull meter 0..100 (100 = 归窍)
+  tugT: 240,         // ch5: 井开三刻 timer (ticks; Shen's pull runs it down)
+  held: false,       // ch5: gripping the red string
   hintKey: '',       // two-level hint tracking
   hintLv: 0,
   clues: [],
@@ -2187,7 +2213,7 @@ function renderRite(){
       if(btn.dataset.rite === STEPS[S.riteStep]){
         log.innerHTML += LINES[S.riteStep] + '<br>';
         S.riteStep++;
-        if(S.riteStep >= 3){ S.ch5done = true; endingA(); }
+        if(S.riteStep >= 3){ S.ch5done = true; startWellOpen(); }
       } else {
         S.riteStep = 0;
         if(!costKe()) return;
@@ -2197,6 +2223,99 @@ function renderRite(){
   });
   if(S.stage < 22) S.stage = 22;
   return el;
+}
+
+/* ---------- chapter 5: 井开三刻 · 夺魂 (long-press red-string tug) ---------- */
+function startWellOpen(){
+  S.locked = true;
+  showStory([
+    {cls:'narr', text:'你喊完她的名字——<b>03:33。井开。</b><br>整栋楼向下沉了一寸，泳池中央凹出一个漩涡。'},
+    {cls:'narr', text:'水面裂成一面镜。镜里是四十四层的静室，是漩涡，<br>是一只在井底攥了一百年绳的手——它攥着红绳的另一头。'},
+    {cls:'sys', who:'沈聿', text:'“……你？”<br>一个很老、很轻的声音，从水底浮上来。<br>“我等这个窍，等了一百年。小丫头，你放手。”'},
+    {cls:'narr', text:'红绳绷得笔直。你这头系着她的腕，那头没入水里。<br>牌位上那行<b>丁丑</b>你还记得——井要的旧躯，是他。<br>你只要<b>不松手</b>，井就照写好的收人。'},
+  ], () => { S.locked = false; enterTug(); });
+}
+
+function enterTug(){
+  S.tugOn = true; S.tug = 34; S.tugT = 240; S.held = false; S.ch5done = true;
+  S.ktOn = false; S.locked = true;
+  if(S.stage < 22) S.stage = 22;
+  updateClock();
+  return renderTug();
+}
+
+function renderTug(){
+  const el = card(`
+    <span class="tag">MIRROR SIDE // 井开三刻 · 夺魂</span>
+    <h3>红绳绷直。她在两界之间，你在这头。</h3>
+    <div class="imgwrap">${svgRite}</div>
+    <div class="tug-shen mono"></div>
+    <div class="tug-wrap">
+      <div class="tug-bar"><div class="tug-fill"></div></div>
+      <div class="tug-ends"><span>◂ 归窍</span><span>入井 ▸</span></div>
+      <div class="tug-time"><div class="tug-timefill"></div></div>
+    </div>
+    <button class="tug-grip">按 住 · 握 紧 红 绳</button>
+    <button class="tug-lure" style="display:none"></button>
+    <div class="tug-hint sub">按住不放，一寸一寸把她拉回来。<br>别松手——也别信水里那个声音。</div>
+  `);
+  const fill = el.querySelector('.tug-fill'),
+        timefill = el.querySelector('.tug-timefill'),
+        shen = el.querySelector('.tug-shen'),
+        grip = el.querySelector('.tug-grip'),
+        lure = el.querySelector('.tug-lure');
+
+  const setHeld = v => { S.held = v; if(v) grip.classList.add('down'); else grip.classList.remove('down'); };
+  grip.addEventListener('pointerdown', e => { e.preventDefault(); setHeld(true); });
+  grip.addEventListener('pointerup', () => setHeld(false));
+  grip.addEventListener('pointerleave', () => setHeld(false));
+  grip.addEventListener('pointercancel', () => setHeld(false));
+  if(document.addEventListener) document.addEventListener('pointerup', () => setHeld(false));
+
+  /* 癸未 lure — her voice, faked by him. Touching it = you verify her = 交割 */
+  const LURES = ['「报我的八字，快！我要被拖走了！」','「是我呀，你不认得我了吗？报生辰！」','「癸未年三月——你说出来，我就能回去！」'];
+  lure.onclick = () => { if(S.tugOn) tugLose('lure'); };
+  (function lureLoop(){
+    if(!S.tugOn) return;
+    lure.textContent = LURES[Math.floor(Math.random()*LURES.length)];
+    lure.style.display = 'block';
+    setTimeout(() => {
+      if(!S.tugOn) return;
+      lure.style.display = 'none';
+      setTimeout(lureLoop, 1300 + Math.random()*1400);
+    }, 1700);
+  })();
+
+  const SHEN = [
+    '“你拉不动的。我攥了一百年。”',
+    '“她的绳，是那个老太婆续的。老太婆早死了。”',
+    '“松手吧。松手，我让你走。”',
+    '“……你怎么还不松手。”',
+  ];
+  (function tugStep(){
+    if(!S.tugOn) return;
+    S.tugT--;
+    S.tug += S.held ? 1.3 : -1.55;
+    if(S.tug > 100) S.tug = 100;
+    if(S.tug < 0) S.tug = 0;
+    if(fill.style) fill.style.width = S.tug.toFixed(1) + '%';
+    if(timefill.style) timefill.style.width = Math.max(0, S.tugT/240*100).toFixed(1) + '%';
+    if(shen){ const i = Math.min(SHEN.length-1, Math.floor((100-S.tugT/240*100)/25)); shen.innerHTML = SHEN[i]; }
+    if(S.tug >= 100){ tugWin(); return; }
+    if(S.tug <= 0){ tugLose('pull'); return; }
+    if(S.tugT <= 0){ tugLose('time'); return; }
+    setTimeout(tugStep, 120);
+  })();
+  return el;
+}
+
+function tugWin(){
+  S.tugOn = false; S.held = false; S.locked = false;
+  if(S.named43 && S.morse) endingC(); else endingA();
+}
+function tugLose(reason){
+  S.tugOn = false; S.held = false; S.locked = false;
+  badEnd(reason === 'lure' ? 'lure' : 'tug');
 }
 
 /* ---------- chapter 5 countdown & endings ---------- */
@@ -2214,10 +2333,10 @@ function endingA(){
   try{ localStorage.setItem('glimmer_end','A'); }catch(e){}
   sfxShimmer();
   const beats = [
-    {cls:'narr', text:'名字出口的一瞬间——水面所有的纹路，同时停了。'},
-    {cls:'narr', text:'红绳从你掌心自己松开，缠上她的手腕，<br>打了一个很旧、很熟练的结。'},
-    {cls:'narr', text:'她眨了眨眼。<br>这一次，水里的倒影和她，是<b>同时</b>眨的。'},
-    {cls:'narr', text:'<b>03:33。井开。</b><br>整栋楼向下沉了一寸。泳池中央凹出一个漩涡——<br>牌位上的生辰已经写好了，井照单收人。'},
+    {cls:'narr', text:'你死死攥住绳，一寸、一寸地往回收。<br>水里那只手，先是抖，然后——<b>松了</b>。'},
+    {cls:'narr', text:'她整个人向你倒过来。红绳自己缠上她的手腕，<br>打了一个很旧、很熟练的结。'},
+    {cls:'narr', text:'牌位上那行<b>丁丑</b>亮了一下。<br>井认得这个生辰——它等的旧躯，从来就是他。'},
+    {cls:'sys', who:'沈聿', text:'“……不。不该是我。<br>我操持这口井，一百年——”<br>话没说完，漩涡把他卷了下去。<b>一声没出。</b>'},
     {cls:'narr', text:'漩涡合拢前，你听见电梯「叮」了一声。<br>这一次，是<b>下行</b>。'},
     {cls:'xiaoya', who:'小雅', text:'“……好冷。”<br>她攥着腕上的红绳缩进你怀里，声音是活人的温度：<br>“我梦见外婆了。她说，<b>到家了</b>。”'},
     {cls:'sys', who:'GLIMMER OS', text:'档案 045 · 结案：<b>归窍</b><br>名录 · 本季闭页<br><br><span style="opacity:.5">// 天快亮了。</span>'},
@@ -2230,26 +2349,61 @@ function endingA(){
   showStory(beats, () => showEnd5('A'));
 }
 
-function badEnd(){
-  S.ktOn = false; S.kt = 0;
+/* hidden true ending: freed victims (named43 + morse) pull him under themselves */
+function endingC(){
+  S.ktOn = false; S.kt = 0; S.stage = 23;
+  updateClock();
+  try{ localStorage.setItem('glimmer_end','C'); }catch(e){}
+  sfxShimmer();
+  showStory([
+    {cls:'narr', text:'你撑到手指发白——水面忽然<b>亮了</b>。'},
+    {cls:'narr', text:'水底那四十四双眼睛，一齐睁开。<br>不是眼睛。是四十四双手，从井壁上伸出来。'},
+    {cls:'narr', text:'是被他吞了一百年的人。你替他们把名字带了出去——<br>陈婷、周明远……现在，他们记起了自己。'},
+    {cls:'narr', text:'四十四双手抓住红绳，抓住沈聿。<br>这一次，往下拉的，不是你。'},
+    {cls:'sys', who:'沈聿', text:'沈聿这一次<b>喊了</b>。<br>一百年的长生，一口气全吐进了井里。'},
+    {cls:'narr', text:'井，被填平了。楼，安静下来。<br>红绳松松地垂在她腕上，像从没被人动过。'},
+    {cls:'xiaoya', who:'小雅', text:'她睁开眼，认得你了。<br>“……我们回家吧。”'},
+    {cls:'sys', who:'GLIMMER OS', text:'名录 · <b>已清空</b><br>访客计数：——<br><br><span style="opacity:.5">// 那些「中奖」邮件，再也发不出去了。</span>'},
+    {cls:'narr', text:'天亮。你们走出正门。<br>海边的枯井旧址上，一夜之间，长出了草。'},
+    {cls:'narr', text:'那个 1998 年的旧网页，最后刷新了一次——<br><b>然后再也打不开了。</b>'},
+  ], () => showEnd5('C'));
+}
+
+function badEnd(from){
+  S.ktOn = false; S.kt = 0; S.tugOn = false; S.held = false;
   updateClock();
   try{ localStorage.setItem('glimmer_end','B'); }catch(e){}
   sfxPlunge();
+  const open = from === 'lure'
+    ? {cls:'narr', text:'你信了那个声音。<br>「癸未年三月」——四个字刚出口，你就知道错了。<br>井当场核验，收下了她。'}
+    : from === 'tug'
+    ? {cls:'narr', text:'你的手，撑不住了。<br>红绳从掌心一寸一寸滑进水里。<br>那头的手，攥得比一百年前还紧。'}
+    : {cls:'narr', text:'<b>03:33。</b><br>你还没有做完。水面正中，无风自裂。'};
   showStory([
-    {cls:'narr', text:'<b>03:33。</b><br>你还没有做完。水面正中，无风自裂。'},
-    {cls:'narr', text:'月影碎成四十四片。<br>每一片里，都睁着眼睛。'},
+    open,
+    {cls:'narr', text:'水面碎成四十四片。<br>每一片里，都睁着眼睛。'},
     {cls:'xiaoya', who:'小雅', text:'她转过身来，笑容标准得像前台。<br>“先生，久等了。”她说，<br>“手续，<b>办完了</b>。”'},
     {cls:'sys', who:'GLIMMER OS', text:'名录 · 已添新页<br><b>第四十六号 · 供体 王某</b><br>访客计数：0000046'},
   ], () => {
-    ghostType('欢迎成为微光的一部分。', () => showEnd5('B'));
+    ghostType('欢迎成为微光的一部分。', () => {
+      showStory([
+        {cls:'narr', text:'天亮了。你换上一身干净衣服，站到了前台后面。<br>你的笑容，标准得刚刚好。'},
+        {cls:'sys', who:'GLIMMER OS', text:'// 新邮件已发送<br>// 收件人：下一位幸运住客<br>// 主题：恭喜！您与同行人已被抽中……<br>访客计数：<b>0000047</b>'},
+        {cls:'narr', text:'很远的地方，某个人的手机，在凌晨<b>03:33</b>亮了一下。<br>屏幕上是一封中奖邮件。'},
+      ], () => showEnd5('B'));
+    });
   });
 }
 
 function showEnd5(kind){
-  $('endtitle').textContent = kind === 'A' ? '终章 · 归窍' : '终章 · 添页';
-  $('endtag').textContent  = kind === 'A' ? 'ENDING A · 井已闭' : 'ENDING B · 0000046';
-  $('endquote').textContent = kind === 'A' ? '「绳不离身，魂不离窍。」' : '「欢迎成为微光的一部分。」';
-  $('endstats').textContent = `你共搜索了 ${S.searches} 次，唤醒了 ${S.clues.length} 条线索。`;
+  const TITLE = {A:'终章 · 归窍', B:'终章 · 添页', C:'终章 · 散'};
+  const TAG   = {A:'ENDING A · 井已闭', B:'ENDING B · 0000046', C:'ENDING C · 井已填'};
+  const QUOTE = {A:'「绳不离身，魂不离窍。」', B:'「欢迎成为微光的一部分。」', C:'「把我的名字，带出去。」'};
+  $('endtitle').textContent = TITLE[kind];
+  $('endtag').textContent  = TAG[kind];
+  $('endquote').textContent = QUOTE[kind];
+  $('endstats').textContent = `你共搜索了 ${S.searches} 次，唤醒了 ${S.clues.length} 条线索。`
+    + (kind === 'A' ? '（隐藏结局：救下井里所有人。）' : '');
   const btns = $('endbtns'); btns.innerHTML = '';
   if(kind === 'B'){
     const b = document.createElement('button');
@@ -2269,6 +2423,7 @@ function backToCh4(){
   S.ktOn = false; S.kt = 210;
   S.seenPool = S.seenMoon = S.seenEyes = S.named43 = S.morse = S.ch5done = false;
   S.riteStep = 0;
+  S.tugOn = false; S.tug = 34; S.tugT = 240; S.held = false;
   S.mw = false;
   document.body.classList.remove('mw');
   try{ localStorage.removeItem('glimmer_end'); }catch(e){}
@@ -3130,8 +3285,9 @@ const DEVPTS = [
    r:() => devNote('<b>第五章开局</b>：00:03 回到现实侧，小雅在顶楼池沿。倒计时 3:30，每搜一刻。<br>→ 下一步：搜「泳池」')},
   {label:'五章 · 水面即镜',     stage:21, room:1, card:1, cctv:1, kt:180, pool:1, moon:1, r:() => renderMoonWater()},
   {label:'五章 · 引魂仪',       stage:22, room:1, card:1, cctv:1, kt:150, pool:1, moon:1, eyes:1, r:() => renderRite()},
+  {label:'五章 · 井开三刻',     stage:22, room:1, card:1, cctv:1, pool:1, moon:1, eyes:1, tug:1, r:() => enterTug()},
   {label:'终 · 归窍(A)',        stage:23, room:1, card:1, cctv:1,
-   r:() => devNote('<b>终章 · 归窍（结局A）</b>：引魂三步完成，井按牌位收走沈聿，小雅归窍。<br>坏结局（B·添页）＝倒计时耗尽即触发。')},
+   r:() => devNote('<b>终章 · 归窍（结局A）</b>：井开三刻·夺魂——长按握绳把小雅拉回、沈聿入井。<br>坏结局 B（添页·循环）＝三刻耗尽/中癸未诱饵；隐藏结局 C（散）＝传名周明远＋听井底摩斯。')},
 ];
 function devJump(i){
   const p = DEVPTS[i];
@@ -3154,8 +3310,9 @@ function devJump(i){
   /* ch5 state */
   S.seenPool = !!p.pool; S.seenMoon = !!p.moon; S.seenEyes = !!p.eyes;
   S.named43 = false; S.morse = false; S.riteStep = 0;
+  S.tugOn = false; S.tug = 34; S.tugT = 240; S.held = false;
   S.ch5done = p.stage >= 23;
-  S.ktOn = p.stage >= 19 && p.stage < 23;
+  S.ktOn = p.stage >= 19 && p.stage < 23 && !p.tug;
   S.kt = p.kt || 210;
   if(p.stage >= 14){ try{ localStorage.setItem('glimmer_ch4','1'); }catch(e){} }
   if(p.stage >= 15){ try{ localStorage.setItem('sst_pai','044'); }catch(e){} }

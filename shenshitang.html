@@ -357,6 +357,22 @@ try{
       tB.style.color = '';
       tB.innerHTML = '<div class="m-head">刚刚 · 访客 0046</div><span style="color:#a02020">（正在输入……）</span>';
     }
+  } else if(END === 'C'){
+    var cC = document.querySelector('.counter');
+    if(cC){ cC.textContent = '———————'; cC.classList.remove('blink'); }
+    var mC = document.querySelector('marquee');
+    if(mC) mC.innerHTML = '本堂已歇业 ★ 井已填 ★ 各位客人，都到家了 ★';
+    document.getElementById('st45').innerHTML = '<b>已归窍</b>';
+    document.getElementById('whshen').innerHTML = '—';
+    document.getElementById('stshen').innerHTML = '<b style="color:#a02020">已归井</b>';
+    var tbC = document.getElementById('minglu');
+    if(tbC) tbC.insertAdjacentHTML('beforeend',
+      '<tr><td colspan="4" style="text-align:center;color:#7a1f1f"><b>——本季名录已清空，四十四页尽散——</b></td></tr>');
+    var tC = document.getElementById('typingmsg');
+    if(tC){
+      tC.style.color = '';
+      tC.innerHTML = '<div class="m-head">刚刚 · <b style="color:#7a1f1f">北海阿婆</b></div><b>都到家了。谢谢你。</b>';
+    }
   }
 }catch(e){}
 </script>
