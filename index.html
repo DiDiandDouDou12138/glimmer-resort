@@ -362,27 +362,38 @@
   .ritebtn:hover{background:var(--accent);color:#fff}
   .ritelog{margin-top:12px;font-size:13px;line-height:1.9;min-height:26px}
 
-  /* ch5: 井开三刻 · 夺魂 (long-press red-string tug) */
-  .tug-shen{min-height:22px;margin-top:10px;color:#c98090;font-size:13px;line-height:1.7}
-  .tug-wrap{margin-top:14px}
-  .tug-bar{position:relative;height:16px;border-radius:8px;background:linear-gradient(90deg,#3a1520,#1c2733);overflow:hidden;border:1px solid #39404d}
-  .tug-fill{position:absolute;top:0;left:0;height:100%;width:34%;background:linear-gradient(90deg,#b3202e,#e0607a);transition:width .12s linear}
-  .tug-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-top:4px;letter-spacing:.1em}
-  .tug-time{height:5px;border-radius:3px;background:#2a1016;overflow:hidden;margin-top:12px}
-  .tug-timefill{height:100%;width:100%;background:#ff5470;transition:width .12s linear}
-  .tug-grip{
-    display:block;width:100%;margin-top:16px;padding:20px;border:none;border-radius:14px;cursor:pointer;
-    background:#8a1622;color:#f4d9dd;font-family:"SF Mono",Consolas,monospace;font-size:16px;letter-spacing:.3em;
-    user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .08s,background .15s;
-  }
-  .tug-grip.down{background:#c1121f;color:#fff;transform:scale(.98)}
-  .tug-lure{
-    display:block;width:100%;margin-top:12px;padding:13px;border:1px dashed #c98090;border-radius:12px;cursor:pointer;
-    background:rgba(193,18,31,.14);color:#e0a0aa;font-size:14px;letter-spacing:.1em;
-    animation:lurePulse 1s ease-in-out infinite;font-family:inherit;
-  }
-  @keyframes lurePulse{0%,100%{opacity:.55;box-shadow:0 0 0 rgba(224,96,122,0)}50%{opacity:1;box-shadow:0 0 18px rgba(224,96,122,.4)}}
-  .tug-hint{margin-top:12px}
+  /* ch5: 井开三刻 · 夺魂 (full-screen confrontation) */
+  #welltug{background:radial-gradient(ellipse at 50% 92%,#0a1c2e 0%,#050a12 62%);
+    justify-content:flex-start;cursor:default;padding:0;overflow:hidden}
+  #wt-top{width:100%;padding:20px 26px 0;flex:none}
+  #wt-label{font-family:"SF Mono",Consolas,monospace;letter-spacing:.5em;font-size:12px;color:#ff7a90;text-align:center;margin-bottom:9px}
+  #wt-timebar{height:4px;border-radius:2px;background:#2a1016;overflow:hidden}
+  #wt-timefill{height:100%;width:100%;background:linear-gradient(90deg,#ff5470,#ffa7b6)}
+  #wt-scene{position:relative;flex:1;width:100%;min-height:0;overflow:hidden}
+  #wt-svgwrap{position:absolute;inset:0}
+  #wt-svgwrap svg{width:100%;height:100%;display:block}
+  #wt-her{position:absolute;left:50%;top:3%;transform:translateX(-50%);font-size:12px;letter-spacing:.3em;color:#f0c0cc;text-shadow:0 0 12px rgba(240,160,180,.7)}
+  #wt-rope{position:absolute;left:50%;top:8%;bottom:12%;width:3px;transform:translateX(-50%);
+    background:linear-gradient(#e5a7b8,#c1121f);opacity:.85;border-radius:2px}
+  #wt-knot{position:absolute;left:50%;top:76%;width:24px;height:24px;border-radius:50%;
+    transform:translate(-50%,-50%);background:radial-gradient(circle at 40% 35%,#ffc2cd,#b3202e);
+    box-shadow:0 0 22px rgba(224,96,122,.85);transition:top .12s linear}
+  #wt-lure{position:absolute;left:50%;top:44%;transform:translateX(-50%);max-width:230px;
+    padding:11px 15px;border-radius:16px;background:rgba(24,10,15,.92);border:1px solid #c98090;
+    color:#eab8c2;font-size:13px;line-height:1.6;cursor:pointer;text-align:center;
+    animation:lurePulse 1s ease-in-out infinite}
+  #wt-lure.hidden{display:none}
+  @keyframes lurePulse{0%,100%{opacity:.6;box-shadow:0 0 0 rgba(224,96,122,0)}50%{opacity:1;box-shadow:0 0 22px rgba(224,96,122,.5)}}
+  #wt-shen{flex:none;min-height:20px;padding:6px 26px;color:#c98090;font-size:13px;text-align:center;line-height:1.6}
+  #wt-grip{flex:none;margin:6px 24px;padding:22px;border-radius:16px;text-align:center;
+    background:#8a1622;color:#f4d9dd;font-family:"SF Mono",Consolas,monospace;font-size:16px;letter-spacing:.35em;
+    cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:transform .08s,background .15s}
+  #wt-grip.down{background:#c1121f;color:#fff;transform:scale(.98);box-shadow:0 0 30px rgba(193,18,31,.5)}
+  #wt-hint{flex:none;padding:0 26px 20px;color:#6b7686;font-size:12px;text-align:center;line-height:1.7}
+  #welltug .wt-eye{opacity:0;transition:opacity .7s}
+  #welltug.freed .wt-eye{opacity:.92}
+  #welltug.freed #wt-grip,#welltug.freed #wt-hint,#welltug.freed #wt-lure{opacity:.15;pointer-events:none;transition:opacity .8s}
+  #welltug.freed #wt-knot{transition:top 1.6s cubic-bezier(.4,0,.3,1);box-shadow:0 0 34px rgba(255,180,200,.9)}
 
   /* ---------- prologue: on his phone (iOS lock → Gmail → mobile web) ---------- */
   #prologue{
@@ -715,6 +726,24 @@
     <div id="endbtns"></div>
   </div>
 
+  <!-- ch5 finale: 井开三刻 · 夺魂 (full-screen) -->
+  <div class="overlay hidden" id="welltug">
+    <div id="wt-top">
+      <div id="wt-label">井 开 三 刻</div>
+      <div id="wt-timebar"><div id="wt-timefill"></div></div>
+    </div>
+    <div id="wt-scene">
+      <div id="wt-svgwrap"></div>
+      <div id="wt-her">她</div>
+      <div id="wt-rope"></div>
+      <div id="wt-knot"></div>
+      <div id="wt-lure" class="hidden"></div>
+    </div>
+    <div id="wt-shen"></div>
+    <div id="wt-grip">按 住 · 握 紧 红 绳</div>
+    <div id="wt-hint">按住不放，一寸一寸把她拉回来。<br>别松手——也别信水里那个声音。</div>
+  </div>
+
   <!-- OS -->
   <div id="statusbar">
     <span class="brand">GLIMMER OS</span>
@@ -789,9 +818,10 @@ const S = {
   riteStep: 0,       // ch5: ritual progress (rope→moon→name)
   ch5done: false,    // ch5: soul guided back
   tugOn: false,      // ch5: 井开三刻 confrontation active
-  tug: 34,           // ch5: pull meter 0..100 (100 = 归窍)
-  tugT: 240,         // ch5: 井开三刻 timer (ticks; Shen's pull runs it down)
+  tug: 45,           // ch5: pull meter 0..100 (100 = 归窍)
+  tugT: 220,         // ch5: 井开三刻 timer (ticks; Shen's pull runs it down)
   held: false,       // ch5: gripping the red string
+  tugFreed: false,   // ch5: the 44 rose (ending C takeover triggered)
   hintKey: '',       // two-level hint tracking
   hintLv: 0,
   clues: [],
@@ -1717,6 +1747,48 @@ const svgRite = `
   <text x="320" y="34" text-anchor="middle" fill="#22314a" font-size="10" font-family="monospace" letter-spacing="6">03:33 INCOMING</text>
 </svg>`;
 
+/* ch5 finale scene: vertical shaft — surface up top, whirlpool + his hand down in the well */
+const svgWellTug = (() => {
+  let eyes = '';
+  for(let i=0;i<22;i++){
+    const x = 40 + ((i*151)%320), y = 120 + ((i*97)%320);
+    if(Math.abs(x-200)<44) continue; /* keep the rope column clear */
+    eyes += `<g class="wt-eye" fill="#cfd8c8">
+      <ellipse cx="${x}" cy="${y}" rx="4.5" ry="2.6"/><ellipse cx="${x+12}" cy="${y}" rx="4.5" ry="2.6"/>
+      <circle cx="${x}" cy="${y}" r="1.2" fill="#0a0d0a"/><circle cx="${x+12}" cy="${y}" r="1.2" fill="#0a0d0a"/></g>`;
+  }
+  return `
+<svg viewBox="0 0 400 560" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <radialGradient id="wtwater" cx=".5" cy=".92" r=".9">
+      <stop offset="0" stop-color="#123049"/><stop offset=".6" stop-color="#081726"/><stop offset="1" stop-color="#04080f"/>
+    </radialGradient>
+    <radialGradient id="wtmoon" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#eef0e0" stop-opacity=".8"/><stop offset="1" stop-color="#eef0e0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="560" fill="url(#wtwater)"/>
+  <!-- surface glimmer near the top (her side) -->
+  <ellipse cx="200" cy="46" rx="150" ry="10" fill="#9dbdd4" opacity=".18"/>
+  <ellipse cx="200" cy="70" rx="40" ry="12" fill="url(#wtmoon)"/>
+  ${eyes}
+  <!-- whirlpool at the bottom (the well) -->
+  <g fill="none" stroke="#24425c">
+    <ellipse cx="200" cy="500" rx="150" ry="42"/>
+    <ellipse cx="200" cy="502" rx="112" ry="31" opacity=".8"/>
+    <ellipse cx="200" cy="504" rx="76" ry="21" opacity=".6"/>
+    <ellipse cx="200" cy="506" rx="42" ry="12" opacity=".5"/>
+  </g>
+  <ellipse cx="200" cy="508" rx="20" ry="6" fill="#02060c"/>
+  <!-- his pale hand rising from the well, gripping the rope -->
+  <g stroke="#c9cfc0" stroke-width="4" fill="none" opacity=".9">
+    <path d="M186 500 q4 -30 8 -52"/><path d="M197 502 q2 -32 4 -56"/>
+    <path d="M209 502 q0 -32 -1 -56"/><path d="M221 500 q-3 -30 -8 -50"/>
+    <path d="M176 512 q26 16 52 0"/>
+  </g>
+</svg>`;
+})();
+
 function card(html, corrupt=false){
   const el = document.createElement('div');
   el.className = 'card' + (corrupt?' corrupt':'');
@@ -2237,85 +2309,94 @@ function startWellOpen(){
 }
 
 function enterTug(){
-  S.tugOn = true; S.tug = 34; S.tugT = 240; S.held = false; S.ch5done = true;
+  S.tugOn = true; S.tug = 45; S.tugT = 220; S.held = false; S.tugFreed = false; S.ch5done = true;
   S.ktOn = false; S.locked = true;
   if(S.stage < 22) S.stage = 22;
   updateClock();
   return renderTug();
 }
 
+const TUG_SHEN = [
+  '“你拉不动的。我攥了一百年。”',
+  '“她的绳，是那个老太婆续的。老太婆早死了。”',
+  '“松手吧。松手，我让你走。”',
+  '“……你怎么还不松手。”',
+];
+const TUG_LURES = ['「报我的八字，快！我要被拖走了！」','「是我呀，你不认得我了吗？报生辰！」','「癸未年三月——你说出来，我就能回去！」'];
+
 function renderTug(){
-  const el = card(`
-    <span class="tag">MIRROR SIDE // 井开三刻 · 夺魂</span>
-    <h3>红绳绷直。她在两界之间，你在这头。</h3>
-    <div class="imgwrap">${svgRite}</div>
-    <div class="tug-shen mono"></div>
-    <div class="tug-wrap">
-      <div class="tug-bar"><div class="tug-fill"></div></div>
-      <div class="tug-ends"><span>◂ 归窍</span><span>入井 ▸</span></div>
-      <div class="tug-time"><div class="tug-timefill"></div></div>
-    </div>
-    <button class="tug-grip">按 住 · 握 紧 红 绳</button>
-    <button class="tug-lure" style="display:none"></button>
-    <div class="tug-hint sub">按住不放，一寸一寸把她拉回来。<br>别松手——也别信水里那个声音。</div>
-  `);
-  const fill = el.querySelector('.tug-fill'),
-        timefill = el.querySelector('.tug-timefill'),
-        shen = el.querySelector('.tug-shen'),
-        grip = el.querySelector('.tug-grip'),
-        lure = el.querySelector('.tug-lure');
+  const wt = $('welltug');
+  wt.classList.remove('freed','hidden');
+  $('wt-svgwrap').innerHTML = svgWellTug;
+  const knot = $('wt-knot'), timefill = $('wt-timefill'), shen = $('wt-shen'),
+        grip = $('wt-grip'), lure = $('wt-lure'), hint = $('wt-hint');
+  shen.innerHTML = TUG_SHEN[0];
+  if(hint.style) hint.style.opacity = '';
+  if(grip.style) grip.style.opacity = '';
+  grip.classList.remove('down');
 
+  /* grip: press-and-hold (pointer capture keeps the hold if you slide off) */
   const setHeld = v => { S.held = v; if(v) grip.classList.add('down'); else grip.classList.remove('down'); };
-  grip.addEventListener('pointerdown', e => { e.preventDefault(); setHeld(true); });
-  grip.addEventListener('pointerup', () => setHeld(false));
-  grip.addEventListener('pointerleave', () => setHeld(false));
-  grip.addEventListener('pointercancel', () => setHeld(false));
-  if(document.addEventListener) document.addEventListener('pointerup', () => setHeld(false));
+  grip.onpointerdown = e => {
+    if(e && e.preventDefault) e.preventDefault();
+    if(grip.setPointerCapture && e && e.pointerId != null){ try{ grip.setPointerCapture(e.pointerId); }catch(_){} }
+    setHeld(true);
+  };
+  grip.onpointerup = () => setHeld(false);
+  grip.onpointercancel = () => setHeld(false);
+  grip.onpointerleave = () => { if(!grip.hasPointerCapture) setHeld(false); };
 
-  /* 癸未 lure — her voice, faked by him. Touching it = you verify her = 交割 */
-  const LURES = ['「报我的八字，快！我要被拖走了！」','「是我呀，你不认得我了吗？报生辰！」','「癸未年三月——你说出来，我就能回去！」'];
+  /* 癸未 lure — her voice, faked by him. Touching it = you verify her = 交割 = 坏结局 */
   lure.onclick = () => { if(S.tugOn) tugLose('lure'); };
   (function lureLoop(){
-    if(!S.tugOn) return;
-    lure.textContent = LURES[Math.floor(Math.random()*LURES.length)];
-    lure.style.display = 'block';
+    if(!S.tugOn || S.tugFreed) return;
+    lure.textContent = TUG_LURES[Math.floor(Math.random()*TUG_LURES.length)];
+    lure.classList.remove('hidden');
+    lure.style.top = (34 + Math.random()*26) + '%';
     setTimeout(() => {
       if(!S.tugOn) return;
-      lure.style.display = 'none';
-      setTimeout(lureLoop, 1300 + Math.random()*1400);
-    }, 1700);
+      lure.classList.add('hidden');
+      setTimeout(lureLoop, 1200 + Math.random()*1300);
+    }, 1600);
   })();
 
-  const SHEN = [
-    '“你拉不动的。我攥了一百年。”',
-    '“她的绳，是那个老太婆续的。老太婆早死了。”',
-    '“松手吧。松手，我让你走。”',
-    '“……你怎么还不松手。”',
-  ];
   (function tugStep(){
     if(!S.tugOn) return;
     S.tugT--;
-    S.tug += S.held ? 1.3 : -1.55;
+    S.tug += S.held ? 1.4 : -0.85;
     if(S.tug > 100) S.tug = 100;
     if(S.tug < 0) S.tug = 0;
-    if(fill.style) fill.style.width = S.tug.toFixed(1) + '%';
-    if(timefill.style) timefill.style.width = Math.max(0, S.tugT/240*100).toFixed(1) + '%';
-    if(shen){ const i = Math.min(SHEN.length-1, Math.floor((100-S.tugT/240*100)/25)); shen.innerHTML = SHEN[i]; }
+    if(knot.style) knot.style.top = (84 - S.tug * 0.76).toFixed(1) + '%';
+    if(timefill.style) timefill.style.width = Math.max(0, S.tugT / 220 * 100).toFixed(1) + '%';
+    if(shen) shen.innerHTML = TUG_SHEN[Math.min(TUG_SHEN.length - 1, Math.floor((220 - S.tugT) / 55))];
+    /* hidden ending C: once you've earned it (name + morse) and pulled past halfway, the 44 rise */
+    if(S.named43 && S.morse && S.tug >= 55 && !S.tugFreed){ tugFree(); return; }
     if(S.tug >= 100){ tugWin(); return; }
     if(S.tug <= 0){ tugLose('pull'); return; }
     if(S.tugT <= 0){ tugLose('time'); return; }
     setTimeout(tugStep, 120);
   })();
-  return el;
+  return $('welltug');
 }
 
 function tugWin(){
   S.tugOn = false; S.held = false; S.locked = false;
-  if(S.named43 && S.morse) endingC(); else endingA();
+  $('welltug').classList.add('hidden');
+  endingA();
 }
 function tugLose(reason){
   S.tugOn = false; S.held = false; S.locked = false;
+  $('welltug').classList.add('hidden');
   badEnd(reason === 'lure' ? 'lure' : 'tug');
+}
+/* the freed victims take over — hands rise, they pull him down themselves */
+function tugFree(){
+  S.tugOn = false; S.tugFreed = true; S.held = false; S.locked = false;
+  const wt = $('welltug'); wt.classList.add('freed');
+  const knot = $('wt-knot'); if(knot.style) knot.style.top = '5%';
+  const shen = $('wt-shen'); if(shen) shen.innerHTML = '水底四十四双手，一齐抓住了绳。<br>这一次，往下拉的不是你。';
+  const lure = $('wt-lure'); if(lure) lure.classList.add('hidden');
+  setTimeout(() => { $('welltug').classList.add('hidden'); endingC(); }, 2000);
 }
 
 /* ---------- chapter 5 countdown & endings ---------- */
@@ -2423,7 +2504,8 @@ function backToCh4(){
   S.ktOn = false; S.kt = 210;
   S.seenPool = S.seenMoon = S.seenEyes = S.named43 = S.morse = S.ch5done = false;
   S.riteStep = 0;
-  S.tugOn = false; S.tug = 34; S.tugT = 240; S.held = false;
+  S.tugOn = false; S.tug = 45; S.tugT = 220; S.held = false; S.tugFreed = false;
+  $('welltug').classList.add('hidden');
   S.mw = false;
   document.body.classList.remove('mw');
   try{ localStorage.removeItem('glimmer_end'); }catch(e){}
@@ -2682,9 +2764,10 @@ function onSearch(){
         S.kt = Math.min(S.kt + 30, 210);
         updateClock();
         card(`<span class="tag">⚠ 井底 · 敲击</span>
-          <p>你趴在池沿听。三短，三长，三短——不急，不乱。<br>你认得这个节奏，也认得敲的人。</p>
-          <p class="mono">他在替你数拍子。心稳了，手就快。<b>（多出一刻）</b></p>`, true);
-      } else { butler('敲击声还在。一下，一下。'); }
+          <p>你趴在池沿听。三短、三长、三短——<b>S·O·S</b>。<br>你认得这个节奏，也认得敲的人：<br>冷库里那个没有嘴的人，<b>周明远</b>。他没死透，他一直在下面。</p>
+          <p class="mono">他替你数着拍子。你想起他说过的那句话——<br><b>「把我的名字，带出去。」</b><b>（多出一刻）</b></p>`, true);
+        addClue('井底敲 SOS 的是周明远——他要你把名字带出去（搜「周明远」传名）');
+      } else { butler('敲击声还在。一下，一下。SOS。') }
       return;
     }
     if(matchAny(q,['小雅','林小雅','女朋友'])){
@@ -3296,6 +3379,7 @@ function devJump(i){
     'glitching','mirrored','torch','blackout','faceflash','vanish','falling','rotting','mw','rippling');
   $('boot').classList.add('hidden');
   $('prologue').classList.add('hidden');
+  $('welltug').classList.add('hidden');
   const ov = $('story'); ov.classList.add('hidden'); ov.onclick = null;
   $('endscreen').classList.add('hidden');
   S.locked = false;
@@ -3310,7 +3394,7 @@ function devJump(i){
   /* ch5 state */
   S.seenPool = !!p.pool; S.seenMoon = !!p.moon; S.seenEyes = !!p.eyes;
   S.named43 = false; S.morse = false; S.riteStep = 0;
-  S.tugOn = false; S.tug = 34; S.tugT = 240; S.held = false;
+  S.tugOn = false; S.tug = 45; S.tugT = 220; S.held = false; S.tugFreed = false;
   S.ch5done = p.stage >= 23;
   S.ktOn = p.stage >= 19 && p.stage < 23 && !p.tug;
   S.kt = p.kt || 210;
