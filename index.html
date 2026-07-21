@@ -472,6 +472,47 @@
   .pperks b{color:#1c1c1e}
   .pweb-cta{display:block;width:100%;margin-top:16px;padding:15px;border:none;border-radius:14px;background:#c0392b;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
   .pfine{font-size:10px;color:#a4a4a9;text-align:center;margin-top:12px;line-height:1.7}
+  /* ps2: real 抽奖领取 H5 (festive, distinct from Glimmer's minimal light UI) */
+  .pbody.lucky{padding:0 0 28px;background:linear-gradient(#1b1030,#0e0a1c 42%,#0a0812);color:#f0e6d0}
+  .lk-hero{position:relative;overflow:hidden;padding:24px 18px 18px;text-align:center;background:linear-gradient(#3a1e12,#2a1428 62%,transparent)}
+  .lk-rays{position:absolute;top:-46%;left:50%;width:320px;height:320px;transform:translateX(-50%);pointer-events:none;
+    background:conic-gradient(from 0deg,rgba(255,200,90,.15) 0 6deg,transparent 6deg 30deg,rgba(255,200,90,.15) 30deg 36deg,transparent 36deg 60deg,rgba(255,200,90,.15) 60deg 66deg,transparent 66deg 90deg,rgba(255,200,90,.15) 90deg 96deg,transparent 96deg 120deg,rgba(255,200,90,.15) 120deg 126deg,transparent 126deg 150deg,rgba(255,200,90,.15) 150deg 156deg,transparent 156deg 180deg,rgba(255,200,90,.15) 180deg 186deg,transparent 186deg 210deg,rgba(255,200,90,.15) 210deg 216deg,transparent 216deg 240deg,rgba(255,200,90,.15) 240deg 246deg,transparent 246deg 270deg,rgba(255,200,90,.15) 270deg 276deg,transparent 276deg 300deg,rgba(255,200,90,.15) 300deg 306deg,transparent 306deg 330deg,rgba(255,200,90,.15) 330deg 336deg,transparent 336deg 360deg);
+    animation:lkspin 26s linear infinite}
+  @keyframes lkspin{to{transform:translateX(-50%) rotate(360deg)}}
+  .lk-ribbon{position:relative;display:inline-block;background:linear-gradient(#e6ad44,#c98a2a);color:#3a1e0a;font-size:10px;letter-spacing:.2em;padding:4px 16px;border-radius:20px;font-weight:700;margin-bottom:12px}
+  .lk-congrats{position:relative;font-size:23px;font-weight:800;color:#ffe9b8;text-shadow:0 2px 14px rgba(255,180,60,.5);margin-bottom:6px}
+  .lk-subtitle{position:relative;font-size:12px;color:#c9a86a;letter-spacing:.08em}
+  .lk-lucky{position:relative;margin-top:12px;font-size:12px;color:#e8d5b0}
+  .lk-lucky b{display:block;font-size:36px;font-weight:800;color:#ffcf5a;letter-spacing:.04em;text-shadow:0 0 22px rgba(255,180,60,.55);margin-top:1px}
+  .lk-ticket{position:relative;display:flex;margin:2px 16px 0;background:linear-gradient(105deg,#fff8ec,#ffe9c8);border-radius:14px;overflow:hidden;box-shadow:0 8px 26px rgba(0,0,0,.4)}
+  .lk-ticket::before,.lk-ticket::after{content:"";position:absolute;right:84px;width:14px;height:14px;border-radius:50%;background:#0d0917;transform:translateX(50%);z-index:2}
+  .lk-ticket::before{top:-7px}
+  .lk-ticket::after{bottom:-7px}
+  .lk-tk-main{flex:1;padding:15px 16px}
+  .lk-tk-label{font-size:11px;color:#a07a3a}
+  .lk-tk-prize{font-size:22px;font-weight:800;color:#b3202e;margin:4px 0 6px}
+  .lk-tk-meta{font-size:12px;line-height:1.7;color:#7a5a2a}
+  .lk-tk-meta b{color:#5a3a12}
+  .lk-tk-side{width:84px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#b3202e,#8a1622);color:#ffe9b8;border-left:2px dashed rgba(255,240,210,.55)}
+  .lk-tk-side span{font-size:11px;opacity:.85}
+  .lk-tk-side b{font-size:19px;font-weight:800;margin-top:3px}
+  .lk-count{text-align:center;margin:16px 16px 0;font-size:13px;color:#e8d5b0}
+  .lk-count span{display:inline-block;background:#2a1420;color:#ff6b6b;font-family:"SF Mono",Consolas,monospace;font-size:15px;padding:3px 10px;border-radius:6px;letter-spacing:.08em;margin-left:6px}
+  .lk-cta{display:block;width:calc(100% - 32px);margin:16px 16px 0;padding:16px;border:none;border-radius:30px;background:linear-gradient(#ffd45a,#f0982a);color:#5a2a08;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 26px rgba(240,150,40,.5);animation:lkpulse 1.4s ease-in-out infinite}
+  .lk-cta small{display:block;font-size:11px;font-weight:600;opacity:.75;margin-top:3px;letter-spacing:.05em}
+  @keyframes lkpulse{0%,100%{transform:scale(1);box-shadow:0 8px 26px rgba(240,150,40,.42)}50%{transform:scale(1.025);box-shadow:0 12px 34px rgba(240,150,40,.72)}}
+  .lk-scarce{text-align:center;font-size:12px;color:#e0a05a;margin:11px 16px 0}
+  .lk-scarce b{color:#ff6b6b;font-weight:700}
+  .lk-feed{margin:12px 16px 0;height:64px;overflow:hidden;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,220,160,.12)}
+  .lk-feed-track{animation:lkfeed 10s linear infinite}
+  @keyframes lkfeed{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+  .lk-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:12px;color:#cdb98c}
+  .lk-item em{font-style:normal;color:#9a8a6a}
+  .lk-dot{width:6px;height:6px;border-radius:50%;background:#4ad07a;flex:none;box-shadow:0 0 6px #4ad07a}
+  .lk-rules{margin:16px 16px 0;border-top:1px solid rgba(255,220,160,.12);padding-top:12px}
+  .lk-rules-h{font-size:12px;color:#c9a86a;margin-bottom:6px}
+  .lk-fine{font-size:10px;color:#8a7a5a;line-height:1.8}
+  .lk-fine b{color:#c9a86a}
   .pform-title{font-size:19px;font-weight:700;margin:6px 2px 14px}
   .pfield{background:#fff;border-radius:12px;padding:13px 16px;margin-bottom:10px;box-shadow:0 1px 5px rgba(0,0,0,.05)}
   .pfield span{color:#8a8a8e;font-size:11px;display:block;margin-bottom:3px}
@@ -664,17 +705,50 @@
         </div>
       </div>
 
-      <!-- ps2: promo landing page (mobile browser) -->
+      <!-- ps2: promo landing page (mobile browser) — real 抽奖领取 H5 -->
       <div class="pscreen pbrowser" id="ps2">
         <div class="pchrome"><div class="paddr">🔒 glimmer-resort.cn/lucky</div></div>
-        <div class="pbody">
-          <div class="phero" id="phero"></div>
-          <div class="pslogan">微光，知你所求。</div>
-          <div class="plucky">幸运住客 <b>No.045</b></div>
-          <div class="pperks">免费三晚 · 双人自助餐 · 顶楼无边泳池<br>尊享房号 <b>0413</b>（已为您排定）</div>
-          <button class="pweb-cta" id="pgo3">立即领取</button>
-          <div class="pfine">奖项最终解释权归 Glimmer Group 所有 · 中奖者信息以登记证件为准</div>
-          <div class="pfine">© 2025 Glimmer Group · 所有进入微光的人，都将成为微光的一部分。</div>
+        <div class="pbody lucky">
+          <div class="lk-hero">
+            <div class="lk-rays"></div>
+            <div class="lk-ribbon">中奖通知 · WINNER</div>
+            <div class="lk-congrats">恭喜！您已中奖 🎉</div>
+            <div class="lk-subtitle">微光度假村 · 开业回馈月抽奖</div>
+            <div class="lk-lucky">幸运号 <b>No.045</b></div>
+          </div>
+          <div class="lk-ticket">
+            <div class="lk-tk-main">
+              <div class="lk-tk-label">您获得的奖品</div>
+              <div class="lk-tk-prize">双人免费三晚</div>
+              <div class="lk-tk-meta">双人自助餐 · 顶楼无边泳池<br>尊享房号 <b>0413</b>（已为您排定）</div>
+            </div>
+            <div class="lk-tk-side"><span>价值</span><b>¥8888</b></div>
+          </div>
+          <div class="lk-count">领取倒计时 <span id="lk-timer">23:59:59</span></div>
+          <button class="lk-cta" id="pgo3">立即领取<small>本站仅剩 1 席</small></button>
+          <div class="lk-scarce">已有 <b>44</b> 位幸运住客成功领取，仅剩 <b>1</b> 席</div>
+          <div class="lk-feed">
+            <div class="lk-feed-track">
+              <div class="lk-item"><span class="lk-dot"></span>陈** · 0413房 · <em>刚刚</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>周** · 1301房 · <em>3 分钟前</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>▓** · 0906房 · <em>12 分钟前</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>▓** · 0208房 · <em>28 分钟前</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>第 042 号住客 · <em>昨天</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>第 041 号住客 · <em>昨天</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>陈** · 0413房 · <em>刚刚</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>周** · 1301房 · <em>3 分钟前</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>▓** · 0906房 · <em>12 分钟前</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>▓** · 0208房 · <em>28 分钟前</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>第 042 号住客 · <em>昨天</em> 领取成功</div>
+              <div class="lk-item"><span class="lk-dot"></span>第 041 号住客 · <em>昨天</em> 领取成功</div>
+            </div>
+          </div>
+          <div class="lk-rules">
+            <div class="lk-rules-h">活动规则</div>
+            <div class="lk-fine">1. 本活动由 Glimmer Group 主办，奖项最终解释权归主办方所有。<br>
+            2. 中奖者信息以<b>登记证件</b>为准，名额不可转让。<br>
+            3. 所有进入微光的人，都将成为微光的一部分。</div>
+          </div>
         </div>
       </div>
 
@@ -3306,7 +3380,16 @@ function startCh4(){
 
 /* =====================  PROLOGUE  ===================== */
 (function initPrologue(){
-  $('phero').innerHTML = svgPanorama;
+  /* live 领取倒计时 on the promo page — real campaign pages always tick (browser only) */
+  if(typeof requestAnimationFrame === 'function'){
+    let t = 23*3600 + 59*60 + 59;
+    const pad = n => String(n).padStart(2,'0');
+    setInterval(() => {
+      const el = $('lk-timer'); if(!el) return;
+      t = t > 0 ? t - 1 : 23*3600 + 59*60 + 59;
+      el.textContent = pad(t/3600|0) + ':' + pad((t%3600)/60|0) + ':' + pad(t%60);
+    }, 1000);
+  }
   const go = id => {
     ['ps0','ps1','ps2','ps3','ps4'].forEach(s => $(s).classList.remove('show'));
     $(id).classList.add('show');
