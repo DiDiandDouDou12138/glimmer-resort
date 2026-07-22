@@ -401,13 +401,20 @@
     background:radial-gradient(120% 80% at 30% 15%,#2a3652 0%,#141a29 60%,#0a0d16 100%);
     display:flex;align-items:center;justify-content:center;
     font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
+    transition:background 1.3s ease,opacity .7s ease;
   }
   #prologue.hidden{display:none}
+  /* seamless morph: phone widens into the tablet, backdrop shifts to the Glimmer environment */
+  #prologue.morph{background:linear-gradient(160deg,#dfe6ee 0%,#c9d4e0 100%)}
+  #prologue.fade{opacity:0}
   #phone{
     width:min(338px,90vw);height:min(90vh,716px);background:#000;
     border-radius:46px;position:relative;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px #2c2e33;
+    transition:width 1.3s cubic-bezier(.62,.02,.24,1),height 1.3s cubic-bezier(.62,.02,.24,1),border-radius 1.3s ease,box-shadow 1.3s ease;
   }
-  #pscreens{position:absolute;inset:6px;border-radius:40px;overflow:hidden;background:#000}
+  #phone.morph{border-radius:28px;box-shadow:0 30px 80px rgba(30,45,70,.4),0 0 0 2px #1b1e24}
+  #pscreens{position:absolute;inset:6px;border-radius:40px;overflow:hidden;background:#000;transition:border-radius 1.3s ease}
+  #phone.morph #pscreens{border-radius:22px}
   .pisland{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:92px;height:25px;background:#000;border-radius:16px;z-index:20}
   .pstatus{
     position:absolute;top:0;left:0;right:0;height:46px;z-index:15;pointer-events:none;
@@ -545,7 +552,7 @@
   .pdone span{font-size:13px;color:#8a8a8e;letter-spacing:.15em}
   #pskip{position:absolute;right:14px;bottom:22px;z-index:30;font-size:11px;color:#fff;cursor:pointer;user-select:none;background:rgba(0,0,0,.3);padding:5px 12px;border-radius:20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   #ptrans{
-    position:absolute;inset:0;background:#000;color:#cfd6e2;display:flex;align-items:center;justify-content:center;
+    position:absolute;inset:0;background:#0d1117;color:#cfd6e2;display:flex;align-items:center;justify-content:center;
     letter-spacing:.42em;font-size:16px;opacity:0;pointer-events:none;transition:opacity .9s;z-index:40;
   }
   #ptrans.show{opacity:1;pointer-events:auto}
@@ -3449,11 +3456,21 @@ function startCh4(){
   };
   const finish = played => {
     if(played){
+      /* 两周后 · 北海 → phone widens into the tablet, backdrop shifts, crossfade to GLIMMER OS */
       $('ptrans').classList.add('show');
+      setTimeout(() => {
+        const ph = $('phone'), tab = $('tablet');
+        /* morph to the real tablet's measured size (explicit px so it tweens; min() won't interpolate) */
+        const r = tab.getBoundingClientRect ? tab.getBoundingClientRect() : null;
+        if(r && r.width){ ph.style.width = r.width + 'px'; ph.style.height = r.height + 'px'; }
+        ph.classList.add('morph');
+        $('prologue').classList.add('morph');
+      }, 700);
+      setTimeout(() => { $('prologue').classList.add('fade'); }, 2050);
       setTimeout(() => {
         $('prologue').classList.add('hidden');
         addClue('“中奖”邮件：幸运住客 No.045 · 指定 0413 房');
-      }, 2200);
+      }, 2750);
     } else {
       $('prologue').classList.add('hidden');
     }
