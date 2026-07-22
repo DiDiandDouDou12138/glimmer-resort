@@ -401,19 +401,21 @@
     background:radial-gradient(120% 80% at 30% 15%,#2a3652 0%,#141a29 60%,#0a0d16 100%);
     display:flex;align-items:center;justify-content:center;
     font-family:-apple-system,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
-    transition:background 1.3s ease,opacity .7s ease;
+    transition:opacity .7s ease;
   }
+  /* seamless morph: light Glimmer backdrop crossfades in over the dark one (gradient→gradient can't tween, so use opacity) */
+  #prologue::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:linear-gradient(160deg,#dfe6ee 0%,#c9d4e0 100%);opacity:0;transition:opacity 1.3s ease}
+  #prologue.morph::before{opacity:1}
   #prologue.hidden{display:none}
-  /* seamless morph: phone widens into the tablet, backdrop shifts to the Glimmer environment */
-  #prologue.morph{background:linear-gradient(160deg,#dfe6ee 0%,#c9d4e0 100%)}
   #prologue.fade{opacity:0}
   #phone{
     width:min(338px,90vw);height:min(90vh,716px);background:#000;
-    border-radius:46px;position:relative;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px #2c2e33;
-    transition:width 1.3s cubic-bezier(.62,.02,.24,1),height 1.3s cubic-bezier(.62,.02,.24,1),border-radius 1.3s ease,box-shadow 1.3s ease;
+    border-radius:46px;position:relative;z-index:1;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px #2c2e33;
   }
+  /* fallback (no Web Animations API): still land at tablet size */
   #phone.morph{border-radius:28px;box-shadow:0 30px 80px rgba(30,45,70,.4),0 0 0 2px #1b1e24}
-  #pscreens{position:absolute;inset:6px;border-radius:40px;overflow:hidden;background:#000;transition:border-radius 1.3s ease}
+  #pscreens{position:absolute;inset:6px;border-radius:40px;overflow:hidden;background:#000}
   #phone.morph #pscreens{border-radius:22px}
   .pisland{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:92px;height:25px;background:#000;border-radius:16px;z-index:20}
   .pstatus{
@@ -3460,11 +3462,21 @@ function startCh4(){
       $('ptrans').classList.add('show');
       setTimeout(() => {
         const ph = $('phone'), tab = $('tablet');
-        /* morph to the real tablet's measured size (explicit px so it tweens; min() won't interpolate) */
-        const r = tab.getBoundingClientRect ? tab.getBoundingClientRect() : null;
-        if(r && r.width){ ph.style.width = r.width + 'px'; ph.style.height = r.height + 'px'; }
-        ph.classList.add('morph');
-        $('prologue').classList.add('morph');
+        $('prologue').classList.add('morph');   /* crossfade the light backdrop in */
+        const pr = ph.getBoundingClientRect ? ph.getBoundingClientRect() : null;
+        const tr = tab.getBoundingClientRect ? tab.getBoundingClientRect() : null;
+        /* animate phone → tablet with WAAPI (px→px, no CSS min()/gradient snap) */
+        if(ph.animate && pr && pr.width && tr && tr.width){
+          ph.animate([
+            {width:pr.width+'px', height:pr.height+'px', borderRadius:'46px',
+             boxShadow:'0 40px 90px rgba(0,0,0,.6),0 0 0 2px #2c2e33'},
+            {width:tr.width+'px', height:tr.height+'px', borderRadius:'28px',
+             boxShadow:'0 30px 80px rgba(30,45,70,.4),0 0 0 2px #1b1e24'}
+          ], {duration:1300, easing:'cubic-bezier(.62,.02,.24,1)', fill:'forwards'});
+        } else {
+          if(tr && tr.width){ ph.style.width = tr.width+'px'; ph.style.height = tr.height+'px'; }
+          ph.classList.add('morph');
+        }
       }, 700);
       setTimeout(() => { $('prologue').classList.add('fade'); }, 2050);
       setTimeout(() => {
