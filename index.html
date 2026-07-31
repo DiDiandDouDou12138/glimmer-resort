@@ -1884,7 +1884,7 @@ function renderFreezer(){
     <div class="imgwrap">${svgFreezer}</div>
     <div class="caption">▲ 面板右下角那行绿字：<b>4 号挂位 +36.5°C</b>——那是人的体温。</div>
     <p>那是档案 <b>043</b>，上个月「失踪」的住客。他还活着，睁着眼，
-    嘴的位置只有一片平滑的皮肤。他看见了你的镜头，整个人一下、一下地晃起来——<br>脚踝上的铁钩磕着横杆，磕出一串字：</p>
+    嘴的位置只有一片平滑的皮肤。他看见了你的镜头，垂着的手抬了起来，<br>一下、一下地磕着身侧结霜的柜壁——磕出一串字：</p>
     <p class="mono" style="letter-spacing:.08em">。气精的们你要想他<br>。了到经已，夜魂回</p>
     <button class="disconnect">▷ 断开连接 DISCONNECT</button>
   `, true);
@@ -2041,7 +2041,7 @@ function renderVisit043(){
     <h3>他还在那里。他一直在等你回来。</h3>
     <p>你举起从后厨顺来的钥匙时，他的眼睛动了。<br>
     他垂着的那只手抬起来，指了指旁边空着的挂位——<b>044 号</b>的铜牌还挂在钩子上。<br>
-    你取下牌。他又晃了起来，铁钩磕着横杆，一下，一下，替你数着节拍。</p>
+    你取下牌。他又磕起了柜壁，一下，一下，替你数着节拍。</p>
     <p class="mono" style="letter-spacing:.08em">。去出带字名的我把<br>。远明周叫我</p>
     <p class="sub">他的眼睛在你转身时，弯了一下。像在笑。</p>
   `, true);
@@ -2818,7 +2818,7 @@ function onSearch(){
       const rp = S.stage >= 8;
       hijack(() => renderFreezer(), rp ? null : () => {
         showStory([
-          {cls:'narr', text:'断开连接的一瞬间，你听见走廊尽头传来铁器磕碰的声音。<br>三短，三长，三短。'},
+          {cls:'narr', text:'断开连接的一瞬间，你听见走廊尽头传来指节敲击金属的声音。<br>三短，三长，三短。'},
           {cls:'sys', who:'GLIMMER OS', text:'// 检测到未授权检索。<br>// 0413 的「静默处理」申请已提交，等待回魂夜批准。<br><br><span style="opacity:.5">// 他说，回魂夜已经到了。去查那个词。</span>'},
         ], () => {});
       }, 'freeze', rp);
