@@ -71,6 +71,29 @@ OSS_BUCKET: YOUR-BUCKET-NAME                  # ← 换成你的 Bucket 名
      ```
    - 把 AccessKey ID / Secret 填进第一步的 GitHub Secrets。
 
+## 三点五、本项目的选型（2026-07-31 定）
+
+**Bucket 建在国内（华东1·杭州），因此必须先完成 ICP 备案。**
+`deploy.yml` 里的 `OSS_ENDPOINT` 保持 `oss-cn-hangzhou.aliyuncs.com` 即可，
+只需把 `OSS_BUCKET` 换成真实 Bucket 名。
+
+上线顺序（前三步串行，急不得）：
+
+1. 注册域名 → **实名认证**（1–3 天，阿里云注册的域名必做）
+2. **ICP 备案**（1–20 个工作日）
+3. 备案通过 → Bucket 绑定自定义域名 → DNS 加 CNAME → 站点可访问
+
+⚠️ **备案要先有「备案服务码」，光买 OSS 可能拿不到。**
+阿里云的备案服务码是购买符合条件的产品才发放的，各时期政策不同。
+去「阿里云备案系统 → 申请备案服务码」看你账号是否符合条件；
+如果提示不符合，最常见的做法是买一台**最低配 ECS 包年包月（3 个月，几十块）**
+专门用来换服务码，备案下来后那台机器闲置不用也行。**这一步别买错，先看页面提示。**
+
+⚠️ **备案通过之前，站点在线上是打不开的**（默认域名会强制下载，见下一节）。
+所以**先别删 Netlify 站点**——等 OSS + 域名真的能访问了再删，
+否则中间这两三周你手上没有任何可以分享的在线地址。
+（本地双击 `index.html` 始终能玩，不受影响。）
+
 ## 四、⚠️ 必须绑自定义域名，否则网页会被"下载"而不是打开
 
 这是 OSS 和 Netlify 最大的区别，务必先知道：
@@ -118,10 +141,12 @@ OSS_BUCKET: YOUR-BUCKET-NAME                  # ← 换成你的 Bucket 名
 
 见仓库 README「部署」一节，或直接照下面做：
 
-1. **停掉 Netlify 自动构建**
-   Netlify 后台 → 选中站点 → **Site configuration → Build & deploy → 
+1. **先停构建，别急着删站**
+   Netlify 后台 → 选中站点 → **Site configuration → Build & deploy →
    Continuous deployment → Stop builds**。
-   或者干脆删站：**Site configuration → General → 拉到最底 → Delete this site**。
+   ⚠️ **等 OSS + 自定义域名真的能打开了，再回来删站**：
+   **Site configuration → General → 拉到最底 → Delete this site**。
+   备案期间删了 Netlify，就会有两三周完全没有在线地址可用。
 
 2. **删掉 GitHub 上残留的 Netlify webhook**
    仓库 → **Settings → Webhooks**，找 payload URL 里带 `netlify.com` 的那条
