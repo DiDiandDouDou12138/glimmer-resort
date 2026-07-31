@@ -25,7 +25,7 @@ env:
   #
   # OSS_BUCKET：同一个「概览」页最上方的 Bucket 名称。
   OSS_ENDPOINT: oss-cn-hangzhou.aliyuncs.com
-  OSS_BUCKET: YOUR-BUCKET-NAME
+  OSS_BUCKET: glimmer-resort
 
   # 要上传的目录。纯静态项目＝从仓库根目录复制出来的 _site；
   # 将来若引入构建，改成 dist 或 build。
