@@ -1,0 +1,107 @@
+# 推送到 main 即自动部署到阿里云 OSS 静态网站托管
+#
+# 本项目是纯静态站点：只有 index.html + shenshitang.html，
+# 没有 package.json，不需要任何构建步骤。
+# 如果以后加了构建（比如 npm run build 输出到 dist/），
+# 在「准备待上传目录」那一步之前插入 setup-node + npm ci + npm run build，
+# 并把 SITE_DIR 改成 dist 即可。
+#
+# 首次配置看仓库根目录的 DEPLOY.md。
+
+name: Deploy to Aliyun OSS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 允许在 Actions 页面手动触发一次部署
+
+env:
+  # ↓↓↓ 这两个值去阿里云 OSS 控制台改 ↓↓↓
+  #
+  # OSS_ENDPOINT：控制台 → 对象存储 OSS → 选中 Bucket → 「概览」页，
+  #   找「访问端口」/「Endpoint」一栏里的**外网访问 Endpoint**，
+  #   形如 oss-cn-hangzhou.aliyuncs.com（杭州）、oss-cn-beijing.aliyuncs.com（北京）。
+  #   注意：只填域名，不要带 https:// 前缀，也不要填前面带 Bucket 名的那个完整域名。
+  #
+  # OSS_BUCKET：同一个「概览」页最上方的 Bucket 名称。
+  OSS_ENDPOINT: oss-cn-hangzhou.aliyuncs.com
+  OSS_BUCKET: YOUR-BUCKET-NAME
+
+  # 要上传的目录。纯静态项目＝从仓库根目录复制出来的 _site；
+  # 将来若引入构建，改成 dist 或 build。
+  SITE_DIR: _site
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 检查配置是否填好
+        id: guard
+        # 占位符还没换、或 Secrets 还没加时，跳过部署而不是报错失败，
+        # 免得在 Actions 里留一串红叉。配好之后这一步会自动放行。
+        run: |
+          missing=""
+          [ "$OSS_BUCKET" = "YOUR-BUCKET-NAME" ] && missing="$missing\n  - .github/workflows/deploy.yml 里的 OSS_BUCKET 还是占位符"
+          [ -z "${{ secrets.ALIYUN_ACCESS_KEY_ID }}" ] && missing="$missing\n  - 仓库 Secrets 缺 ALIYUN_ACCESS_KEY_ID"
+          [ -z "${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}" ] && missing="$missing\n  - 仓库 Secrets 缺 ALIYUN_ACCESS_KEY_SECRET"
+          if [ -n "$missing" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::OSS 部署尚未配置完成，本次已跳过。缺：$(echo -e "$missing")"
+            echo -e "OSS 部署尚未配置完成，本次跳过。缺：$missing\n\n照 DEPLOY.md 配好后重新 push，或在本页点 Run workflow 手动触发。"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 准备待上传目录（本项目为纯静态，无需构建）
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          mkdir -p "$SITE_DIR"
+          # 用 rsync 把要发布的文件挑出来，排除 .git / .github / node_modules。
+          # 为什么不直接让 ossutil 传仓库根目录再 --exclude：
+          # ossutil 的 --include/--exclude 只对**文件名**生效，不支持按目录排除，
+          # 直接传根目录会把 .git 里上千个文件一起推到 OSS 上。
+          # 不想把 README.md / DEPLOY.md 也传上去的话，加一行 --exclude '*.md'。
+          rsync -a \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude "$SITE_DIR" \
+            ./ "$SITE_DIR"/
+          echo "本次将上传以下文件："
+          find "$SITE_DIR" -type f | sort
+
+      - name: 安装并配置 ossutil
+        if: steps.guard.outputs.ready == 'true'
+        uses: manyuanrong/setup-ossutil@v2.0
+        with:
+          endpoint: ${{ env.OSS_ENDPOINT }}
+          access-key-id: ${{ secrets.ALIYUN_ACCESS_KEY_ID }}
+          access-key-secret: ${{ secrets.ALIYUN_ACCESS_KEY_SECRET }}
+
+      - name: 上传到 OSS
+        if: steps.guard.outputs.ready == 'true'
+        # -r 递归；-f 覆盖同名文件且不弹确认；-u 增量（仅当本地比线上新才传）
+        # 源路径结尾的 / 很重要：带斜杠＝上传目录**内容**到 Bucket 根，
+        # 不带斜杠会在 Bucket 里多套一层 _site/ 目录。
+        run: ossutil cp -r -f -u "$SITE_DIR"/ oss://$OSS_BUCKET/
+
+      - name: 给 HTML 关掉缓存（保证 push 完刷新就能看到新版）
+        if: steps.guard.outputs.ready == 'true'
+        # OSS/CDN 默认会缓存 HTML，不设这个的话改动可能要等很久才生效，
+        # 体验就和以前的 Netlify 不一样了。
+        # 本项目发布物全是 HTML，所以直接对 *.html 生效即可；
+        # 以后若加了图片/JS 等静态资源，它们反而该设长缓存，届时再拆开处理。
+        run: |
+          ossutil set-meta oss://$OSS_BUCKET/ \
+            --include "*.html" -r -f \
+            --meta "Cache-Control:no-cache, must-revalidate"
+
+      - name: 部署完成
+        if: steps.guard.outputs.ready == 'true'
+        run: |
+          echo "已部署到 oss://$OSS_BUCKET/"
+          echo "⚠️ 用 Bucket 默认域名访问 .html 会被强制下载而不是打开，"
+          echo "   必须绑定自定义域名才能在线游玩，详见仓库根目录 DEPLOY.md。"
