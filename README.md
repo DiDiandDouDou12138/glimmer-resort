@@ -25,6 +25,16 @@
 - 六种不重样的"劫持"惊吓效果，看过即不重播（防脱敏）
 - 内置线索手账、两级提示、开发者模式（进度条即时跳转任意节点）
 
+## 部署
+
+托管在**阿里云 OSS 静态网站托管**，push 到 `main` 由 GitHub Actions 自动部署
+（工作流：[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)）。
+
+首次配置、密钥、以及从 Netlify 迁移的收尾步骤，见 **[DEPLOY.md](DEPLOY.md)**。
+
+> ⚠️ OSS 的 Bucket 默认域名访问 HTML 会被强制下载而不是打开，
+> **必须绑定自定义域名**站点才能在线游玩；国内节点还需 ICP 备案。详见 DEPLOY.md。
+
 ## ⚠️ 剧透警告
 
 源码里能看到所有谜底与关键词表。想先玩再看代码。
