@@ -1877,8 +1877,9 @@ function renderVisit043(){
 /* first-visit follow-up: hands the player the next question */
 function afterVisit043(){
   showStory([
-    {cls:'narr', text:'你把 044 铜牌塞进贴身的口袋，掩上冷库的门。<br>走廊尽头的挂钟：<b>20:51</b>。'},
-    {cls:'narr', text:'堂规第十一条在你脑子里过了一遍：<br>「回魂夜<b>亥时三刻</b>起，诸镜皆门。」<br><br>——亥时三刻，换成钟点，到底是<b>几点几分</b>？'},
+    {cls:'narr', text:'你把 044 铜牌塞进贴身的口袋，掩上冷库的门。'},
+    {cls:'narr', text:'堂规第十一条在你脑子里过了一遍：<br>「回魂夜<b>亥时三刻</b>起，诸镜皆门。」<br><br>——现在，<b>几点了</b>？'},
+    {cls:'narr', text:'你抬头。走廊尽头的挂钟：<b>20:51</b>。'},
     {cls:'sys', who:'GLIMMER OS', text:'// 通行权限：最高。'},
   ], () => { addClue('走廊挂钟：20:51'); });
 }
