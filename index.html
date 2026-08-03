@@ -1116,10 +1116,11 @@ function updateClock(){
   el.classList.remove('kt');
   if(S.stage >= 19){ el.textContent = '03:33'; document.title = TITLE0; return; }
   // fictional in-game evening clock, creeps toward 03:33 as stages advance
-  /* stage 15 = 拿到 044 铜牌那一刻，必须与 afterVisit043 里「走廊尽头的挂钟：20:51」一致；
+  /* stage 14 = 四章开局，须与「窗外的光已经是斜的／天黑前剩下的几个小时」对得上（下午）。
+     stage 15 = 拿到 044 铜牌那一刻，必须与 afterVisit043 里「走廊尽头的挂钟：20:51」一致；
      且要给玩家留出跑去旧门户查《十二时辰》表的时间（20:51 → 亥时三刻 21:45 ＝ 54 分钟）。
      stage 16 = 21:45 是穿镜时刻，与 renderMirrorEntry 的标题对齐，别动。 */
-  const base = [ '21:47','22:31','23:58','01:12','02:59','08:12','10:26','13:40','16:55','18:03','09:12','13:26','20:41','23:57','19:05','20:51','21:45','22:47','23:59' ][Math.min(S.stage,18)];
+  const base = [ '21:47','22:31','23:58','01:12','02:59','08:12','10:26','13:40','16:55','18:03','09:12','13:26','20:41','23:57','16:20','20:51','21:45','22:47','23:59' ][Math.min(S.stage,18)];
   /* in the mirror world, time runs backwards — the title too */
   el.textContent = S.mw ? base.split('').reverse().join('') : base;
   document.title = S.mw ? TITLE0.split('').reverse().join('') : TITLE0;
@@ -2689,7 +2690,7 @@ function onSearch(){
     return;
   }
   /* ch4: the computed hour opens the door */
-  if(matchAny(q,['2145','21时45','21点45','21点45分','九点四十五','晚上九点四十五'])){
+  if(matchAny(q,['2145','21时45','21点45','21点45分','九点四十五','晚上九点四十五','54分钟','54分','54','五十四分钟','还有54分钟','还剩54分钟'])){
     if(S.stage === 15){
       S.locked = true;
       showStory([
@@ -3014,7 +3015,7 @@ function startCh4(){
   /* ch4 begins — the old portal's 时辰 table has a reason to exist now */
   try{ localStorage.setItem('glimmer_ch4','1'); }catch(e){}
   showStory([
-    {cls:'narr', text:'<b>第四章 · 亥时诸镜皆门</b><br><br>回魂夜。清晨你睁开眼——<br>小雅坐在床边看着你，不知道看了多久。'},
+    {cls:'narr', text:'<b>第四章 · 亥时诸镜皆门</b><br><br>回魂夜。你睁开眼的时候，窗外的光已经是斜的。<br>整个白天就这么没了——你不记得自己是什么时候睡过去的。<br>小雅坐在床边看着你，不知道看了多久。'},
     {cls:'xiaoya', who:'小雅', text:'“今晚的月亮最圆，”她说，声音像浸过井水，<br>“我们去顶楼，好不好？”'},
     {cls:'narr', text:'你的筹码：贴身收着的红头绳；<br>堂规第十三条——<b>先入者为主</b>；<br>还有天黑前剩下的几个小时。'},
     {cls:'narr', text:'亥时三刻，诸镜皆门。你要赶在井开之前，先一步进到镜子那边、上到 44 层。<br>你打开平板，想先查一查顶楼的路线——'},
