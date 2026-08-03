@@ -1116,7 +1116,10 @@ function updateClock(){
   el.classList.remove('kt');
   if(S.stage >= 19){ el.textContent = '03:33'; document.title = TITLE0; return; }
   // fictional in-game evening clock, creeps toward 03:33 as stages advance
-  const base = [ '21:47','22:31','23:58','01:12','02:59','08:12','10:26','13:40','16:55','18:03','09:12','13:26','20:41','23:57','19:05','21:40','21:45','22:47','23:59' ][Math.min(S.stage,18)];
+  /* stage 15 = 拿到 044 铜牌那一刻，必须与 afterVisit043 里「走廊尽头的挂钟：20:51」一致；
+     且要给玩家留出跑去旧门户查《十二时辰》表的时间（20:51 → 亥时三刻 21:45 ＝ 54 分钟）。
+     stage 16 = 21:45 是穿镜时刻，与 renderMirrorEntry 的标题对齐，别动。 */
+  const base = [ '21:47','22:31','23:58','01:12','02:59','08:12','10:26','13:40','16:55','18:03','09:12','13:26','20:41','23:57','19:05','20:51','21:45','22:47','23:59' ][Math.min(S.stage,18)];
   /* in the mirror world, time runs backwards — the title too */
   el.textContent = S.mw ? base.split('').reverse().join('') : base;
   document.title = S.mw ? TITLE0.split('').reverse().join('') : TITLE0;
