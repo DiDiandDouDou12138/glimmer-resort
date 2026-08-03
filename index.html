@@ -1878,10 +1878,10 @@ function renderVisit043(){
 function afterVisit043(){
   showStory([
     {cls:'narr', text:'你把 044 铜牌塞进贴身的口袋，掩上冷库的门。'},
-    {cls:'narr', text:'堂规第十一条在你脑子里过了一遍：<br>「回魂夜<b>亥时三刻</b>起，诸镜皆门。」<br><br>——现在，<b>几点了</b>？'},
-    {cls:'narr', text:'你抬头。走廊尽头的挂钟：<b>20:51</b>。'},
+    {cls:'narr', text:'堂规第十一条在你脑子里过了一遍：<br>「回魂夜<b>亥时三刻</b>起，诸镜皆门。」'},
+    {cls:'narr', text:'你抬头。走廊尽头的挂钟：<b>20:51</b>。<br><br>还有多久？<br>——你算不出来。<b>一头是数字，一头是时辰。</b>'},
     {cls:'sys', who:'GLIMMER OS', text:'// 通行权限：最高。'},
-  ], () => { addClue('走廊挂钟：20:51'); });
+  ], () => { addClue('走廊挂钟：20:51（离亥时三刻还有多久？）'); });
 }
 
 function renderMirrorEntry(){
