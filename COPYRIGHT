@@ -1,0 +1,91 @@
+《微光度假村》 THE GLIMMER RESORT
+版权与使用条款 · Copyright & Terms of Use
+
+© 2026 DiDiandDouDou12138　保留所有权利 / All rights reserved.
+
+
+────────────────────────────────────────────────────────
+一、这个仓库是公开的，但不是开源的
+────────────────────────────────────────────────────────
+
+本仓库公开源码，是为了让人可以查看实现、验证内容、以及作为作者的作品展示。
+
+本仓库**未采用任何开源许可证**。在中国著作权法及各国相关法律下，
+未附许可证即意味着**保留所有权利**——公开可见不等于授予使用许可。
+
+
+────────────────────────────────────────────────────────
+二、你可以（无需另行授权）
+────────────────────────────────────────────────────────
+
+·  在 https://glimmer.mimoris.cn 游玩本作
+·  阅读本仓库源码，用于个人学习与研究
+·  克隆到本地、在本机运行以查看效果
+·  在文章、评测、教程、课堂或社交平台中评介本作，
+   并引用少量代码片段或截图——请注明作品名与原始地址
+
+
+────────────────────────────────────────────────────────
+三、你不可以（须事先取得书面授权）
+────────────────────────────────────────────────────────
+
+·  转载、镜像或以任何形式重新发布本作（含部署到其他域名、
+   打包上传至任何网站、应用商店或分发平台）
+·  二次分发本作的全部或实质性部分
+·  改编、汉化以外的翻译、续写、重制或制作衍生作品
+·  将本作或其任何组成部分用于任何商业用途
+·  移除、修改或遮蔽作品中的版权声明、免责声明与署名
+·  单独抽取本作的美术素材、音频素材、剧情文本或谜题设计，
+   用于其他项目（无论是否商用）
+
+
+────────────────────────────────────────────────────────
+四、素材说明
+────────────────────────────────────────────────────────
+
+本作部分图片与配音由 AI 生成工具制作，经作者人工筛选、编辑后接入，
+并与剧情文案反复对齐。这些素材作为本作的组成部分受本条款约束，
+不得单独提取使用。
+
+
+────────────────────────────────────────────────────────
+五、防伪
+────────────────────────────────────────────────────────
+
+唯一官方地址　　https://glimmer.mimoris.cn
+唯一官方源码仓库　https://github.com/DiDiandDouDou12138/glimmer-resort
+
+在其他域名上出现的副本均非官方发布，其内容完整性与安全性不受保证。
+页面内置域名校验：在非官方地址上打开时，页脚会显示告警。
+
+
+────────────────────────────────────────────────────────
+六、需要授权
+────────────────────────────────────────────────────────
+
+请在本仓库提交 Issue 说明用途，作者会逐案答复。
+超出第二节范围的使用，未获书面同意前一律视为未授权。
+
+
+────────────────────────────────────────────────────────
+ENGLISH SUMMARY
+────────────────────────────────────────────────────────
+
+This repository is public but NOT open source. No license is granted.
+© 2026 DiDiandDouDou12138. All rights reserved.
+
+You MAY: play the game at https://glimmer.mimoris.cn, read the source
+for personal study, run it locally, and quote short excerpts or
+screenshots when writing about it (with attribution and a link).
+
+You MAY NOT, without prior written permission: redistribute, mirror or
+re-host the work (including deploying it to any other domain), create
+derivative works or adaptations, use it for any commercial purpose,
+remove or alter the copyright/disclaimer notices, or extract its art,
+audio, narrative text or puzzle design for use in other projects.
+
+Part of the imagery and voice-over was produced with AI generation
+tools and then curated and edited by the author; these assets are part
+of this work and are covered by the same terms.
+
+For permission requests, please open an Issue in this repository.
