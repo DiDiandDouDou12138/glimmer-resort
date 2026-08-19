@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<!--
+  《微光度假村》 THE GLIMMER RESORT — 游戏内虚构网站页面
+  © 2026 DiDiandDouDou12138 — 保留所有权利 / All rights reserved.
+  官方地址 https://glimmer.mimoris.cn
+  官方源码 https://github.com/DiDiandDouDou12138/glimmer-resort
+  本页为虚构作品的一部分，非真实机构。未经授权不得转载、镜像或二次分发。
+-->
 <meta charset="UTF-8">
 <title>沈氏堂 -- 百年老号 冥货一站</title>
 <style>
@@ -73,6 +80,21 @@
     min-height:60px; background:#fffdf2; border:1px inset #c9bd96;
     padding:12px 16px; margin-top:12px; font-size:13px; line-height:2;
   }
+
+  /* ========== 真实声明（非虚构内容），刻意不套用本页的 1998 年配色 ========== */
+  #realnotice{
+    max-width:760px;margin:0 auto;padding:16px 20px 22px;
+    background:#fbfbfc;border-top:3px double #b3a67e;
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;
+    font-size:11.5px;line-height:1.9;color:#6a7280;text-align:left;
+  }
+  #realnotice .rn-h{
+    font-size:10.5px;letter-spacing:.16em;color:#9aa2ac;
+    text-align:center;margin-bottom:8px;
+  }
+  #realnotice b{color:#3f4650}
+  #realnotice a{color:#3f6fbf}
+  #realnotice .rn-fake{color:#c0453f;font-weight:700}
 </style>
 </head>
 <body>
@@ -370,6 +392,27 @@ try{
     }
   }
 }catch(e){}
+</script>
+
+<!-- ============ 真实声明（非虚构内容） ============ -->
+<div id="realnotice">
+  <div class="rn-h">—— 以下为真实声明，与本页上方的虚构内容无关 ——</div>
+  <p><b>本页是虚构作品《微光度假村》的一部分</b>（游戏内的虚构网站），并非真实存在的机构、店铺或服务，不提供任何真实商品与服务，请勿据此联系或汇款。页面中的民俗、择日与仪轨内容均为剧情需要的艺术加工，不代表任何真实的民俗、宗教或医学主张，也不构成任何形式的建议。</p>
+  <p><b>本作含轻度恐怖内容</b>：暗色调画面、突发音效与涉及死亡的文字描写。不建议光敏性癫痫或心脏疾病患者、易受惊吓者及无监护的未成年人游玩；如感到不适请立即关闭页面。</p>
+  <p>本作部分图片与配音由 <b>AI 生成工具</b>制作后经人工编辑接入。</p>
+  <p><b>© 2026 DiDiandDouDou12138，保留所有权利。</b>未经授权不得转载、镜像、二次分发或用于商业用途。
+     唯一官方地址 <a href="https://glimmer.mimoris.cn" target="_blank" rel="noopener">glimmer.mimoris.cn</a>，
+     唯一官方源码仓库 <a href="https://github.com/DiDiandDouDou12138/glimmer-resort" target="_blank" rel="noopener">github.com/DiDiandDouDou12138/glimmer-resort</a>；
+     <span id="rn-verdict"></span></p>
+</div>
+<script>
+(function(){
+  var OFFICIAL=['glimmer.mimoris.cn'], LOCAL=['localhost','127.0.0.1','0.0.0.0',''];
+  var host=location.hostname||'', el=document.getElementById('rn-verdict');
+  if(OFFICIAL.indexOf(host)>=0){ el.textContent='当前为官方地址。'; }
+  else if(LOCAL.indexOf(host)>=0){ el.textContent='当前为本地运行。'; }
+  else { el.innerHTML='<span class="rn-fake">当前地址非官方发布，此副本内容可能已被修改。</span>'; }
+})();
 </script>
 </body>
 </html>
